@@ -1,5 +1,6 @@
 package it.unive.dais.cevid.datadroid.lib.parser;
 
+import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -88,6 +89,7 @@ public abstract class AbstractAsyncParser<Data, Progress> implements AsyncParser
         return asyncTask;
     }
 
+    @SuppressLint("StaticFieldLeak")
     protected class MyAsyncTask extends AsyncTask<Void, Progress, List<Data>> {
         /**
          * Metodo interno che invoca {@code parse} all'interno di un blocco try..catch.
@@ -119,12 +121,10 @@ public abstract class AbstractAsyncParser<Data, Progress> implements AsyncParser
         }
 
         @Override
-        protected void onProgressUpdate(Progress... p) {
-            AbstractAsyncParser.this.onProgressUpdate(p[0]);
-        }
+        protected void onProgressUpdate(Progress... p) { AbstractAsyncParser.this.onProgressUpdate(p[0]); }
 
         @Override
-        protected void onPostExecute(List<Data> r) {
+        protected void onPostExecute(@NonNull List<Data> r) {
             AbstractAsyncParser.this.onPostExecute(r);
         }
 
@@ -135,15 +135,17 @@ public abstract class AbstractAsyncParser<Data, Progress> implements AsyncParser
          * @param p varargs di tipo Progress
          */
         void _publishProgress(Progress... p) { this.publishProgress(p); }
-
     }
 
-    protected void onPreExecute() {}
-    protected void onProgressUpdate(Progress p) {}
-    protected void onPostExecute(List<Data> r) {}
-
-    protected void publishProgress(Progress p) {
+    protected final void publishProgress(Progress p) {
         asyncTask._publishProgress(p);
     }
+
+    // customizable hooks
+    protected void onPreExecute() {}
+    protected void onProgressUpdate(Progress p) {}
+    protected void onDataItemParsed(Data d) {}
+    protected void onPostExecute(List<Data> r) {}
+
 
 }

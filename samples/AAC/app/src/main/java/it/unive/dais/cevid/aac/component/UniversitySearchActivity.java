@@ -34,7 +34,7 @@ import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
 public class UniversitySearchActivity extends AppCompatActivity {
     private static final String TAG = "UniversitySearchActivity";
 
-    public static final String BUNDLE_UNI = "UNI";
+    public static final String UNIVERSITY_ITEM = "UNI";
     private static final String BUNDLE_LIST = "LIST";
 
     private UniversityItem university;
@@ -125,7 +125,7 @@ public class UniversitySearchActivity extends AppCompatActivity {
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
-        savedInstanceState.putSerializable(BUNDLE_UNI, university);
+        savedInstanceState.putSerializable(UNIVERSITY_ITEM, university);
 //        saveParserState(savedInstanceState, appaltiParser);
 //        saveParserState(savedInstanceState, soldiPubbliciParser);
         super.onSaveInstanceState(savedInstanceState);
@@ -159,10 +159,10 @@ public class UniversitySearchActivity extends AppCompatActivity {
 
         if (savedInstanceState == null) {
             // crea l'activity da zero
-            university = (UniversityItem) getIntent().getSerializableExtra(BUNDLE_UNI);
+            university = (UniversityItem) getIntent().getSerializableExtra(UNIVERSITY_ITEM);
         } else {
             // ricrea l'activity deserializzando alcuni dati dal bundle
-            university = (UniversityItem) savedInstanceState.getSerializable(BUNDLE_UNI);
+            university = (UniversityItem) savedInstanceState.getSerializable(UNIVERSITY_ITEM);
         }
         TextView title = (TextView) findViewById(R.id.univeristy_name);
         title.setText(university.getTitle());

@@ -45,9 +45,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import it.unive.dais.cevid.aac.component.MunicipalitySearchActivity;
@@ -70,19 +68,21 @@ public class MapFragment extends Fragment
         GoogleMap.OnCameraMoveStartedListener,
         GoogleMap.OnMarkerClickListener,
         BottomNavigationView.OnNavigationItemSelectedListener {
-    public static final String TAG = "MapFragment";
 
-    View mView;
-    MapView mapView;
-    MainActivity parentActivity;
+    private static final String TAG = "MapFragment";
     protected static final int REQUEST_CHECK_SETTINGS = 500;
     protected static final int PERMISSIONS_REQUEST_ACCESS_BOTH_LOCATION = 501;
-    private List<SupplierItem> suppliers;
-    private List<MunicipalityItem> municipalities;
-    private List<UniversityItem> universities;
+
+    private MainActivity parentActivity;
+
+//    private List<SupplierItem> suppliers;
+//    private List<MunicipalityItem> municipalities;
+//    private List<UniversityItem> universities;
+
     private Map<String, UniversityItem> universityMap = new HashMap<>();
     private Map<String, MunicipalityItem> municipalityMap = new HashMap<>();
     private Map<String, SupplierItem> supplierMap = new HashMap<>();
+
     /**
      * Questo oggetto è la mappa di Google Maps. Viene inizializzato asincronamente dal metodo {@code onMapsReady}.
      */
@@ -109,10 +109,12 @@ public class MapFragment extends Fragment
     @Nullable
     protected Marker hereMarker = null;
 
-    public MapFragment() {}
+    //public MapFragment() {}
+
     public void setParentActivity(MainActivity activity) {
         this.parentActivity = activity;
     }
+
     /**
      * Metodo proprietario che imposta la visibilità del pulsante HERE.
      * Si occupa di nascondere o mostrare il pulsante HERE in base allo zoom attuale, confrontandolo con la soglia di zoom
@@ -131,11 +133,10 @@ public class MapFragment extends Fragment
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        mView =  inflater.inflate(R.layout.fragment_map, container, false);
-        mapView = (MapView) mView.findViewById(R.id.mapView);
+        View mView = inflater.inflate(R.layout.fragment_map, container, false);
+        MapView mapView = (MapView) mView.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
         mapView.onResume(); // needed to get the map to display immediately
 
@@ -201,7 +202,7 @@ public class MapFragment extends Fragment
         uis.setCompassEnabled(true);
         uis.setZoomControlsEnabled(true);
         uis.setMapToolbarEnabled(true);
-        populateMap(this.parentActivity.getActiveItem());
+        populateMap(parentActivity.getActiveItem());
 
         gMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
@@ -210,19 +211,19 @@ public class MapFragment extends Fragment
                 if (universityMap.containsKey(id)) {
                     if (hereMarker == null || (hereMarker.getPosition() != marker.getPosition())) {
                         Intent intent = new Intent(getContext(), UniversitySearchActivity.class);
-                        intent.putExtra(UniversitySearchActivity.BUNDLE_UNI, universityMap.get(id));
+                        intent.putExtra(UniversitySearchActivity.UNIVERSITY_ITEM, universityMap.get(id));
                         startActivity(intent);
                     }
                 } else if (municipalityMap.containsKey(id)) {
                     Intent intent = new Intent(getContext(), MunicipalitySearchActivity.class);
                     MunicipalityItem item = municipalityMap.get(id);
-                    intent.putExtra(MunicipalitySearchActivity.CODENTE, item.getCodiceEnte());
-                    intent.putExtra(MunicipalitySearchActivity.CODCOMPARTO, item.getCodiceComparto());
-                    intent.putExtra(MunicipalitySearchActivity.COMUNE, item);
+                    intent.putExtra(MunicipalitySearchActivity.CODICE_ENTE, item.getCodiceEnte());
+                    intent.putExtra(MunicipalitySearchActivity.CODICE_COMPARTO, item.getCodiceComparto());
+                    intent.putExtra(MunicipalitySearchActivity.MUNICIPALITY_ITEM, item);
                     startActivity(intent);
                 } else if (supplierMap.containsKey(id)) {
                     Intent intent = new Intent(getContext(), SupplierSearchActivity.class);
-                    intent.putExtra(SupplierSearchActivity.BUNDLE_SUPPLY, supplierMap.get(id));
+                    intent.putExtra(SupplierSearchActivity.SUPPLIER_ITEM, supplierMap.get(id));
                     startActivity(intent);
                 }
             }
@@ -274,7 +275,6 @@ public class MapFragment extends Fragment
     }
 
 
-
     @Override
     public void onCameraMoveStarted(int i) {
         setHereButtonVisibility();
@@ -300,6 +300,7 @@ public class MapFragment extends Fragment
         });
         return false;
     }
+
     /**
      * Viene chiamato quando si clicca sulla mappa.
      * Aggiungere qui codice che si vuole eseguire quando l'utente clicca sulla mappa.
@@ -377,72 +378,74 @@ public class MapFragment extends Fragment
         gMap.clear();
     }
 
-    public void setUniversityItems(List<UniversityItem> uni) {
-        this.universities = uni;
-    }
-
-    public void setSupplierItems(List<SupplierItem> supply) {
-        this.suppliers = supply;
-    }
-
-    public void setMunicipalityItems(List<MunicipalityItem> mun) {
-        this.municipalities = mun;
-    }
+//    public void setUniversityItems(List<UniversityItem> uni) {
+//        this.universities = uni;
+//    }
+//
+//    public void setSupplierItems(List<SupplierItem> supply) {
+//        this.suppliers = supply;
+//    }
+//
+//    public void setMunicipalityItems(List<MunicipalityItem> mun) {
+//        this.municipalities = mun;
+//    }
 
     protected void populateMap(MenuItem item) {
-        if (gMap == null) return;
-        gMap.clear();
-        this.municipalityMap.clear();
-        this.universityMap.clear();
-        this.supplierMap.clear();
-        String title = String.valueOf(item.getTitle());
-        if (title.equals(getString(R.string.bottom_menu_university))) {
-            generateUniveristy();
-        } else if (title.equals(getString(R.string.bottom_menu_public))) {
-            generateComuni();
-        } else if (title.equals(getString(R.string.bottom_menu_winners))) {
-            generateFornitori();
+        if (gMap != null) {
+            gMap.clear();
+            municipalityMap.clear();
+            universityMap.clear();
+            supplierMap.clear();
+            String title = String.valueOf(item.getTitle());
+            if (title.equals(getString(R.string.bottom_menu_university))) {
+                putUniversityItems();
+            } else if (title.equals(getString(R.string.bottom_menu_public))) {
+                putMunicipalityItems();
+            } else if (title.equals(getString(R.string.bottom_menu_winners))) {
+                putSupplierItems();
+            }
         }
     }
 
-    private void generateFornitori() {
+    // TODO: questi 3 metodi fanno schifo, sono replicatissimi. Scriverne 1 solo, oppure addirittura usare MapItem.putMarkersFromMapItems()
+    private void putSupplierItems() {
         for (SupplierItem f : this.suppliers) {
-            MarkerOptions markeropt = new MarkerOptions()
+            MarkerOptions opts = new MarkerOptions()
                     .position(f.getPosition())
                     .title(f.getTitle())
                     .snippet(f.getDescription())
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
-            Marker marker = gMap.addMarker(markeropt);
+            Marker marker = gMap.addMarker(opts);
             supplierMap.put(marker.getId(), f);
-
         }
     }
 
-    private void generateComuni() {
+    private void putMunicipalityItems() {
         for (MunicipalityItem c : this.municipalities) {
-            MarkerOptions markeropt = new MarkerOptions()
+            MarkerOptions opts = new MarkerOptions()
                     .position(c.getPosition())
                     .title(c.getTitle())
                     .snippet(c.getDescription())
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-            Marker marker = gMap.addMarker(markeropt);
+            Marker marker = gMap.addMarker(opts);
             municipalityMap.put(marker.getId(), c);
         }
     }
 
-    private void generateUniveristy() {
+    private void putUniversityItems() {
         for (UniversityItem u : universities) {
-            MarkerOptions markerOptions = new MarkerOptions();
-            markerOptions.position(u.getPosition());
-            markerOptions.title(u.getTitle());
-            markerOptions.snippet(u.getDescription());
-            Marker marker = gMap.addMarker(markerOptions);
+            MarkerOptions opts = new MarkerOptions()
+                    .position(u.getPosition())
+                    .title(u.getTitle())
+                    .snippet(u.getDescription())
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+            Marker marker = gMap.addMarker(opts);
             universityMap.put(marker.getId(), u);
-
         }
     }
 
     public void changeMenuSelection(MenuItem item) {
         this.populateMap(item);
     }
+
 }

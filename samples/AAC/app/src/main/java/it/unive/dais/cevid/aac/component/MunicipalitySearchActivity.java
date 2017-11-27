@@ -22,11 +22,11 @@ import it.unive.dais.cevid.datadroid.lib.parser.SoldipubbliciParser;
 import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
 
 public class MunicipalitySearchActivity extends AppCompatActivity {
-    public static final String COMUNE = "COMUNE";
+    public static final String MUNICIPALITY_ITEM = "MUNICIPALITY_ITEM";
     private static final int MAX_SIZE = 100;
     SoldipubbliciParser soldipubbliciParser;
     MunicipalityParser comuniParser;
-    public static String CODENTE = "ENTE", CODCOMPARTO = "COMPARTO";
+    public static String CODICE_ENTE = "ENTE", CODICE_COMPARTO = "COMPARTO";
     MunicipalityItem comune;
     String ente;
     String comparto;
@@ -36,11 +36,11 @@ public class MunicipalitySearchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_comuni_info);
-        ente = getIntent().getStringExtra(CODENTE);
-        comparto = getIntent().getStringExtra(CODCOMPARTO);
+        ente = getIntent().getStringExtra(CODICE_ENTE);
+        comparto = getIntent().getStringExtra(CODICE_COMPARTO);
         progressBar = (ProgressBar) findViewById(R.id.progress_bar_comuni);
-        comune = (MunicipalityItem) getIntent().getSerializableExtra(COMUNE);
-        soldipubbliciParser = new CustomSoldiParser(comparto, ente);
+        comune = (MunicipalityItem) getIntent().getSerializableExtra(MUNICIPALITY_ITEM);
+        soldipubbliciParser = new CustomSoldipubbliciParser(comparto, ente);
         soldipubbliciParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         comuniParser = new MunicipalityParser(comune.getTitle());
         comuniParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -128,14 +128,14 @@ public class MunicipalitySearchActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    protected class CustomSoldiParser extends SoldipubbliciParser {
+    protected class CustomSoldipubbliciParser extends SoldipubbliciParser {
 
         private static final String TAG = "CustomSoldipubbliciParser";
 
         protected String codiceComparto;
         protected String codiceEnte;
 
-        public CustomSoldiParser(String codiceComparto, String codiceEnte) {
+        public CustomSoldipubbliciParser(String codiceComparto, String codiceEnte) {
             super(codiceComparto, codiceEnte);
             progressBar.setIndeterminate(false);
             progressBar.setMax(100);
@@ -154,13 +154,11 @@ public class MunicipalitySearchActivity extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
-            super.onPreExecute();
             progressBar.setVisibility(View.VISIBLE);
         }
 
         @Override
         protected void onPostExecute(List<Data> r) {
-            super.onPostExecute(r);
             progressBar.setVisibility(View.GONE);
         }
     }

@@ -20,7 +20,7 @@ import it.unive.dais.cevid.aac.parser.ParticipantParser;
 
 public class SupplierSearchActivity extends AppCompatActivity {
     public static final String TAG = "SupplierSearchActivity";
-    public static String BUNDLE_SUPPLY = "SUPPLY";
+    public static String SUPPLIER_ITEM = "SUPPLY";
     private SupplierItem supp;
     private View mainView;
     private ParticipantParser parser;
@@ -32,10 +32,10 @@ public class SupplierSearchActivity extends AppCompatActivity {
         // bundle restore
         if (savedInstanceState == null) {
             // crea l'activity da zero
-            supp = (SupplierItem) getIntent().getSerializableExtra(BUNDLE_SUPPLY);
+            supp = (SupplierItem) getIntent().getSerializableExtra(SUPPLIER_ITEM);
         } else {
             // ricrea l'activity deserializzando alcuni dati dal bundle
-            supp = (SupplierItem) savedInstanceState.getSerializable(BUNDLE_SUPPLY);
+            supp = (SupplierItem) savedInstanceState.getSerializable(SUPPLIER_ITEM);
         }
         //create activity
 

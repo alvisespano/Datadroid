@@ -24,11 +24,15 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationSettingsStates;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import it.unive.dais.cevid.aac.R;
 import it.unive.dais.cevid.aac.item.MunicipalityItem;
@@ -36,7 +40,9 @@ import it.unive.dais.cevid.aac.item.SupplierItem;
 import it.unive.dais.cevid.aac.item.UniversityItem;
 import it.unive.dais.cevid.aac.fragment.MapFragment;
 import it.unive.dais.cevid.aac.parser.SupplierParser;
+import it.unive.dais.cevid.datadroid.lib.parser.AsyncParser;
 import it.unive.dais.cevid.datadroid.lib.util.Function;
+import it.unive.dais.cevid.datadroid.lib.util.MapItem;
 import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
 
 public class MainActivity extends AppCompatActivity implements
@@ -52,10 +58,12 @@ public class MainActivity extends AppCompatActivity implements
     private MapFragment mapFragment;
     private BottomNavigationView bottomNavigationView;
 
-    private @NonNull List<UniversityItem> universityItems = new ArrayList<>();
-    private @NonNull List<MunicipalityItem> municipalityItems = new ArrayList<>();
-    private @NonNull List<SupplierItem> supplierItems = new ArrayList<>();
-
+    @NonNull
+    private final List<UniversityItem> universityItems = new ArrayList<>();
+    @NonNull
+    private final List<MunicipalityItem> municipalityItems = new ArrayList<>();
+    @NonNull
+    private final List<SupplierItem> supplierItems = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,104 +72,104 @@ public class MainActivity extends AppCompatActivity implements
         fragmentManager = getSupportFragmentManager();
         mapFragment = new MapFragment();
 
-        this.bottomNavigationView = (BottomNavigationView) findViewById(R.id.navigation);
-        this.bottomNavigationView.setOnNavigationItemSelectedListener(this);
-        for (int i = 0; i < bottomNavigationView.getMenu().size(); i++) {
-            MenuItem item = bottomNavigationView.getMenu().getItem(i);
-            if (item.getTitle().equals(getString(R.string.bottom_menu_winners))) {
-                item.setEnabled(false);
-            }
+        bottomNavigationView = (BottomNavigationView) findViewById(R.id.navigation);
+        bottomNavigationView.setOnNavigationItemSelectedListener(this);
 
-        }
+        // non serve più disabilitare i pulsanti del menu, perché sono sempre abilitati, ma i marker vengono disposti asincronamente
+//        for (int i = 0; i < bottomNavigationView.getMenu().size(); i++) {
+//            MenuItem item = bottomNavigationView.getMenu().getItem(i);
+//            if (item.getTitle().equals(getString(R.string.bottom_menu_winners))) {
+//                item.setEnabled(false);
+//            }
+//
+//        }
 
-        SupplierParser supplierParser = new SupplierParser(new Function<List<SupplierParser.Data>, Void>() {
-            @Override
-            public Void apply(List<SupplierParser.Data> suppliers) {
-                if (!(suppliers == null || suppliers.size() <= 0)) {
-                    View container = findViewById(R.id.main_view);
-                    for (SupplierParser.Data supplier : suppliers) {
-                        supplierItems.add(new SupplierItem(MainActivity.this, supplier));
-                        BottomNavigationView bnv = (BottomNavigationView) container.findViewById(R.id.navigation);
-                        for (int i = 0; i < bnv.getMenu().size(); i++) {
-                            MenuItem item = bnv.getMenu().getItem(i);
-                            if (!item.isEnabled()) {
-                                item.setEnabled(true);
-                            }
-                        }
-                    }
-                }
-                return null;
-            }
-        });
-        supplierParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        setupSupplierItems();
+        setupUniversityItems();
+        setupMunicipalityItems();
 
-        //------- INIZIALIZZAZIONE COMUNI  E FORNITORI---------------------------
-        //add Ca Foscari
-        try {
-            List<URL> urls = new ArrayList<>();
-            urls.add(new URL("http://www.unive.it/avcp/datiAppalti2016.xml"));
-            universityItems.add(new UniversityItem("Ca'Foscari", 45.437576, 12.3289554, "Università degli studi di Venezia", urls, "000704968000000"));
-        } catch (MalformedURLException e) {
-            Log.w(TAG, "malformed url");
-            e.printStackTrace();
-        }
-
-        //add Padova
-        try {
-            List<URL> urls = new ArrayList<>();
-            urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s1_01.xml"));
-            urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s1_02.xml"));
-            urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s1_03.xml"));
-            urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s2_01.xml"));
-            urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s2_02.xml"));
-            universityItems.add(new UniversityItem("Università di Padova", 45.406766, 11.8774462, "Università degli studi di Padova", urls, "000058546000000"));
-        } catch (MalformedURLException e) {
-            Log.w(TAG, "malformed url");
-            e.printStackTrace();
-        }
-
-        //add Trento
-        try {
-            List<URL> urls = new ArrayList<>();
-            urls.add(new URL("http://approvvigionamenti.unitn.it/bandi-di-gara-e-contratti/2017/ricerca_2016.xml"));
-            urls.add(new URL("http://approvvigionamenti.unitn.it/bandi-di-gara-e-contratti/2017/amministrazione_2016.xml"));
-            universityItems.add(new UniversityItem("Università di Trento", 46.0694828, 11.1188738, "Università degli studi di Trento", urls, "000067046000000"));
-        } catch (MalformedURLException e) {
-            Log.w(TAG, "malformed url");
-            e.printStackTrace();
-        }
-
-
-        //add Comuni
-        municipalityItems = new ArrayList<>();
-
-        municipalityItems.add(new MunicipalityItem("Venezia", 45.4375466, 12.3289983, "Comune di Venezia", "000066862"));
-        municipalityItems.add(new MunicipalityItem("Milano", 45.4628327, 9.1075204, "Comune di Milano", "800000013"));
-
-        municipalityItems.add(new MunicipalityItem("Torino", 45.0735885, 7.6053946, "Comune di Torino", "000098618"));
-        municipalityItems.add(new MunicipalityItem("Bologna", 44.4992191, 11.2614736, "Comune di Bologna", "000250878"));
-
-        municipalityItems.add(new MunicipalityItem("Genova", 44.4471368, 8.7504034, "Comune di Genova", "000164848"));
-        municipalityItems.add(new MunicipalityItem("Firenze", 43.7800606, 11.1707559, "Comune di Firenze", "800000038"));
-
-        municipalityItems.add(new MunicipalityItem("Roma", 41.9102411, 12.3955688, "Comune di Roma", "800000047"));
-        municipalityItems.add(new MunicipalityItem("Napoli", 40.854042, 14.1763903, "Comune di Napoli", "000708829"));
-
-        municipalityItems.add(new MunicipalityItem("Palermo", 38.1406577, 13.2870764, "Comune di Palermo", "800000060"));
-        municipalityItems.add(new MunicipalityItem("Cagliari", 39.2254656, 9.0932726, "Comune di Cagliari", "000021556"));
-
-        //Ora che MainActivity è pronta, mostro il fragment della mappa.
-        setupMapFragment(mapFragment);
+        setupMapFragment();
         setContentFragment(R.id.contentFrame, mapFragment);
     }
 
-    private void setupMapFragment(MapFragment fragment) {
-        fragment.setParentActivity(this);
-        fragment.setUniversityItems(universityItems);
-        fragment.setSupplierItems(supplierItems);
-        fragment.setMunicipalityItems(municipalityItems);
+    private void setupSupplierItems() {
+        SupplierParser supplierParser = new SupplierParser() {
+            @Override
+            public void onPostExecute(@NonNull List<SupplierParser.Data> suppliers) {
+                for (SupplierParser.Data supplier : suppliers) {
+                    synchronized (supplierItems) {
+                        supplierItems.add(new SupplierItem(MainActivity.this, supplier));
+                    }
+                }
+            }
+        };
+        supplierParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
+    private void setupUniversityItems() {
+        synchronized (universityItems) {
+            //add Ca Foscari
+            try {
+                List<URL> urls = new ArrayList<>();
+                urls.add(new URL("http://www.unive.it/avcp/datiAppalti2016.xml"));
+                universityItems.add(new UniversityItem("Ca'Foscari", 45.437576, 12.3289554, "Università degli studi di Venezia", urls, "000704968000000"));
+            } catch (MalformedURLException e) {
+                Log.w(TAG, "malformed url");
+                e.printStackTrace();
+            }
+
+            //add Padova
+            try {
+                List<URL> urls = new ArrayList<>();
+                urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s1_01.xml"));
+                urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s1_02.xml"));
+                urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s1_03.xml"));
+                urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s2_01.xml"));
+                urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s2_02.xml"));
+                universityItems.add(new UniversityItem("Università di Padova", 45.406766, 11.8774462, "Università degli studi di Padova", urls, "000058546000000"));
+            } catch (MalformedURLException e) {
+                Log.w(TAG, "malformed url");
+                e.printStackTrace();
+            }
+
+            //add Trento
+            try {
+                List<URL> urls = new ArrayList<>();
+                urls.add(new URL("http://approvvigionamenti.unitn.it/bandi-di-gara-e-contratti/2017/ricerca_2016.xml"));
+                urls.add(new URL("http://approvvigionamenti.unitn.it/bandi-di-gara-e-contratti/2017/amministrazione_2016.xml"));
+                universityItems.add(new UniversityItem("Università di Trento", 46.0694828, 11.1188738, "Università degli studi di Trento", urls, "000067046000000"));
+            } catch (MalformedURLException e) {
+                Log.w(TAG, "malformed url");
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void setupMunicipalityItems() {
+        synchronized (municipalityItems) {
+            municipalityItems.add(new MunicipalityItem("Venezia", 45.4375466, 12.3289983, "Comune di Venezia", "000066862"));
+            municipalityItems.add(new MunicipalityItem("Milano", 45.4628327, 9.1075204, "Comune di Milano", "800000013"));
+
+            municipalityItems.add(new MunicipalityItem("Torino", 45.0735885, 7.6053946, "Comune di Torino", "000098618"));
+            municipalityItems.add(new MunicipalityItem("Bologna", 44.4992191, 11.2614736, "Comune di Bologna", "000250878"));
+
+            municipalityItems.add(new MunicipalityItem("Genova", 44.4471368, 8.7504034, "Comune di Genova", "000164848"));
+            municipalityItems.add(new MunicipalityItem("Firenze", 43.7800606, 11.1707559, "Comune di Firenze", "800000038"));
+
+            municipalityItems.add(new MunicipalityItem("Roma", 41.9102411, 12.3955688, "Comune di Roma", "800000047"));
+            municipalityItems.add(new MunicipalityItem("Napoli", 40.854042, 14.1763903, "Comune di Napoli", "000708829"));
+
+            municipalityItems.add(new MunicipalityItem("Palermo", 38.1406577, 13.2870764, "Comune di Palermo", "800000060"));
+            municipalityItems.add(new MunicipalityItem("Cagliari", 39.2254656, 9.0932726, "Comune di Cagliari", "000021556"));
+        }
+    }
+
+    private void setupMapFragment() {
+        mapFragment.setParentActivity(this);
+//        mapFragment.setUniversityItems(universityItems);
+//        mapFragment.setSupplierItems(supplierItems);
+//        mapFragment.setMunicipalityItems(municipalityItems);
+    }
 
     private void setContentFragment(int container, Fragment fragment) {
         fragmentManager.beginTransaction().replace(container, fragment, fragment.getTag()).commit();
@@ -265,8 +273,11 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onPause() {
         super.onPause();
+
+        // TODO: questo probabilmente non serve più se non si usa il notification manager
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         int id = this.getBaseContext().getResources().getInteger(R.integer.id_notification);
+        assert mNotificationManager != null;
         mNotificationManager.cancel(id);
     }
 
@@ -278,20 +289,23 @@ public class MainActivity extends AppCompatActivity implements
         super.onDestroy();
     }
 
+    // TODO: assicurarsi che questo modo di avere il menu item attivo sia il modo corretto
     public MenuItem getActiveItem() {
         this.bottomNavigationView = (BottomNavigationView) findViewById(R.id.navigation);
-        return (bottomNavigationView.getMenu().findItem(bottomNavigationView.getSelectedItemId()));
+        return bottomNavigationView.getMenu().findItem(bottomNavigationView.getSelectedItemId());
     }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        this.mapFragment.changeMenuSelection(item); // TODO: temporaneo!
-        /*bisogna controllare quale fragment è attivo al momento e agire di conseguenza*/
+        mapFragment.changeMenuSelection(item);
         return true;
     }
 
 
     // test stuff
+    //
+    //
+
     private void testProgressStepper() {
         final int n1 = 10, n2 = 30, n3 = 5;
         ProgressStepper p1 = new ProgressStepper(n1);

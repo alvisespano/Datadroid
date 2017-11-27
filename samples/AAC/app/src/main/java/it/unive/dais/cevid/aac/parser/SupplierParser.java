@@ -29,18 +29,7 @@ public class SupplierParser extends AbstractAsyncParser<SupplierParser.Data, Pro
             "FROM%20%22f476dccf-d60a-4301-b757-829b3e030ac6%22%20" +
             "ORDER%20BY%22Numero_Aggiudicazioni%22%20DESC%20LIMIT%20100";
 
-//    private final View container;
-//    private final ArrayList<SupplierItem> items;
-//    private final Context context;
-    private final Function<List<Data>, Void> onPostExecute;
-
-    // TODO: controllare meglio l'uso del campo context
-    public SupplierParser(Function<List<Data>, Void> onPostExecute) {
-//        this.items = list;
-//        this.context = ctx;
-//        this.container = container;
-        this.onPostExecute = onPostExecute;
-    }
+    public SupplierParser() {}
 
     @NonNull
     @Override
@@ -51,7 +40,6 @@ public class SupplierParser extends AbstractAsyncParser<SupplierParser.Data, Pro
                 .addHeader("Accept", "Application/json")
                 .addHeader("X-Requested-With", "XMLHttpRequest")
                 .build();
-
         try {
             return parseJSON(new OkHttpClient().newCall(request).execute().body().string());
         } catch (JSONException e) {
@@ -84,6 +72,7 @@ public class SupplierParser extends AbstractAsyncParser<SupplierParser.Data, Pro
             if (!Objects.equals(d.n_aggiudicati, "") && !Objects.equals(d.n_aggiudicati, "0")) {
                 r.add(d);
             }
+            onDataItemParsed(d);
             prog.step();
             publishProgress(prog);
         }
@@ -91,46 +80,29 @@ public class SupplierParser extends AbstractAsyncParser<SupplierParser.Data, Pro
 
     }
 
-
     @Override
-    protected void onPostExecute(List<Data> r) {
-        super.onPostExecute(r);
-        this.onPostExecute.apply(r);
+    protected void onDataItemParsed(Data data) {
 
-//        if (r == null || r.size() <= 0) return;
-//        List<Data> fornitori = new ArrayList<>(r);
-//        for (SupplierParser.Data fornitore : fornitori) {
-//            SupplierItem f = new SupplierItem(context, fornitore);
-//            this.items.add(f);
-//            BottomNavigationView bnv = (BottomNavigationView) this.container.findViewById(R.id.navigation);
-//            for (int i = 0; i < bnv.getMenu().size(); i++) {
-//                MenuItem item = bnv.getMenu().getItem(i);
-//                if (!item.isEnabled()) {
-//                    item.setEnabled(true);
-//                }
-//            }
+    }
+
+//    @Override
+//    protected void onPostExecute(List<Data> r) {
+//        onPostExecute.apply(r);
 //
-//        }
-
-        // TODO: valutare se vale la pena riusare la notifica al sistema quando finisce il download
-//        NotificationManager mManager = (NotificationManager) this.context.getSystemService(Context.NOTIFICATION_SERVICE);
-//        NotificationCompat.Builder mBuilder =
-//                new NotificationCompat.Builder(this.context)
-//                        .setSmallIcon(R.drawable.ic_file_download_black_24dp)
-//                        .setContentTitle(context.getResources().getString(R.string.notification_title))
-//                        .setContentText(context.getResources().getString(R.string.notification_msg));
-//        //.setContentIntent(pendingIntent);
-//        Notification notification = mBuilder.build();
-//        notification.flags = Notification.FLAG_AUTO_CANCEL | Notification.FLAG_ONLY_ALERT_ONCE;
-//        int id = context.getResources().getInteger(R.integer.id_notification);
-//        assert mManager != null;
-//        mManager.notify(id, notification);
-    }
-
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-    }
+//        // TODO: valutare se vale la pena riusare la notifica al sistema quando finisce il download
+////        NotificationManager mManager = (NotificationManager) this.context.getSystemService(Context.NOTIFICATION_SERVICE);
+////        NotificationCompat.Builder mBuilder =
+////                new NotificationCompat.Builder(this.context)
+////                        .setSmallIcon(R.drawable.ic_file_download_black_24dp)
+////                        .setContentTitle(context.getResources().getString(R.string.notification_title))
+////                        .setContentText(context.getResources().getString(R.string.notification_msg));
+////        //.setContentIntent(pendingIntent);
+////        Notification notification = mBuilder.build();
+////        notification.flags = Notification.FLAG_AUTO_CANCEL | Notification.FLAG_ONLY_ALERT_ONCE;
+////        int id = context.getResources().getInteger(R.integer.id_notification);
+////        assert mManager != null;
+////        mManager.notify(id, notification);
+//    }
 
 
     public class Data implements Serializable {
@@ -149,53 +121,4 @@ public class SupplierParser extends AbstractAsyncParser<SupplierParser.Data, Pro
                 n_attivi;
     }
 
-    /*
-        private Position position;
-
-        private class Position implements Serializable {
-            private double latitute;
-            private double longitude;
-
-            private Position(LatLng position) {
-                this.latitute = position.latitude;
-                this.longitude = position.longitude;
-            }
-
-            private LatLng getLatLng() {
-                return new LatLng(this.latitute, this.longitude);
-            }
-        }
-
-
-        public void setPosition() {
-            this.position = new Position(getLatLngFromAddress(String.format("%s %s %s %s %s",
-                    this.indirizzo, this.comune, this.provincia, this.regione, this.nazione)));
-        }
-
-        public LatLng getLatLngFromAddress(String address) {
-            Geocoder geocode = new Geocoder(context, Locale.getDefault());
-            List<Address> names = new ArrayList<>();
-            try {
-                names = geocode.getFromLocationName(address, 10);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            if (names.size() <= 0) return new LatLng(0, 0);
-            return new LatLng(names.get(0).getLatitude(), names.get(0).getLongitude());
-        }
-
-        public LatLng getPosition() {
-            return this.position.getLatLng();
-        }
-
-        public String getDescription() {
-            return String.format("%s\n%s", forma_societaria, piva);
-        }
-
-        public String getAddress() {
-            return String.format("%s, %s, %s, %s (%s)",
-                    this.indirizzo, this.comune, this.provincia, this.regione, this.nazione);
-        }
-    }
-    */
 }

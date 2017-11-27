@@ -4,6 +4,8 @@ package it.unive.dais.cevid.aac.parser;
  * Created by fbusolin on 15/11/17.
  */
 
+import android.support.annotation.NonNull;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -37,6 +39,7 @@ public class ParticipantParser extends AbstractAsyncParser<ParticipantParser.Dat
 
     }
 
+    @NonNull
     public List<Data> parse() throws IOException {
         OkHttpClient client = new OkHttpClient();
         List returnList = new ArrayList();
