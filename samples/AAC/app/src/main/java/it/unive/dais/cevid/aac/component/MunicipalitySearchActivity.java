@@ -35,16 +35,22 @@ public class MunicipalitySearchActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+<<<<<<< HEAD
         setContentView(R.layout.activity_comuni_info);
         ente = getIntent().getStringExtra(CODICE_ENTE);
         comparto = getIntent().getStringExtra(CODICE_COMPARTO);
+=======
+        setContentView(R.layout.activity_municipality_search);
+        ente = getIntent().getStringExtra(CODENTE);
+        comparto = getIntent().getStringExtra(CODCOMPARTO);
+>>>>>>> 4eb43a0265bae476deb2644381f0a6cd5a4ff227
         progressBar = (ProgressBar) findViewById(R.id.progress_bar_comuni);
         comune = (MunicipalityItem) getIntent().getSerializableExtra(MUNICIPALITY_ITEM);
         soldipubbliciParser = new CustomSoldipubbliciParser(comparto, ente);
         soldipubbliciParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         comuniParser = new MunicipalityParser(comune.getTitle());
         comuniParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        Button btn = (Button) findViewById(R.id.button_comuni);
+        Button btn = (Button) findViewById(R.id.municipality_button);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

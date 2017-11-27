@@ -28,10 +28,10 @@
     <View style="@style/Divider"/>
 
     <Button
-        android:id="@+id/button_comuni"
+        android:id="@+id/municipality_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/supply_button"
+        android:text="@string/municipality_button_text"
         android:layout_gravity="end"
         />
     <ProgressBar

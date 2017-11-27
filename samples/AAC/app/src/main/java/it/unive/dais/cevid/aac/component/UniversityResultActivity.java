@@ -46,7 +46,7 @@ public class UniversityResultActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_university);
+        setContentView(R.layout.activity_university_result);
         Intent i = getIntent();
 //        Mode mode = (Mode) i.getSerializableExtra(MODE);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);

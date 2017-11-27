@@ -151,7 +151,7 @@ public class UniversitySearchActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search);
+        setContentView(R.layout.activity_university_search);
         mainView = (LinearLayout) findViewById(R.id.search_activity);
 
         progressBar1 = (ProgressBar) findViewById(R.id.progress_bar1);
