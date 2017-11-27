@@ -56,4 +56,9 @@
     <string name="notification_msg">Completato download fornitori</string>
     <string name="euro_symbol">\u0020€</string>
     <string name="com_desc">Nome:\u0020</string>
+    <string name="mun_details_code">Ente:\u0020</string>
+    <string name="mun_details_validita">Scadenza:\u0020</string>
+    <string name="mun_details_siope">Codice siope:\u0020</string>
+    <string name="municipality_button_text">Mostra voci di spesa</string>
+    <string name="mun_details_procapite">Spesa procapite:\u0020</string>
 </resources>

@@ -15,7 +15,7 @@ public class SupplierDetailsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_bid);
+        setContentView(R.layout.activity_supplier_details);
 
         this.tender = (TenderParser.Data) getIntent().getSerializableExtra(BUNDLE_BID);
         TextView title = (TextView) findViewById(R.id.bid_title);

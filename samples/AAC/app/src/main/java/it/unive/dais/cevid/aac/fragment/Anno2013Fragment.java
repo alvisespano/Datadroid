@@ -1,5 +1,6 @@
 package it.unive.dais.cevid.aac.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -7,10 +8,12 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import it.unive.dais.cevid.aac.R;
+import it.unive.dais.cevid.aac.component.MunicipalityDetailsActivity;
 import it.unive.dais.cevid.aac.component.MunicipalityResultActivity;
 
 import java.util.ArrayList;
@@ -36,10 +39,10 @@ public class Anno2013Fragment extends Fragment {
         MunicipalityResultActivity activity = (MunicipalityResultActivity) getActivity();
 
         numero_abitanti = activity.getNumero_abitanti();
-        List<SoldipubbliciParser.Data> spese_ente = activity.getSpese_Ente_2013();
+        final List<SoldipubbliciParser.Data> spese_ente = activity.getSpese_Ente_2013();
         spesePROCapite = new ArrayList<>();
         datas = new ArrayList<>();
-        View rootView = inflater.inflate(R.layout.anno2013, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_anno2013, container, false);
 
         lv = (ListView) rootView.findViewById(R.id.list_view);
         inputSearch = (EditText) rootView.findViewById(R.id.inputSearch);
@@ -60,6 +63,15 @@ public class Anno2013Fragment extends Fragment {
 
         adapter = new ArrayAdapter<>(getContext(), R.layout.list_spese, R.id.Spesa, datas);
         lv.setAdapter(adapter);
+        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                SoldipubbliciParser.Data data = spese_ente.get(position);
+                Intent intent = new Intent(getContext(),MunicipalityDetailsActivity.class);
+                intent.putExtra(MunicipalityDetailsActivity.DATA,data);
+                startActivity(intent);
+            }
+        });
 
         inputSearch.addTextChangedListener(new TextWatcher() {
             @Override

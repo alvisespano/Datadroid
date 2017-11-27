@@ -65,47 +65,51 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".component.MainActivity" />
         </activity>
-        <activity android:name=".component.SupplierSearchActivity"
+        <activity
+            android:name=".component.SupplierSearchActivity"
             android:parentActivityName=".component.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".component.MainActivity" />
-
         </activity>
-        <activity android:name=".component.SupplierResultActivity"
+        <activity
+            android:name=".component.SupplierResultActivity"
             android:parentActivityName=".component.SupplierSearchActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".component.SupplierSearchActivity" />
         </activity>
-
-        <activity android:name=".component.SupplierDetailsActivity"
+        <activity
+            android:name=".component.SupplierDetailsActivity"
             android:parentActivityName=".component.SupplierResultActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".component.SupplierResultActivity" />
         </activity>
-
-        <activity android:name=".component.MunicipalityResultActivity"
+        <activity
+            android:name=".component.MunicipalityResultActivity"
             android:parentActivityName=".component.MunicipalitySearchActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".component.MunicipalitySearchActivity" />
         </activity>
-        <activity android:name=".component.MunicipalitySearchActivity"
+        <activity
+            android:name=".component.MunicipalitySearchActivity"
             android:parentActivityName=".component.MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".component.MainActivity" />
-
         </activity>
-        <activity android:name=".component.MainActivity"
+        <activity
+            android:name=".component.MainActivity"
             android:label="@string/title_activity_maps">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".component.MunicipalityDetailsActivity"></activity>
     </application>
 
 </manifest>

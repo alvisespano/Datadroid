@@ -28,7 +28,7 @@ public class SupplierSearchActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_info_supplier);
+        setContentView(R.layout.activity_supplier_search);
         // bundle restore
         if (savedInstanceState == null) {
             // crea l'activity da zero

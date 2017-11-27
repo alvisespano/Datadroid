@@ -30,7 +30,7 @@ public class MunicipalityResultActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_searchable);
+        setContentView(R.layout.activity_municipality_result);
 
         Intent i = getIntent();
 

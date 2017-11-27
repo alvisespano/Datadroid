@@ -32,7 +32,7 @@ public class SupplierResultActivity extends AppCompatActivity {
         map = new HashMap<>();
         parsers = new ArrayList<>();
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_partecipations_bids);
+        setContentView(R.layout.activity_supplier_result);
         Intent intent = getIntent();
         RecyclerView.LayoutManager lmanager = new LinearLayoutManager(this);
         RecyclerView view = (RecyclerView) findViewById(R.id.lista_partecipazioni);
