@@ -12,7 +12,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/contentFrame"
+        android:id="@+id/content_frame"
         android:layout_below="@id/navigation">
 
     </FrameLayout>

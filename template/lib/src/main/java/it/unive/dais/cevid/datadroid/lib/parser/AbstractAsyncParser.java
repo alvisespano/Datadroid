@@ -79,7 +79,6 @@ public abstract class AbstractAsyncParser<Data, Progress> implements AsyncParser
     @NonNull
     public String getName() { return AbstractAsyncParser.class.getName(); }
 
-
     /**
      * Restituisce l'oggetto interno di tipo AsyncTask.
      * @return oggetto di tipo AsyncTask.
@@ -91,6 +90,8 @@ public abstract class AbstractAsyncParser<Data, Progress> implements AsyncParser
 
     @SuppressLint("StaticFieldLeak")
     protected class MyAsyncTask extends AsyncTask<Void, Progress, List<Data>> {
+        private final AbstractAsyncParser parent = AbstractAsyncParser.this;
+
         /**
          * Metodo interno che invoca {@code parse} all'interno di un blocco try..catch.
          * Non è necessario fare override a meno che non si desideri specificare un comportamento diverso.
@@ -102,7 +103,7 @@ public abstract class AbstractAsyncParser<Data, Progress> implements AsyncParser
         @Override
         @Nullable
         protected List<Data> doInBackground(Void... params) {
-            final String name = AbstractAsyncParser.this.getName();
+            final String name = parent.getName();
             try {
                 Log.v(TAG, String.format("started parser %s", name));
                 List<Data> r = parse();
@@ -117,16 +118,14 @@ public abstract class AbstractAsyncParser<Data, Progress> implements AsyncParser
 
         @Override
         protected void onPreExecute() {
-            AbstractAsyncParser.this.onPreExecute();
+            parent.onPreExecute();
         }
 
         @Override
-        protected void onProgressUpdate(Progress... p) { AbstractAsyncParser.this.onProgressUpdate(p[0]); }
+        protected void onProgressUpdate(@NonNull Progress... p) { parent.onProgressUpdate(p[0]); }
 
         @Override
-        protected void onPostExecute(@NonNull List<Data> r) {
-            AbstractAsyncParser.this.onPostExecute(r);
-        }
+        protected void onPostExecute(@NonNull List<Data> r) { parent.onPostExecute(r); }
 
         /**
          * Questo metodo è solamente uno stub di {@code publishProgress}.
@@ -134,18 +133,17 @@ public abstract class AbstractAsyncParser<Data, Progress> implements AsyncParser
          * dalle sottoclassi della enclosing class {@code AbstractAsyncParser}-.
          * @param p varargs di tipo Progress
          */
-        void _publishProgress(Progress... p) { this.publishProgress(p); }
+        void _publishProgress(@NonNull Progress... p) { this.publishProgress(p); }
     }
 
     protected final void publishProgress(Progress p) {
         asyncTask._publishProgress(p);
     }
 
-    // customizable hooks
+    // AsyncTask-like hooks
     protected void onPreExecute() {}
-    protected void onProgressUpdate(Progress p) {}
-    protected void onDataItemParsed(Data d) {}
-    protected void onPostExecute(List<Data> r) {}
-
+    protected void onProgressUpdate(@NonNull Progress p) {}
+    protected void onItemParsed(@NonNull Data d) {}
+    protected void onPostExecute(@NonNull List<Data> r) {}
 
 }

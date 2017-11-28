@@ -2,7 +2,7 @@ package it.unive.dais.cevid.aac.fragment;
 
 
 import android.Manifest;
-import android.app.NotificationManager;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -46,6 +46,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import it.unive.dais.cevid.aac.component.MunicipalitySearchActivity;
@@ -57,6 +58,9 @@ import it.unive.dais.cevid.aac.component.SettingsActivity;
 import it.unive.dais.cevid.aac.item.MunicipalityItem;
 import it.unive.dais.cevid.aac.item.SupplierItem;
 import it.unive.dais.cevid.aac.item.UniversityItem;
+import it.unive.dais.cevid.datadroid.lib.util.MapItem;
+
+import static it.unive.dais.cevid.aac.component.MainActivity.*;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -73,19 +77,20 @@ public class MapFragment extends Fragment
     protected static final int REQUEST_CHECK_SETTINGS = 500;
     protected static final int PERMISSIONS_REQUEST_ACCESS_BOTH_LOCATION = 501;
 
+    @Nullable
     private MainActivity parentActivity;
 
-//    private List<SupplierItem> suppliers;
-//    private List<MunicipalityItem> municipalities;
-//    private List<UniversityItem> universities;
-
+    @NonNull
     private Map<String, UniversityItem> universityMap = new HashMap<>();
+    @NonNull
     private Map<String, MunicipalityItem> municipalityMap = new HashMap<>();
+    @NonNull
     private Map<String, SupplierItem> supplierMap = new HashMap<>();
 
     /**
      * Questo oggetto è la mappa di Google Maps. Viene inizializzato asincronamente dal metodo {@code onMapsReady}.
      */
+    @Nullable
     protected GoogleMap gMap;
     /**
      * Pulsanti in sovraimpressione gestiti da questa app. Da non confondere con i pulsanti che GoogleMaps mette in sovraimpressione e che non
@@ -109,10 +114,15 @@ public class MapFragment extends Fragment
     @Nullable
     protected Marker hereMarker = null;
 
-    //public MapFragment() {}
 
-    public void setParentActivity(MainActivity activity) {
-        this.parentActivity = activity;
+//    public void setParentActivity(@NonNull MainActivity activity) {
+//        this.parentActivity = activity;
+//    }
+
+    @Override
+    public void onAttach(Context ctx) {
+        super.onAttach(ctx);
+        parentActivity = (MainActivity) ctx;
     }
 
     /**
@@ -131,7 +141,6 @@ public class MapFragment extends Fragment
         }
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -147,11 +156,9 @@ public class MapFragment extends Fragment
         }
         mapView.getMapAsync(this);
 
-        // trova gli oggetti che rappresentano i bottoni e li salva come campi d'istanza
         button_here = (ImageButton) mView.findViewById(R.id.button_here);
         button_car = (ImageButton) mView.findViewById(R.id.button_car);
 
-        // API per i servizi di localizzazione
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
         button_here.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -165,6 +172,7 @@ public class MapFragment extends Fragment
                     opts.position(currentPosition);
                     opts.title(getString(R.string.marker_title));
                     opts.snippet(String.format("lat: %g\nlng: %g", currentPosition.latitude, currentPosition.longitude));
+                    assert gMap != null;
                     hereMarker = gMap.addMarker(opts);
                     if (gMap != null)
                         gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, getResources().getInteger(R.integer.zoomFactor_button_here)));
@@ -176,7 +184,7 @@ public class MapFragment extends Fragment
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(@NonNull GoogleMap googleMap) {
         this.gMap = googleMap;
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_BOTH_LOCATION);
@@ -202,11 +210,14 @@ public class MapFragment extends Fragment
         uis.setCompassEnabled(true);
         uis.setZoomControlsEnabled(true);
         uis.setMapToolbarEnabled(true);
-        populateMap(parentActivity.getActiveItem());
+        assert parentActivity != null;
+        redrawMap(parentActivity.getCurrentMode());
 
         gMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
+                //TODO: buttare via le hashmap ed usare Marker.setTag() per memorizzare dati in ogni marker
+
                 final String id = marker.getId();
                 if (universityMap.containsKey(id)) {
                     if (hereMarker == null || (hereMarker.getPosition() != marker.getPosition())) {
@@ -254,8 +265,6 @@ public class MapFragment extends Fragment
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         Log.i(TAG, "Location settings are not satisfied. Show the user a dialog to upgrade location settings ");
                         try {
-                            // Show the dialog by calling startResolutionForResult(), and check the result
-                            // in onActivityResult().
                             status.startResolutionForResult(getActivity(), REQUEST_CHECK_SETTINGS);
                         } catch (IntentSender.SendIntentException e) {
                             Log.i(TAG, "PendingIntent unable to execute request.");
@@ -274,7 +283,6 @@ public class MapFragment extends Fragment
         return false;
     }
 
-
     @Override
     public void onCameraMoveStarted(int i) {
         setHereButtonVisibility();
@@ -282,7 +290,6 @@ public class MapFragment extends Fragment
 
     @Override
     public void onMapLongClick(LatLng latLng) {
-
     }
 
     @Override
@@ -364,9 +371,10 @@ public class MapFragment extends Fragment
     @Override
     public void onPause() {
         super.onPause();
-        NotificationManager mNotificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-        int id = getContext().getResources().getInteger(R.integer.id_notification);
-        mNotificationManager.cancel(id);
+//        NotificationManager mNotificationManager = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+//        int id = getContext().getResources().getInteger(R.integer.id_notification);
+//        assert mNotificationManager != null;
+//        mNotificationManager.cancel(id);
     }
 
     /**
@@ -375,77 +383,45 @@ public class MapFragment extends Fragment
     @Override
     public void onDestroy() {
         super.onDestroy();
-        gMap.clear();
+        if (gMap != null) gMap.clear();
     }
 
-//    public void setUniversityItems(List<UniversityItem> uni) {
-//        this.universities = uni;
-//    }
-//
-//    public void setSupplierItems(List<SupplierItem> supply) {
-//        this.suppliers = supply;
-//    }
-//
-//    public void setMunicipalityItems(List<MunicipalityItem> mun) {
-//        this.municipalities = mun;
-//    }
-
-    protected void populateMap(MenuItem item) {
+    public void redrawMap(Mode mode) {
         if (gMap != null) {
             gMap.clear();
             municipalityMap.clear();
             universityMap.clear();
             supplierMap.clear();
-            String title = String.valueOf(item.getTitle());
-            if (title.equals(getString(R.string.bottom_menu_university))) {
-                putUniversityItems();
-            } else if (title.equals(getString(R.string.bottom_menu_public))) {
-                putMunicipalityItems();
-            } else if (title.equals(getString(R.string.bottom_menu_winners))) {
-                putSupplierItems();
+            assert parentActivity != null;
+            switch (mode) {
+                case MUNICIPALITY:
+                    putItems(parentActivity.getMunicipalityItemsItems(), BitmapDescriptorFactory.HUE_GREEN, municipalityMap);
+                    break;
+                case UNIVERSITY:
+                    putItems(parentActivity.getUniversityItems(), BitmapDescriptorFactory.HUE_RED, universityMap);
+                    break;
+                case SUPPLIER:
+                    putItems(parentActivity.getSupplierItems(), BitmapDescriptorFactory.HUE_BLUE, supplierMap);
+                    break;
             }
         }
     }
 
-    // TODO: questi 3 metodi fanno schifo, sono replicatissimi. Scriverne 1 solo, oppure addirittura usare MapItem.putMarkersFromMapItems()
-    private void putSupplierItems() {
-        for (SupplierItem f : this.suppliers) {
-            MarkerOptions opts = new MarkerOptions()
-                    .position(f.getPosition())
-                    .title(f.getTitle())
-                    .snippet(f.getDescription())
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
-            Marker marker = gMap.addMarker(opts);
-            supplierMap.put(marker.getId(), f);
+    public <I extends MapItem> void putItems(@NonNull List<I> c, float hue, @NonNull Map<String, I> map) {
+        for (I i : c) {
+            putItem(hue, map, i);
         }
     }
 
-    private void putMunicipalityItems() {
-        for (MunicipalityItem c : this.municipalities) {
-            MarkerOptions opts = new MarkerOptions()
-                    .position(c.getPosition())
-                    .title(c.getTitle())
-                    .snippet(c.getDescription())
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-            Marker marker = gMap.addMarker(opts);
-            municipalityMap.put(marker.getId(), c);
-        }
-    }
-
-    private void putUniversityItems() {
-        for (UniversityItem u : universities) {
-            MarkerOptions opts = new MarkerOptions()
-                    .position(u.getPosition())
-                    .title(u.getTitle())
-                    .snippet(u.getDescription())
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-            Marker marker = gMap.addMarker(opts);
-            universityMap.put(marker.getId(), u);
-        }
-    }
-
-    public void changeMenuSelection(MenuItem item) {
-        this.populateMap(item);
+    public <I extends MapItem> void putItem(float hue, @NonNull Map<String, I> map, I i) {
+        MarkerOptions opts = new MarkerOptions()
+                .position(i.getPosition())
+                .title(i.getTitle())
+                .snippet(i.getDescription())
+                .icon(BitmapDescriptorFactory.defaultMarker(hue));
+        assert gMap != null;
+        Marker marker = gMap.addMarker(opts);
+        map.put(marker.getId(), i);
     }
 
 }

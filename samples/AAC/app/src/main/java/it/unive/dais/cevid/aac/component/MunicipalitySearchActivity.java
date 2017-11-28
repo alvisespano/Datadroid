@@ -3,6 +3,7 @@ package it.unive.dais.cevid.aac.component;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -35,15 +36,9 @@ public class MunicipalitySearchActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-<<<<<<< HEAD
-        setContentView(R.layout.activity_comuni_info);
+        setContentView(R.layout.activity_municipality_search);
         ente = getIntent().getStringExtra(CODICE_ENTE);
         comparto = getIntent().getStringExtra(CODICE_COMPARTO);
-=======
-        setContentView(R.layout.activity_municipality_search);
-        ente = getIntent().getStringExtra(CODENTE);
-        comparto = getIntent().getStringExtra(CODCOMPARTO);
->>>>>>> 4eb43a0265bae476deb2644381f0a6cd5a4ff227
         progressBar = (ProgressBar) findViewById(R.id.progress_bar_comuni);
         comune = (MunicipalityItem) getIntent().getSerializableExtra(MUNICIPALITY_ITEM);
         soldipubbliciParser = new CustomSoldipubbliciParser(comparto, ente);
@@ -148,7 +143,7 @@ public class MunicipalitySearchActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onProgressUpdate(ProgressStepper p) {
+        public void onProgressUpdate(@NonNull ProgressStepper p) {
             super.onProgressUpdate(p);
             int progress = (int) (p.getPercent() * progressBar.getMax());
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -164,7 +159,7 @@ public class MunicipalitySearchActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(List<Data> r) {
+        protected void onPostExecute(@NonNull List<Data> r) {
             progressBar.setVisibility(View.GONE);
         }
     }

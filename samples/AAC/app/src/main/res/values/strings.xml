@@ -43,8 +43,8 @@
     <string name="licenze_software">Visualizza dati combinati</string>
     <string name="spese_totali">Somma totale degli importi degli appalti ricercati espressa in euro:</string>
     <string name="bottom_menu_university">Università</string>
-    <string name="bottom_menu_winners">Fornitori</string>
-    <string name="bottom_menu_public">Comuni</string>
+    <string name="bottom_menu_supplier">Fornitori</string>
+    <string name="bottom_menu_municipality">Comuni</string>
     <string name="supply_name">Tipo Società:\u0020</string>
     <string name="supply_iva">Partita IVA:\u0020</string>
     <string name="supply_adrr">Sede Legale:\u0020</string>

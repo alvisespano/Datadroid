@@ -1,8 +1,6 @@
 package it.unive.dais.cevid.aac.component;
 
 import android.app.Activity;
-import android.app.NotificationManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
@@ -10,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,21 +15,16 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationSettingsStates;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import it.unive.dais.cevid.aac.R;
 import it.unive.dais.cevid.aac.item.MunicipalityItem;
@@ -40,23 +32,28 @@ import it.unive.dais.cevid.aac.item.SupplierItem;
 import it.unive.dais.cevid.aac.item.UniversityItem;
 import it.unive.dais.cevid.aac.fragment.MapFragment;
 import it.unive.dais.cevid.aac.parser.SupplierParser;
-import it.unive.dais.cevid.datadroid.lib.parser.AsyncParser;
 import it.unive.dais.cevid.datadroid.lib.util.Function;
-import it.unive.dais.cevid.datadroid.lib.util.MapItem;
 import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
+import it.unive.dais.cevid.datadroid.lib.util.UnexpectedException;
 
 public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         BottomNavigationView.OnNavigationItemSelectedListener {
 
+    public enum Mode {
+        UNIVERSITY,
+        MUNICIPALITY,
+        SUPPLIER
+    }
+
+
     private static final String TAG = "MainActivity";
     protected static final int REQUEST_CHECK_SETTINGS = 500;
     protected static final int PERMISSIONS_REQUEST_ACCESS_BOTH_LOCATION = 501;
 
-    private FragmentManager fragmentManager;
     private MapFragment mapFragment;
-    private BottomNavigationView bottomNavigationView;
+    private BottomNavigationView bottomNavigation;
 
     @NonNull
     private final List<UniversityItem> universityItems = new ArrayList<>();
@@ -69,40 +66,36 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        fragmentManager = getSupportFragmentManager();
+        FragmentManager fragmentManager = getSupportFragmentManager();
         mapFragment = new MapFragment();
+        fragmentManager.beginTransaction().replace(R.id.content_frame, mapFragment, mapFragment.getTag()).commit();
 
-        bottomNavigationView = (BottomNavigationView) findViewById(R.id.navigation);
-        bottomNavigationView.setOnNavigationItemSelectedListener(this);
-
-        // non serve più disabilitare i pulsanti del menu, perché sono sempre abilitati, ma i marker vengono disposti asincronamente
-//        for (int i = 0; i < bottomNavigationView.getMenu().size(); i++) {
-//            MenuItem item = bottomNavigationView.getMenu().getItem(i);
-//            if (item.getTitle().equals(getString(R.string.bottom_menu_winners))) {
-//                item.setEnabled(false);
-//            }
-//
-//        }
+        bottomNavigation = (BottomNavigationView) findViewById(R.id.navigation);
+        bottomNavigation.setOnNavigationItemSelectedListener(this);
 
         setupSupplierItems();
         setupUniversityItems();
         setupMunicipalityItems();
-
-        setupMapFragment();
-        setContentFragment(R.id.contentFrame, mapFragment);
     }
 
     private void setupSupplierItems() {
-        SupplierParser supplierParser = new SupplierParser() {
+//        SupplierParser supplierParser = new SupplierParser() {
+//            @Override
+//            public void onPostExecute(@NonNull List<SupplierParser.Data> suppliers) {
+//                for (SupplierParser.Data supplier : suppliers) {
+//                    synchronized (supplierItems) {
+//                        supplierItems.add(new SupplierItem(MainActivity.this, supplier));
+//                    }
+//                }
+//            }
+//        };
+        SupplierParser supplierParser = new SupplierParser(new Function<SupplierParser.Data, Void>() {
             @Override
-            public void onPostExecute(@NonNull List<SupplierParser.Data> suppliers) {
-                for (SupplierParser.Data supplier : suppliers) {
-                    synchronized (supplierItems) {
-                        supplierItems.add(new SupplierItem(MainActivity.this, supplier));
-                    }
-                }
+            public Void apply(SupplierParser.Data x) {
+                supplierItems.add(new SupplierItem(MainActivity.this, x));
+                return null;
             }
-        };
+        });
         supplierParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -164,17 +157,6 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private void setupMapFragment() {
-        mapFragment.setParentActivity(this);
-//        mapFragment.setUniversityItems(universityItems);
-//        mapFragment.setSupplierItems(supplierItems);
-//        mapFragment.setMunicipalityItems(municipalityItems);
-    }
-
-    private void setContentFragment(int container, Fragment fragment) {
-        fragmentManager.beginTransaction().replace(container, fragment, fragment.getTag()).commit();
-    }
-
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Log.i(TAG, "location service connected");
@@ -201,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements
                     Log.d(TAG, "permissions granted: ACCESS_FINE_LOCATION + ACCESS_COARSE_LOCATION");
                 } else {
                     Log.e(TAG, "permissions not granted: ACCESS_FINE_LOCATION + ACCESS_COARSE_LOCATION");
-                    Snackbar.make(this.findViewById(R.id.map), R.string.msg_permissions_not_granted, Snackbar.LENGTH_LONG);
+                    Snackbar.make(this.findViewById(R.id.main_view), R.string.msg_permissions_not_granted, Snackbar.LENGTH_LONG);
                 }
             }
         }
@@ -275,10 +257,10 @@ public class MainActivity extends AppCompatActivity implements
         super.onPause();
 
         // TODO: questo probabilmente non serve più se non si usa il notification manager
-        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        int id = this.getBaseContext().getResources().getInteger(R.integer.id_notification);
-        assert mNotificationManager != null;
-        mNotificationManager.cancel(id);
+//        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+//        int id = this.getBaseContext().getResources().getInteger(R.integer.id_notification);
+//        assert mNotificationManager != null;
+//        mNotificationManager.cancel(id);
     }
 
     /**
@@ -289,16 +271,45 @@ public class MainActivity extends AppCompatActivity implements
         super.onDestroy();
     }
 
-    // TODO: assicurarsi che questo modo di avere il menu item attivo sia il modo corretto
-    public MenuItem getActiveItem() {
-        this.bottomNavigationView = (BottomNavigationView) findViewById(R.id.navigation);
-        return bottomNavigationView.getMenu().findItem(bottomNavigationView.getSelectedItemId());
-    }
-
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        mapFragment.changeMenuSelection(item);
+        Mode mode = getModeByMenuItemId(item.getItemId());
+        Log.d(TAG, String.format("entering mode %s", mode));
+        mapFragment.redrawMap(mode);
         return true;
+    }
+
+    private static Mode getModeByMenuItemId(int id) {
+        switch (id) {
+            case R.id.menu_university:
+                return Mode.UNIVERSITY;
+            case R.id.menu_municipality:
+                return Mode.MUNICIPALITY;
+            case R.id.menu_suppliers:
+                return Mode.SUPPLIER;
+            default:
+                throw new UnexpectedException(String.format("invalid menu item id: %d", id));
+        }
+    }
+
+    public Mode getCurrentMode() {
+        return getModeByMenuItemId(bottomNavigation.getSelectedItemId());
+    }
+
+
+    @NonNull
+    public List<UniversityItem> getUniversityItems() {
+        return universityItems;
+    }
+
+    @NonNull
+    public List<SupplierItem> getSupplierItems() {
+        return supplierItems;
+    }
+
+    @NonNull
+    public List<MunicipalityItem> getMunicipalityItemsItems() {
+        return municipalityItems;
     }
 
 

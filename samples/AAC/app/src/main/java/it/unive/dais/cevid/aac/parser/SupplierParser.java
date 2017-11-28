@@ -29,7 +29,11 @@ public class SupplierParser extends AbstractAsyncParser<SupplierParser.Data, Pro
             "FROM%20%22f476dccf-d60a-4301-b757-829b3e030ac6%22%20" +
             "ORDER%20BY%22Numero_Aggiudicazioni%22%20DESC%20LIMIT%20100";
 
-    public SupplierParser() {}
+    private final Function<Data, Void> onItemParsed;
+
+    public SupplierParser(Function<Data, Void> onItemParsed) {
+        this.onItemParsed = onItemParsed;
+    }
 
     @NonNull
     @Override
@@ -72,38 +76,13 @@ public class SupplierParser extends AbstractAsyncParser<SupplierParser.Data, Pro
             if (!Objects.equals(d.n_aggiudicati, "") && !Objects.equals(d.n_aggiudicati, "0")) {
                 r.add(d);
             }
-            onDataItemParsed(d);
+            onItemParsed.apply(d);
             prog.step();
             publishProgress(prog);
         }
         return r;
 
     }
-
-    @Override
-    protected void onDataItemParsed(Data data) {
-
-    }
-
-//    @Override
-//    protected void onPostExecute(List<Data> r) {
-//        onPostExecute.apply(r);
-//
-//        // TODO: valutare se vale la pena riusare la notifica al sistema quando finisce il download
-////        NotificationManager mManager = (NotificationManager) this.context.getSystemService(Context.NOTIFICATION_SERVICE);
-////        NotificationCompat.Builder mBuilder =
-////                new NotificationCompat.Builder(this.context)
-////                        .setSmallIcon(R.drawable.ic_file_download_black_24dp)
-////                        .setContentTitle(context.getResources().getString(R.string.notification_title))
-////                        .setContentText(context.getResources().getString(R.string.notification_msg));
-////        //.setContentIntent(pendingIntent);
-////        Notification notification = mBuilder.build();
-////        notification.flags = Notification.FLAG_AUTO_CANCEL | Notification.FLAG_ONLY_ALERT_ONCE;
-////        int id = context.getResources().getInteger(R.integer.id_notification);
-////        assert mManager != null;
-////        mManager.notify(id, notification);
-//    }
-
 
     public class Data implements Serializable {
         public String n_abilitazioni,

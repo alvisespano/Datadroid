@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -69,7 +70,7 @@ public class UniversitySearchActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onProgressUpdate(ProgressStepper p) {
+        public void onProgressUpdate(@NonNull ProgressStepper p) {
             int progress = (int) (p.getPercent() * progressBar1.getMax());
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 progressBar1.setProgress(progress, true);
@@ -85,7 +86,7 @@ public class UniversitySearchActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(List<Data> r) {
+        protected void onPostExecute(@NonNull List<Data> r) {
             progressBar1.setVisibility(View.GONE);
         }
     }
@@ -100,7 +101,7 @@ public class UniversitySearchActivity extends AppCompatActivity {
         }
 
         @Override
-        public void onProgressUpdate(ProgressStepper p) {
+        public void onProgressUpdate(@NonNull ProgressStepper p) {
             int progress = (int) (p.getPercent() * progressBar2.getMax());
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 progressBar2.setSecondaryProgress(progress);
@@ -116,7 +117,7 @@ public class UniversitySearchActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onPostExecute(List<Data> r) {
+        protected void onPostExecute(@NonNull List<Data> r) {
             progressBar2.setVisibility(View.GONE);
         }
     }
