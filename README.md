@@ -3,7 +3,7 @@
 Written by Alvise Spanò (C) 2017 Universita' Ca' Foscari Venezia
 
 
-Datadroid is an Android Java library offering wrappers and utilities for several Android components and widely-used APIs, including Google Maps and related components.
+Datadroid is an Android Java library offering wrappers and utilities for several Android components and widely-used APIs, including Google Maps and related components. It is currently under development and its features may change with time.
 
 The library offers a level of abstraction over the typical Android application architecture, transparently performing a number of tasks for dealing with open data downloading, parsing and scraping from several supported sources, allowing the programmer to write code faster and deliver quality apps easily and quickly.
 
