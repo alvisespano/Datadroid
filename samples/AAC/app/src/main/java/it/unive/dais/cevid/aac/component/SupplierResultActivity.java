@@ -35,7 +35,7 @@ public class SupplierResultActivity extends AppCompatActivity {
         setContentView(R.layout.activity_supplier_result);
         Intent intent = getIntent();
         RecyclerView.LayoutManager lmanager = new LinearLayoutManager(this);
-        RecyclerView view = (RecyclerView) findViewById(R.id.lista_partecipazioni);
+        RecyclerView view = (RecyclerView) findViewById(R.id.list_results);
         view.setLayoutManager(lmanager);
 
         tenders = (List<ParticipantParser.Data>) intent.getSerializableExtra(BUNDLE_PARTECIPATIONS);

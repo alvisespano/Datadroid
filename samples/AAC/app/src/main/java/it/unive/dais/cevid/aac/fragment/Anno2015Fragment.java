@@ -44,7 +44,7 @@ public class Anno2015Fragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_anno2015, container, false);
 
         lv = (ListView) rootView.findViewById(R.id.list_view);
-        inputSearch = (EditText) rootView.findViewById(R.id.inputSearch);
+        inputSearch = (EditText) rootView.findViewById(R.id.search_input);
 
         for (SoldipubbliciParser.Data x : spese_ente){
             double spesa = 0;
@@ -56,7 +56,7 @@ public class Anno2015Fragment extends Fragment {
                     "\nSpesa PRO-Capite: " + (spesa / 100) / Double.parseDouble(numero_abitanti)
             );}
 
-        adapter = new ArrayAdapter<>(getContext(), R.layout.list_spese, R.id.Spesa, spesePROCapite);
+        adapter = new ArrayAdapter<>(getContext(), R.layout.list_expenditures, R.id.expenditure, spesePROCapite);
         lv.setAdapter(adapter);
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

@@ -18,10 +18,10 @@ public class SupplierDetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_supplier_details);
 
         this.tender = (TenderParser.Data) getIntent().getSerializableExtra(BUNDLE_BID);
-        TextView title = (TextView) findViewById(R.id.bid_title);
-        TextView desc = (TextView) findViewById(R.id.bid_desc);
-        TextView lotto = (TextView) findViewById(R.id.bid_lotto);
-        TextView mass = (TextView) findViewById(R.id.bid_massimale);
+        TextView title = (TextView) findViewById(R.id.tender_title);
+        TextView desc = (TextView) findViewById(R.id.tender_desc);
+        TextView lotto = (TextView) findViewById(R.id.tender_plot);
+        TextView mass = (TextView) findViewById(R.id.tender_ceiling);
 
         title.setText(tender.denominazione);
         desc.setText(tender.denominazione_lotto);

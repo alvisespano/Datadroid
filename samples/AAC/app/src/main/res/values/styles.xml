@@ -15,12 +15,12 @@
         <item name="android:background">?android:attr/listDivider</item>
     </style>
     <style name="Field">
-        <item name="android:layout_marginTop">@dimen/sep_fields</item>
-        <item name="android:layout_marginBottom">@dimen/sep_fields</item>
+        <item name="android:layout_marginTop">@dimen/separation_padding_field</item>
+        <item name="android:layout_marginBottom">@dimen/separation_padding_field</item>
     </style>
     <style name="Field.Title" parent="Field">
-        <item name="android:layout_marginTop">@dimen/sep_fields</item>
-        <item name="android:layout_marginBottom">@dimen/sep_fields_title</item>
+        <item name="android:layout_marginTop">@dimen/separation_padding_field</item>
+        <item name="android:layout_marginBottom">@dimen/separation_padding_title</item>
         <item name="android:textSize">15sp</item>
         <item name="android:textAlignment">center</item>
 

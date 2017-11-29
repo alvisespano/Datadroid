@@ -4,26 +4,26 @@
     <string name="title_activity_maps">AAC Map</string>
     <!-- -->
 
-    <string name="gps_disabled">GPS disattivato</string>
-    <string name="gps_enabled">GPS attivato</string>
-    <string name="conn_failed">Connessione fallita</string>
-    <string name="conn_suspended">Connessione sospesa</string>
+    <string name="gps_disabled">GPS deactivated</string>
+    <string name="gps_enabled">GPS activated</string>
+    <string name="conn_failed">Connection failed</string>
+    <string name="conn_suspended">Connection suspended</string>
 
 
-    <string name="menu_mapStyle_title">Stile Mappa</string>
-    <string name="menu_mapStyle_summary">Scegli il tipo di mappa di Google Maps</string>
-    <string name="menu_zoomThreshold_title">Soglia di Zoom</string>
-    <string name="menu_zoomThreshold_summary">Soglia oltre la quale scompare il pulsante per impostare il marker</string>
-    <string name="menu_checkBox_title">Aggiornamento Automatico</string>
-    <string name="menu_checkBox_summary">Verifica la presenza di versioni più recenti.</string>
+    <string name="menu_mapStyle_title">Map style</string>
+    <string name="menu_mapStyle_summary">Choose Google Maps\' style</string>
+    <string name="menu_zoomThreshold_title">Zoom threshold</string>
+    <string name="menu_zoomThreshold_summary">Threshold for marker button auto hide</string>
+    <string name="menu_checkBox_title">Auto updates</string>
+    <string name="menu_checkBox_summary">Check for updates</string>
 
-    <string name="menu_zoomThreshold_low">Basso</string>
-    <string name="menu_zoomThreshold_mid">Medio</string>
-    <string name="menu_zoomThreshold_high">Alto</string>
+    <string name="menu_zoomThreshold_low">Low</string>
+    <string name="menu_zoomThreshold_mid">Medium</string>
+    <string name="menu_zoomThreshold_high">High</string>
     <string name="menu_mapStyle_normal">Standard</string>
     <string name="menu_mapStyle_satellite">Satellite</string>
-    <string name="menu_mapStyle_terrain">Terreno</string>
-    <string name="menu_mapStyle_hybrid">Ibrido</string>
+    <string name="menu_mapStyle_terrain">Terrain</string>
+    <string name="menu_mapStyle_hybrid">Hybrid</string>
 
     <string name="credits_year">2017</string>
     <string name="credits_project">CEVID</string>
@@ -31,34 +31,34 @@
     <string name="credits_authors">Alvise Spanò</string>
 
     <string name="action_info">Info</string>
-    <string name="action_impostazioni">Impostazioni</string>
+    <string name="action_settings">Settings</string>
 
-    <string name="msg_loading">Caricamento...</string>
-    <string name="msg_button_car">Pulsante premuto</string>
-    <string name="msg_permissions_not_granted">I permessi appena negati dall\'utente sono necessari per alcune funzionalità dell\'app. Il supporto delle funzionalità sarà ridotto.</string>
-    <string name="marker_title">You are HERE</string>
-    <string name="spesaPubblica">Spesa dai dati della Banca di Italia riguardante:</string>
-    <string name="ricerca_soldi_pubblici">Ricerca libera nelle spese 2016 di soldipubblici.gov.it</string>
-    <string name="ricerca_appalti">Ricerca libera tra gli appalti stipulati nel 2016 dall\'ente</string>
-    <string name="licenze_software">Visualizza dati combinati</string>
-    <string name="spese_totali">Somma totale degli importi degli appalti ricercati espressa in euro:</string>
-    <string name="bottom_menu_university">Università</string>
-    <string name="bottom_menu_supplier">Fornitori</string>
-    <string name="bottom_menu_municipality">Comuni</string>
-    <string name="supply_name">Tipo Società:\u0020</string>
-    <string name="supply_iva">Partita IVA:\u0020</string>
-    <string name="supply_adrr">Sede Legale:\u0020</string>
-    <string name="supply_button">Mostra gli appalti</string>
-    <string name="bid_desc">Descrizione:\u0020</string>
-    <string name="bid_lotto">Codice Lotto:\u0020</string>
-    <string name="bid_massimale">Importo Massimale:\u0020</string>
-    <string name="notification_title">Fornitori pronti</string>
-    <string name="notification_msg">Completato download fornitori</string>
-    <string name="euro_symbol">\u0020€</string>
-    <string name="com_desc">Nome:\u0020</string>
-    <string name="mun_details_code">Ente:\u0020</string>
-    <string name="mun_details_validita">Scadenza:\u0020</string>
-    <string name="mun_details_siope">Codice siope:\u0020</string>
-    <string name="municipality_button_text">Mostra voci di spesa</string>
-    <string name="mun_details_procapite">Spesa procapite:\u0020</string>
+    <string name="msg_loading">Loading&#830;</string>
+    <string name="msg_button_car">Button pushed</string>
+    <string name="msg_permissions_not_granted">Denied permissions will disable some features of the app</string>
+    <string name="marker_title">You are here</string>
+    <string name="public_expense">Expenditure taken from the Bank of Italy about:</string>
+    <string name="search_expense">Search for public expenditure in 2016</string>
+    <string name="search_tenders">Search for public tenders contracted in 2016</string>
+    <string name="license_software">Combine data</string>
+    <string name="total_expense">Total expenditure for the searched tenders (in euros):</string>
+    <string name="bottom_menu_university">Universities</string>
+    <string name="bottom_menu_supplier">Suppliers</string>
+    <string name="bottom_menu_municipality">Municipalities</string>
+    <string name="supply_name">Type:\u0020</string>
+    <string name="supply_iva">VAT registration number:\u0020</string>
+    <string name="supply_adrr">Registered office:\u0020</string>
+    <string name="supply_button">Show tenders</string>
+    <string name="tender_description">Description:\u0020</string>
+    <string name="tender_plot">Plot number:\u0020</string>
+    <string name="tender_ceiling">Budgetary ceiling:\u0020</string>
+    <string name="notification_title">Suppliers are ready</string>
+    <string name="notification_msg">Suppliers download finished</string>
+    <string name="mun_description">Name:\u0020</string>
+    <string name="mun_details_code">Institution fiscal code:\u0020</string>
+    <string name="mun_details_expire">Expire date:\u0020</string>
+    <string name="mun_details_siope">SIOPE code:\u0020</string>
+    <string name="mun_button_text">Show expenditures</string>
+    <string name="mun_details_procapite">Per capita expenditure:\u0020</string>
+    <string name="year_search_hint">Filter by expenditure item\'s name</string>
 </resources>

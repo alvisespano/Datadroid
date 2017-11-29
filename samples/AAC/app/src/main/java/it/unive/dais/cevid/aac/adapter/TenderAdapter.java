@@ -46,10 +46,10 @@ public class TenderAdapter extends RecyclerView.Adapter<TenderAdapter.Partecipat
 
         public PartecipationItem(View itemView) {
             super(itemView);
-            iva = (TextView) itemView.findViewById(R.id.text_part_iva);
+            iva = (TextView) itemView.findViewById(R.id.text_vat);
             nome = (TextView) itemView.findViewById(R.id.text_part_nome);
-            esito = (TextView) itemView.findViewById(R.id.text_part_esito);
-            lotto = (TextView) itemView.findViewById(R.id.text_part_lotto);
+            esito = (TextView) itemView.findViewById(R.id.text_result);
+            lotto = (TextView) itemView.findViewById(R.id.text_plot);
         }
     }
 }

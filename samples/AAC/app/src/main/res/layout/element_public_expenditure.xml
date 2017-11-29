@@ -7,24 +7,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_margin="10dp"
+        android:layout_margin="@dimen/layout_margin_10"
         >
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/spesaPubblica"
+            android:text="@string/public_expense"
             />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/descrizione_spesa_pubblica"
-            android:textSize="20dp"
+            android:id="@+id/description_exp"
+            android:textSize="@dimen/text_title"
             />
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/spesa_pubblica_2016"
-            android:textSize="15dp"
+            android:id="@+id/public_exp_2016"
+            android:textSize="@dimen/text_field"
             />
     </LinearLayout>
 

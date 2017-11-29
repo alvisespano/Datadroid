@@ -174,8 +174,8 @@ public class UniversitySearchActivity extends AppCompatActivity {
         soldiPubbliciParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         appaltiParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-        SearchView appaltiSearch = (SearchView) findViewById(R.id.ricerca_appalti);
-        SearchView soldipubbliciSearch = (SearchView) findViewById(R.id.ricerca_soldipubblici);
+        SearchView appaltiSearch = (SearchView) findViewById(R.id.search_tenders);
+        SearchView soldipubbliciSearch = (SearchView) findViewById(R.id.search_exp);
         appaltiSearch.onActionViewExpanded();
         soldipubbliciSearch.onActionViewExpanded();
 

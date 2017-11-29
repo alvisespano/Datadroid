@@ -36,13 +36,13 @@
         android:layout_height="wrap_content"
         android:id="@+id/univeristy_name"
         android:layout_margin="10dp"
-        android:textSize="@dimen/info_text_size"
+        android:textSize="@dimen/text_title"
         android:textAlignment="center"/>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/ricerca_soldi_pubblici"
+        android:text="@string/search_expense"
         android:textAlignment="center"/>
 
 
@@ -50,27 +50,27 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="30dp"
-        android:id="@+id/ricerca_soldipubblici"/>
+        android:id="@+id/search_exp"/>
 
 
     <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/ricerca_appalti"
+            android:text="@string/search_tenders"
             android:textAlignment="center"/>
 
     <android.support.v7.widget.SearchView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="30dp"
-        android:id="@+id/ricerca_appalti"/>
+        android:id="@+id/search_tenders"/>
 
 
     <Button
         android:id="@+id/button_combine_data"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/licenze_software"
+        android:text="@string/license_software"
         android:layout_gravity="end"
         />
 

@@ -46,7 +46,7 @@ public class Anno2017Fragment extends Fragment {
 
         lv = (ListView) rootView.findViewById(R.id.list_view);
 
-        inputSearch = (EditText) rootView.findViewById(R.id.inputSearch);
+        inputSearch = (EditText) rootView.findViewById(R.id.search_input);
 
         for (SoldipubbliciParser.Data x : spese_ente){
             double spesa = 0;
@@ -59,7 +59,7 @@ public class Anno2017Fragment extends Fragment {
             );}
 
 
-        adapter = new ArrayAdapter<>(getContext(), R.layout.list_spese, R.id.Spesa, spesePROCapite);
+        adapter = new ArrayAdapter<>(getContext(), R.layout.list_expenditures, R.id.expenditure, spesePROCapite);
         lv.setAdapter(adapter);
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

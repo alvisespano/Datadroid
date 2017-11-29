@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     tools:context="it.unive.dais.cevid.aac.component.SupplierDetailsActivity"
-    android:id="@+id/bid_activity">
+    android:id="@+id/tender_activity">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -14,7 +14,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/bid_title"
+            android:id="@+id/tender_title"
             android:textAlignment="center"/>
 
         <LinearLayout
@@ -24,11 +24,11 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/bid_desc"/>
+                android:text="@string/tender_description"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/bid_desc"/>
+                android:id="@+id/tender_desc"/>
         </LinearLayout>
 
         <LinearLayout
@@ -38,11 +38,11 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/bid_lotto"/>
+                android:text="@string/tender_plot"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/bid_lotto"/>
+                android:id="@+id/tender_plot"/>
         </LinearLayout>
 
         <LinearLayout
@@ -52,11 +52,11 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/bid_massimale"/>
+                android:text="@string/tender_ceiling"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/bid_massimale"/>
+                android:id="@+id/tender_ceiling"/>
         </LinearLayout>
 
     </LinearLayout>

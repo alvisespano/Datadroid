@@ -5,10 +5,10 @@
     android:orientation="vertical" >
 
     <!-- Editext for Search -->
-    <EditText android:id="@+id/inputSearch"
+    <EditText android:id="@+id/search_input"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:hint="Inserisci una voce di spesa da cercare"
+        android:hint="@string/year_search_hint"
         android:inputType="textVisiblePassword"/>
 
     <!-- List View -->

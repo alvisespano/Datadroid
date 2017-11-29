@@ -21,7 +21,7 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/navigation"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="@dimen/menu_height"
         app:menu="@menu/bottom_nav_items" />
 
 </RelativeLayout>

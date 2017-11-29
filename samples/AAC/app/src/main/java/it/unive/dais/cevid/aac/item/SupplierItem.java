@@ -22,7 +22,7 @@ import it.unive.dais.cevid.datadroid.lib.util.MapItem;
 
 public class SupplierItem extends MapItem implements Serializable {
     private final SupplierParser.Data data;
-    private Pair<Double, Double> ll;
+    private Pair<Double, Double> ll; //TODO: crash, not serializable
 
     public SupplierItem(Context context, SupplierParser.Data data) {
         this.data = data;
@@ -66,8 +66,7 @@ public class SupplierItem extends MapItem implements Serializable {
 
     @Override
     public String getDescription() {
-        // TODO: fare una descrizione migliore
-        return getTitle();
+        return String.format("%s, %s",data.ragione_sociale,data.forma_societaria);
     }
 
 }
