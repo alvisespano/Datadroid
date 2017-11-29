@@ -45,6 +45,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.io.ObjectInputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,14 +80,6 @@ public class MapFragment extends Fragment
 
     @Nullable
     private MainActivity parentActivity;
-
-    @NonNull
-    private Map<String, UniversityItem> universityMap = new HashMap<>();
-    @NonNull
-    private Map<String, MunicipalityItem> municipalityMap = new HashMap<>();
-    @NonNull
-    private Map<String, SupplierItem> supplierMap = new HashMap<>();
-
     /**
      * Questo oggetto è la mappa di Google Maps. Viene inizializzato asincronamente dal metodo {@code onMapsReady}.
      */
@@ -216,25 +209,24 @@ public class MapFragment extends Fragment
         gMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
-                //TODO: buttare via le hashmap ed usare Marker.setTag() per memorizzare dati in ogni marker
 
-                final String id = marker.getId();
-                if (universityMap.containsKey(id)) {
+                final MapItem markerTag = (MapItem) marker.getTag();
+                if (markerTag instanceof UniversityItem) {
                     if (hereMarker == null || (hereMarker.getPosition() != marker.getPosition())) {
                         Intent intent = new Intent(getContext(), UniversitySearchActivity.class);
-                        intent.putExtra(UniversitySearchActivity.UNIVERSITY_ITEM, universityMap.get(id));
+                        intent.putExtra(UniversitySearchActivity.UNIVERSITY_ITEM, markerTag);
                         startActivity(intent);
                     }
-                } else if (municipalityMap.containsKey(id)) {
+                } else if (markerTag instanceof MunicipalityItem) {
+                    MunicipalityItem item = (MunicipalityItem) markerTag;
                     Intent intent = new Intent(getContext(), MunicipalitySearchActivity.class);
-                    MunicipalityItem item = municipalityMap.get(id);
                     intent.putExtra(MunicipalitySearchActivity.CODICE_ENTE, item.getCodiceEnte());
                     intent.putExtra(MunicipalitySearchActivity.CODICE_COMPARTO, item.getCodiceComparto());
                     intent.putExtra(MunicipalitySearchActivity.MUNICIPALITY_ITEM, item);
                     startActivity(intent);
-                } else if (supplierMap.containsKey(id)) {
+                } else if (markerTag instanceof SupplierItem) {
                     Intent intent = new Intent(getContext(), SupplierSearchActivity.class);
-                    intent.putExtra(SupplierSearchActivity.SUPPLIER_ITEM, supplierMap.get(id));
+                    intent.putExtra(SupplierSearchActivity.SUPPLIER_ITEM, markerTag);
                     startActivity(intent);
                 }
             }
@@ -389,31 +381,28 @@ public class MapFragment extends Fragment
     public void redrawMap(Mode mode) {
         if (gMap != null) {
             gMap.clear();
-            municipalityMap.clear();
-            universityMap.clear();
-            supplierMap.clear();
             assert parentActivity != null;
             switch (mode) {
                 case MUNICIPALITY:
-                    putItems(parentActivity.getMunicipalityItemsItems(), BitmapDescriptorFactory.HUE_GREEN, municipalityMap);
+                    putItems(parentActivity.getMunicipalityItemsItems(), BitmapDescriptorFactory.HUE_GREEN);
                     break;
                 case UNIVERSITY:
-                    putItems(parentActivity.getUniversityItems(), BitmapDescriptorFactory.HUE_RED, universityMap);
+                    putItems(parentActivity.getUniversityItems(), BitmapDescriptorFactory.HUE_RED);
                     break;
                 case SUPPLIER:
-                    putItems(parentActivity.getSupplierItems(), BitmapDescriptorFactory.HUE_BLUE, supplierMap);
+                    putItems(parentActivity.getSupplierItems(), BitmapDescriptorFactory.HUE_BLUE);
                     break;
             }
         }
     }
 
-    public <I extends MapItem> void putItems(@NonNull List<I> c, float hue, @NonNull Map<String, I> map) {
+    public <I extends MapItem> void putItems(@NonNull List<I> c, float hue) {
         for (I i : c) {
-            putItem(hue, map, i);
+            putItem(hue, i);
         }
     }
 
-    public <I extends MapItem> void putItem(float hue, @NonNull Map<String, I> map, I i) {
+    public <I extends MapItem> void putItem(float hue, I i) {
         MarkerOptions opts = new MarkerOptions()
                 .position(i.getPosition())
                 .title(i.getTitle())
@@ -421,7 +410,7 @@ public class MapFragment extends Fragment
                 .icon(BitmapDescriptorFactory.defaultMarker(hue));
         assert gMap != null;
         Marker marker = gMap.addMarker(opts);
-        map.put(marker.getId(), i);
+        marker.setTag(i);
     }
 
 }
