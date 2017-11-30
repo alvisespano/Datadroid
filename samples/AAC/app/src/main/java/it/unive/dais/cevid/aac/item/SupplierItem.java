@@ -19,10 +19,10 @@ import it.unive.dais.cevid.datadroid.lib.util.MapItem;
 /**
  * Created by fbusolin on 13/11/17.
  */
-
+//TODO: crash, NotSerializableException
 public class SupplierItem extends MapItem implements Serializable {
     private final SupplierParser.Data data;
-    private Pair<Double, Double> ll; //TODO: crash, not serializable
+    private Pair<Double, Double> ll;
 
     public SupplierItem(Context context, SupplierParser.Data data) {
         this.data = data;
@@ -68,5 +68,4 @@ public class SupplierItem extends MapItem implements Serializable {
     public String getDescription() {
         return String.format("%s, %s",data.ragione_sociale,data.forma_societaria);
     }
-
 }

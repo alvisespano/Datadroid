@@ -25,6 +25,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import it.unive.dais.cevid.aac.R;
 import it.unive.dais.cevid.aac.item.MunicipalityItem;
@@ -56,11 +57,11 @@ public class MainActivity extends AppCompatActivity implements
     private BottomNavigationView bottomNavigation;
 
     @NonNull
-    private final List<UniversityItem> universityItems = new ArrayList<>();
+    private final CopyOnWriteArrayList<UniversityItem> universityItems = new CopyOnWriteArrayList<>();
     @NonNull
-    private final List<MunicipalityItem> municipalityItems = new ArrayList<>();
+    private final CopyOnWriteArrayList<MunicipalityItem> municipalityItems = new CopyOnWriteArrayList<>();
     @NonNull
-    private final List<SupplierItem> supplierItems = new ArrayList<>();
+    private final CopyOnWriteArrayList<SupplierItem> supplierItems = new CopyOnWriteArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
