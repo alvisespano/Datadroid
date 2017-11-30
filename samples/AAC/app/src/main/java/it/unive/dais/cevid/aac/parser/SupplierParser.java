@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import it.unive.dais.cevid.aac.util.SupplierData;
 import it.unive.dais.cevid.datadroid.lib.parser.AbstractAsyncParser;
 import it.unive.dais.cevid.datadroid.lib.util.Function;
 import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
@@ -22,22 +23,22 @@ import okhttp3.Request;
  * Created by fbusolin on 13/11/17.
  */
 
-public class SupplierParser extends AbstractAsyncParser<SupplierParser.Data, ProgressStepper> {
+public class SupplierParser extends AbstractAsyncParser<SupplierData, ProgressStepper> implements Serializable{
     public static final String TAG = "SupplierParser";
     private static final String QUERY = "http://dati.consip.it/api/action/datastore_search_sql?" +
             "sql=SELECT%20*%20" +
             "FROM%20%22f476dccf-d60a-4301-b757-829b3e030ac6%22%20" +
             "ORDER%20BY%22Numero_Aggiudicazioni%22%20DESC%20LIMIT%20100";
 
-    private final Function<Data, Void> onItemParsed;
+    private final Function<SupplierData, Void> onItemParsed;
 
-    public SupplierParser(Function<Data, Void> onItemParsed) {
+    public SupplierParser(Function<SupplierData, Void> onItemParsed) {
         this.onItemParsed = onItemParsed;
     }
 
     @NonNull
     @Override
-    public List<Data> parse() throws IOException {
+    public List<SupplierData> parse() throws IOException {
         Request request = new Request.Builder()
                 .url(QUERY)
                 .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
@@ -51,15 +52,15 @@ public class SupplierParser extends AbstractAsyncParser<SupplierParser.Data, Pro
         }
     }
 
-    protected List<SupplierParser.Data> parseJSON(String data) throws JSONException {
-        List<SupplierParser.Data> r = new ArrayList<>();
+    protected List<SupplierData> parseJSON(String data) throws JSONException {
+        List<SupplierData> r = new ArrayList<>();
         JSONObject jo = new JSONObject(data);
         JSONObject result = jo.getJSONObject("result");
         JSONArray array = result.getJSONArray("records");
         ProgressStepper prog = new ProgressStepper(array.length());
         for (int i = 0; i < array.length(); i++) {
             JSONObject obj = array.getJSONObject(i);
-            SupplierParser.Data d = new SupplierParser.Data();
+            SupplierData d = new SupplierData();
             d.id = obj.optString("id");
             d.n_abilitazioni = obj.optString("Numero_Abilitazioni");
             d.n_aggiudicati = obj.optString("Numero_Aggiudicazioni");
@@ -82,22 +83,6 @@ public class SupplierParser extends AbstractAsyncParser<SupplierParser.Data, Pro
         }
         return r;
 
-    }
-
-    public class Data implements Serializable {
-        public String n_abilitazioni,
-                n_aggiudicati,
-                forma_societaria,
-                indirizzo,
-                piva,
-                provincia,
-                n_transazioni,
-                ragione_sociale,
-                regione,
-                id,
-                nazione,
-                comune,
-                n_attivi;
     }
 
 }

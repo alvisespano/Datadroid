@@ -44,20 +44,20 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import java.util.List;
+import java.util.Collection;
 
-import it.unive.dais.cevid.aac.component.MunicipalitySearchActivity;
-import it.unive.dais.cevid.aac.component.MainActivity;
 import it.unive.dais.cevid.aac.R;
+import it.unive.dais.cevid.aac.component.MainActivity;
+import it.unive.dais.cevid.aac.component.MunicipalitySearchActivity;
+import it.unive.dais.cevid.aac.component.SettingsActivity;
 import it.unive.dais.cevid.aac.component.SupplierSearchActivity;
 import it.unive.dais.cevid.aac.component.UniversitySearchActivity;
-import it.unive.dais.cevid.aac.component.SettingsActivity;
 import it.unive.dais.cevid.aac.item.MunicipalityItem;
 import it.unive.dais.cevid.aac.item.SupplierItem;
 import it.unive.dais.cevid.aac.item.UniversityItem;
 import it.unive.dais.cevid.datadroid.lib.util.MapItem;
 
-import static it.unive.dais.cevid.aac.component.MainActivity.*;
+import static it.unive.dais.cevid.aac.component.MainActivity.Mode;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -392,7 +392,7 @@ public class MapFragment extends Fragment
         }
     }
 
-    public <I extends MapItem> void putItems(@NonNull List<I> c, float hue) {
+    public <I extends MapItem> void putItems(@NonNull Collection<I> c, float hue) {
         for (I i : c) {
             putItem(hue, i);
         }

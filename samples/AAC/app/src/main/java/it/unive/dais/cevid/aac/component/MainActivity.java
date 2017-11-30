@@ -4,13 +4,13 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,15 +24,17 @@ import com.google.android.gms.location.LocationSettingsStates;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import it.unive.dais.cevid.aac.R;
+import it.unive.dais.cevid.aac.fragment.MapFragment;
 import it.unive.dais.cevid.aac.item.MunicipalityItem;
 import it.unive.dais.cevid.aac.item.SupplierItem;
 import it.unive.dais.cevid.aac.item.UniversityItem;
-import it.unive.dais.cevid.aac.fragment.MapFragment;
 import it.unive.dais.cevid.aac.parser.SupplierParser;
+import it.unive.dais.cevid.aac.util.SupplierData;
 import it.unive.dais.cevid.datadroid.lib.util.Function;
 import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
 import it.unive.dais.cevid.datadroid.lib.util.UnexpectedException;
@@ -57,11 +59,11 @@ public class MainActivity extends AppCompatActivity implements
     private BottomNavigationView bottomNavigation;
 
     @NonNull
-    private final CopyOnWriteArrayList<UniversityItem> universityItems = new CopyOnWriteArrayList<>();
+    private final Collection<UniversityItem> universityItems = new ConcurrentLinkedQueue<>();
     @NonNull
-    private final CopyOnWriteArrayList<MunicipalityItem> municipalityItems = new CopyOnWriteArrayList<>();
+    private final Collection<MunicipalityItem> municipalityItems = new ConcurrentLinkedQueue<>();
     @NonNull
-    private final CopyOnWriteArrayList<SupplierItem> supplierItems = new CopyOnWriteArrayList<>();
+    private final Collection <SupplierItem> supplierItems = new ConcurrentLinkedQueue<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,17 +84,17 @@ public class MainActivity extends AppCompatActivity implements
     private void setupSupplierItems() {
 //        SupplierParser supplierParser = new SupplierParser() {
 //            @Override
-//            public void onPostExecute(@NonNull List<SupplierParser.Data> suppliers) {
-//                for (SupplierParser.Data supplier : suppliers) {
+//            public void onPostExecute(@NonNull List<SupplierParser.SupplierData> suppliers) {
+//                for (SupplierParser.SupplierData supplier : suppliers) {
 //                    synchronized (supplierItems) {
 //                        supplierItems.add(new SupplierItem(MainActivity.this, supplier));
 //                    }
 //                }
 //            }
 //        };
-        SupplierParser supplierParser = new SupplierParser(new Function<SupplierParser.Data, Void>() {
+        SupplierParser supplierParser = new SupplierParser(new Function<SupplierData, Void>() {
             @Override
-            public Void apply(SupplierParser.Data x) {
+            public Void apply(SupplierData x) {
                 supplierItems.add(new SupplierItem(MainActivity.this, x));
                 return null;
             }
@@ -299,17 +301,17 @@ public class MainActivity extends AppCompatActivity implements
 
 
     @NonNull
-    public List<UniversityItem> getUniversityItems() {
+    public Collection<UniversityItem> getUniversityItems() {
         return universityItems;
     }
 
     @NonNull
-    public List<SupplierItem> getSupplierItems() {
+    public Collection<SupplierItem> getSupplierItems() {
         return supplierItems;
     }
 
     @NonNull
-    public List<MunicipalityItem> getMunicipalityItems() {
+    public Collection<MunicipalityItem> getMunicipalityItems() {
         return municipalityItems;
     }
 

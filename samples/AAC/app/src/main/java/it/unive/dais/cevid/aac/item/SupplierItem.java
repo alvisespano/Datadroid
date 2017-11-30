@@ -3,7 +3,6 @@ package it.unive.dais.cevid.aac.item;
 import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
-import android.util.Pair;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -14,6 +13,7 @@ import java.util.List;
 import java.util.Locale;
 
 import it.unive.dais.cevid.aac.parser.SupplierParser;
+import it.unive.dais.cevid.aac.util.SupplierData;
 import it.unive.dais.cevid.datadroid.lib.util.MapItem;
 
 /**
@@ -21,13 +21,13 @@ import it.unive.dais.cevid.datadroid.lib.util.MapItem;
  */
 //TODO: crash, NotSerializableException
 public class SupplierItem extends MapItem implements Serializable {
-    private final SupplierParser.Data data;
-    private Pair<Double, Double> ll;
+    private final SupplierData data;
+    private Position ll;
 
-    public SupplierItem(Context context, SupplierParser.Data data) {
+    public SupplierItem(Context context, SupplierData data) {
         this.data = data;
         LatLng ll = getLatLngFromAddress(context, getAddress());
-        this.ll = new Pair<>(ll.latitude, ll.longitude);
+        this.ll = new Position(ll.latitude, ll.longitude);
     }
 
     private LatLng getLatLngFromAddress(Context context, String address) {
@@ -48,7 +48,7 @@ public class SupplierItem extends MapItem implements Serializable {
 
     @Override
     public LatLng getPosition() {
-        return new LatLng(ll.first, ll.second);
+        return ll.getLatLng();
     }
 
     @Override
@@ -67,5 +67,17 @@ public class SupplierItem extends MapItem implements Serializable {
     @Override
     public String getDescription() {
         return String.format("%s, %s",data.ragione_sociale,data.forma_societaria);
+    }
+
+
+    public class Position implements Serializable{
+        private double latitude,longitude;
+        public Position(double latitude,double longitude){
+            this.latitude = latitude;
+            this.longitude = longitude;
+        }
+        public LatLng getLatLng(){
+            return new LatLng(latitude,longitude);
+        }
     }
 }
