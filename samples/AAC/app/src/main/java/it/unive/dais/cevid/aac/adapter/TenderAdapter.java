@@ -24,7 +24,7 @@ public class TenderAdapter extends RecyclerView.Adapter<TenderAdapter.Partecipat
     public PartecipationItem onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView;
         itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.tender_element, parent, false);
+                .inflate(R.layout.element_tender, parent, false);
         return new PartecipationItem(itemView);
     }
 

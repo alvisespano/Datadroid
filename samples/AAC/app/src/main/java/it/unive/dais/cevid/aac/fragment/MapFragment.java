@@ -2,7 +2,6 @@ package it.unive.dais.cevid.aac.fragment;
 
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -45,10 +44,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import java.io.ObjectInputStream;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import it.unive.dais.cevid.aac.component.MunicipalitySearchActivity;
 import it.unive.dais.cevid.aac.component.MainActivity;
@@ -384,7 +380,7 @@ public class MapFragment extends Fragment
             assert parentActivity != null;
             switch (mode) {
                 case MUNICIPALITY:
-                    putItems(parentActivity.getMunicipalityItemsItems(), BitmapDescriptorFactory.HUE_GREEN);
+                    putItems(parentActivity.getMunicipalityItems(), BitmapDescriptorFactory.HUE_GREEN);
                     break;
                 case UNIVERSITY:
                     putItems(parentActivity.getUniversityItems(), BitmapDescriptorFactory.HUE_RED);

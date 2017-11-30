@@ -308,7 +308,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @NonNull
-    public List<MunicipalityItem> getMunicipalityItemsItems() {
+    public List<MunicipalityItem> getMunicipalityItems() {
         return municipalityItems;
     }
 

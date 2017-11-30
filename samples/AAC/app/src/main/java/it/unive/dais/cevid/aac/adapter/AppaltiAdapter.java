@@ -25,7 +25,7 @@ public class AppaltiAdapter extends RecyclerView.Adapter<AppaltiAdapter.AppaltoI
     public AppaltoItem onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView;
         itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.appalti_element, parent, false);
+                .inflate(R.layout.element_appalti, parent, false);
         return new AppaltoItem(itemView);
     }
 
