@@ -2,7 +2,6 @@ package it.unive.dais.cevid.aac.fragment;
 
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -395,7 +394,7 @@ public class MapFragment extends Fragment
             assert parentActivity != null;
             switch (mode) {
                 case MUNICIPALITY:
-                    putItems(parentActivity.getMunicipalityItemsItems(), BitmapDescriptorFactory.HUE_GREEN, municipalityMap);
+                    putItems(parentActivity.getMunicipalityItems(), BitmapDescriptorFactory.HUE_GREEN, municipalityMap);
                     break;
                 case UNIVERSITY:
                     putItems(parentActivity.getUniversityItems(), BitmapDescriptorFactory.HUE_RED, universityMap);

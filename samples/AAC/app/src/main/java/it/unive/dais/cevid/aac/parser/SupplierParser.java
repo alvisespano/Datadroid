@@ -29,11 +29,8 @@ public class SupplierParser extends AbstractAsyncParser<SupplierParser.Data, Pro
             "FROM%20%22f476dccf-d60a-4301-b757-829b3e030ac6%22%20" +
             "ORDER%20BY%22Numero_Aggiudicazioni%22%20DESC%20LIMIT%20100";
 
-    private final Function<Data, Void> onItemParsed;
 
-    public SupplierParser(Function<Data, Void> onItemParsed) {
-        this.onItemParsed = onItemParsed;
-    }
+    public SupplierParser() {}
 
     @NonNull
     @Override
@@ -76,12 +73,11 @@ public class SupplierParser extends AbstractAsyncParser<SupplierParser.Data, Pro
             if (!Objects.equals(d.n_aggiudicati, "") && !Objects.equals(d.n_aggiudicati, "0")) {
                 r.add(d);
             }
-            onItemParsed.apply(d);
+            onItemParsed(d);
             prog.step();
             publishProgress(prog);
         }
         return r;
-
     }
 
     public class Data implements Serializable {

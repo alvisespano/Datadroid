@@ -79,23 +79,12 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void setupSupplierItems() {
-//        SupplierParser supplierParser = new SupplierParser() {
-//            @Override
-//            public void onPostExecute(@NonNull List<SupplierParser.Data> suppliers) {
-//                for (SupplierParser.Data supplier : suppliers) {
-//                    synchronized (supplierItems) {
-//                        supplierItems.add(new SupplierItem(MainActivity.this, supplier));
-//                    }
-//                }
-//            }
-//        };
-        SupplierParser supplierParser = new SupplierParser(new Function<SupplierParser.Data, Void>() {
+        SupplierParser supplierParser = new SupplierParser() {
             @Override
-            public Void apply(SupplierParser.Data x) {
+            public void onItemParsed(@NonNull SupplierParser.Data x) {
                 supplierItems.add(new SupplierItem(MainActivity.this, x));
-                return null;
             }
-        });
+        };
         supplierParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -303,14 +292,10 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @NonNull
-    public List<SupplierItem> getSupplierItems() {
-        return supplierItems;
-    }
+    public List<SupplierItem> getSupplierItems() { return supplierItems; }
 
     @NonNull
-    public List<MunicipalityItem> getMunicipalityItemsItems() {
-        return municipalityItems;
-    }
+    public List<MunicipalityItem> getMunicipalityItems() { return municipalityItems; }
 
 
     // test stuff
@@ -321,13 +306,11 @@ public class MainActivity extends AppCompatActivity implements
         final int n1 = 10, n2 = 30, n3 = 5;
         ProgressStepper p1 = new ProgressStepper(n1);
         for (int i = 0; i < n1; ++i) {
-
             ProgressStepper p2 = p1.getSubProgressStepper(n2);
             for (int j = 0; j < n2; ++j) {
                 p2.step();
                 Log.d(TAG, String.format("test progress: %d%%", (int) (p2.getPercent() * 100.)));
             }
-
             p1.step();
             Log.d(TAG, String.format("test progress: %d%%", (int) (p1.getPercent() * 100.)));
         }
