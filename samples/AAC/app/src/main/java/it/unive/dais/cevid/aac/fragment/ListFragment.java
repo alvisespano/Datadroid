@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,17 +18,19 @@ import java.util.Collection;
 import java.util.List;
 
 import it.unive.dais.cevid.aac.R;
+import it.unive.dais.cevid.aac.component.MainActivity;
 import it.unive.dais.cevid.aac.component.MunicipalitySearchActivity;
 import it.unive.dais.cevid.aac.component.SupplierSearchActivity;
 import it.unive.dais.cevid.aac.component.UniversitySearchActivity;
 import it.unive.dais.cevid.aac.item.MunicipalityItem;
-import it.unive.dais.cevid.aac.util.ListItem;
 import it.unive.dais.cevid.datadroid.lib.util.MapItem;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ListFragment extends BaseFragment implements AdapterView.OnItemClickListener {
+public class ListFragment extends BaseFragment implements
+        AdapterView.OnItemClickListener,
+        SwipeRefreshLayout.OnRefreshListener{
     private View rootView;
     private ListView listView;
 
@@ -45,13 +48,14 @@ public class ListFragment extends BaseFragment implements AdapterView.OnItemClic
         assert parentActivity != null;
         listView =(ListView) rootView.findViewById(R.id.fragment_list_view);
         listView.setOnItemClickListener(this);
+        ((SwipeRefreshLayout)rootView.findViewById(R.id.refresh)).setOnRefreshListener(this);
         redraw(parentActivity.getCurrentMode());
         return rootView;
 
     }
 
     @Override
-    public void redraw(Mode mode) {
+    public void redraw(MainActivity.Mode mode) {
         assert parentActivity != null;
         switch (mode){
             case SUPPLIER:
@@ -68,17 +72,16 @@ public class ListFragment extends BaseFragment implements AdapterView.OnItemClic
         }
     }
 
-    private <I extends MapItem> List<ListItem> getDataFromItems(Collection<I> collection) {
-        List<ListItem> list = new ArrayList<>();
+    private <I extends MapItem> List<MapItem> getDataFromItems(Collection<I> collection) {
+        List<MapItem> list = new ArrayList<>();
         for(I item : collection){
-            ListItem e = new ListItem(item);
-            list.add(e);
+            list.add(item);
         }
         return list;
     }
 
-    public void putItems(@NonNull List<ListItem> items){
-        ArrayAdapter<ListItem> adapter = new ArrayAdapter<>(getContext(), R.layout.list_fragment, R.id.list_object,items);
+    public void putItems(@NonNull List<MapItem> items){
+        ArrayAdapter<MapItem> adapter = new ArrayAdapter<>(getContext(), R.layout.list_fragment, R.id.list_object,items);
         listView.setAdapter(adapter);
 
     }
@@ -90,12 +93,12 @@ public class ListFragment extends BaseFragment implements AdapterView.OnItemClic
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        ListItem item = (ListItem) parent.getItemAtPosition(position);
-        MapItem content = item.getItem();
+        MapItem item = (MapItem) parent.getItemAtPosition(position);
         Intent intent;
+        assert parentActivity != null;
         switch (parentActivity.getCurrentMode()){
             case MUNICIPALITY:
-                MunicipalityItem municipalityItem = (MunicipalityItem) content;
+                MunicipalityItem municipalityItem = (MunicipalityItem) item;
                 intent = new Intent(getContext(), MunicipalitySearchActivity.class);
                 intent.putExtra(MunicipalitySearchActivity.CODICE_ENTE, municipalityItem.getCodiceEnte());
                 intent.putExtra(MunicipalitySearchActivity.CODICE_COMPARTO, municipalityItem.getCodiceComparto());
@@ -104,16 +107,24 @@ public class ListFragment extends BaseFragment implements AdapterView.OnItemClic
                 break;
             case UNIVERSITY:
                 intent = new Intent(getContext(), UniversitySearchActivity.class);
-                intent.putExtra(UniversitySearchActivity.UNIVERSITY_ITEM, content);
+                intent.putExtra(UniversitySearchActivity.UNIVERSITY_ITEM, item);
                 startActivity(intent);
                 break;
             case SUPPLIER:
                 intent = new Intent(getContext(), SupplierSearchActivity.class);
-                intent.putExtra(SupplierSearchActivity.SUPPLIER_ITEM, content);
+                intent.putExtra(SupplierSearchActivity.SUPPLIER_ITEM, item);
                 startActivity(intent);
                 break;
             default:
                 break;
         }
+    }
+
+    @Override
+    public void onRefresh() {
+        assert parentActivity != null;
+        SwipeRefreshLayout refreshView = (SwipeRefreshLayout) parentActivity.findViewById(R.id.refresh);
+        redraw(parentActivity.getCurrentMode());
+        refreshView.setRefreshing(false);
     }
 }

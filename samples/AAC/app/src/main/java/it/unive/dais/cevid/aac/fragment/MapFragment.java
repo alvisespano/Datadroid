@@ -34,6 +34,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.Collection;
 
 import it.unive.dais.cevid.aac.R;
+import it.unive.dais.cevid.aac.component.MainActivity;
 import it.unive.dais.cevid.aac.component.MunicipalitySearchActivity;
 import it.unive.dais.cevid.aac.component.SettingsActivity;
 import it.unive.dais.cevid.aac.component.SupplierSearchActivity;
@@ -288,7 +289,7 @@ public class MapFragment extends BaseFragment
     }
 
     @Override
-    public void redraw(BaseFragment.Mode mode) {
+    public void redraw(MainActivity.Mode mode) {
         if (gMap != null) {
             gMap.clear();
             assert parentActivity != null;

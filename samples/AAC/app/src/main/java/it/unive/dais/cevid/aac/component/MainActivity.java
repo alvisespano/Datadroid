@@ -1,6 +1,5 @@
 package it.unive.dais.cevid.aac.component;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -37,7 +36,6 @@ import it.unive.dais.cevid.aac.item.MunicipalityItem;
 import it.unive.dais.cevid.aac.item.SupplierItem;
 import it.unive.dais.cevid.aac.item.UniversityItem;
 import it.unive.dais.cevid.aac.parser.SupplierParser;
-import it.unive.dais.cevid.aac.util.SupplierData;
 import it.unive.dais.cevid.datadroid.lib.util.Function;
 import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
 import it.unive.dais.cevid.datadroid.lib.util.UnexpectedException;
@@ -50,6 +48,12 @@ public class MainActivity extends AppCompatActivity implements
     private static final String TAG = "MainActivity";
     protected static final int REQUEST_CHECK_SETTINGS = 500;
     protected static final int PERMISSIONS_REQUEST_ACCESS_BOTH_LOCATION = 501;
+
+    public enum Mode {
+        UNIVERSITY,
+        MUNICIPALITY,
+        SUPPLIER
+    }
 
     private BaseFragment activeFragment;
     private BottomNavigationView bottomNavigation;
@@ -105,17 +109,17 @@ public class MainActivity extends AppCompatActivity implements
     private void setupSupplierItems() {
 //        SupplierParser supplierParser = new SupplierParser() {
 //            @Override
-//            public void onPostExecute(@NonNull List<SupplierParser.SupplierData> suppliers) {
-//                for (SupplierParser.SupplierData supplier : suppliers) {
+//            public void onPostExecute(@NonNull List<SupplierParser.Data> suppliers) {
+//                for (SupplierParser.Data supplier : suppliers) {
 //                    synchronized (supplierItems) {
 //                        supplierItems.add(new SupplierItem(MainActivity.this, supplier));
 //                    }
 //                }
 //            }
 //        };
-        SupplierParser supplierParser = new SupplierParser(new Function<SupplierData, Void>() {
+        SupplierParser supplierParser = new SupplierParser(new Function<SupplierParser.Data, Void>() {
             @Override
-            public Void apply(SupplierData x) {
+            public Void apply(SupplierParser.Data x) {
                 supplierItems.add(new SupplierItem(MainActivity.this, x));
                 return null;
             }
@@ -129,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements
             try {
                 List<URL> urls = new ArrayList<>();
                 urls.add(new URL("http://www.unive.it/avcp/datiAppalti2016.xml"));
-                universityItems.add(new UniversityItem("Ca'Foscari", 45.437576, 12.3289554, "Università degli studi di Venezia", urls, "000704968000000"));
+                universityItems.add(new UniversityItem("Università Ca' Foscari", 45.437576, 12.3289554, "Università degli studi di Venezia", urls, "000704968000000"));
             } catch (MalformedURLException e) {
                 Log.w(TAG, "malformed url");
                 e.printStackTrace();
@@ -230,10 +234,22 @@ public class MainActivity extends AppCompatActivity implements
                 startActivity(new Intent(this, InfoActivity.class));
                 break;
             case R.id.menu_button_swap:
+                changeItemIcon(item);
                 onChangeType();
                 break;
         }
         return false;
+    }
+
+    private void changeItemIcon(MenuItem item) {
+        switch (activeFragment.getType()){
+            case LIST:
+                item.setIcon(R.drawable.ic_view_list);
+                break;
+            case MAP:
+                item.setIcon(R.drawable.ic_view_map);
+                break;
+        }
     }
 
     /**
@@ -300,26 +316,26 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        BaseFragment.Mode mode = getModeByMenuItemId(item.getItemId());
+        Mode mode = getModeByMenuItemId(item.getItemId());
         Log.d(TAG, String.format("entering mode %s", mode));
         activeFragment.redraw(mode);
         return true;
     }
 
-    private static BaseFragment.Mode getModeByMenuItemId(int id) {
+    private static Mode getModeByMenuItemId(int id) {
         switch (id) {
             case R.id.menu_university:
-                return BaseFragment.Mode.UNIVERSITY;
+                return Mode.UNIVERSITY;
             case R.id.menu_municipality:
-                return BaseFragment.Mode.MUNICIPALITY;
+                return Mode.MUNICIPALITY;
             case R.id.menu_suppliers:
-                return BaseFragment.Mode.SUPPLIER;
+                return Mode.SUPPLIER;
             default:
                 throw new UnexpectedException(String.format("invalid menu item id: %d", id));
         }
     }
 
-    public BaseFragment.Mode getCurrentMode() {
+    public Mode getCurrentMode() {
         return getModeByMenuItemId(bottomNavigation.getSelectedItemId());
     }
 
@@ -359,5 +375,4 @@ public class MainActivity extends AppCompatActivity implements
             Log.d(TAG, String.format("test progress: %d%%", (int) (p1.getPercent() * 100.)));
         }
     }
-
 }

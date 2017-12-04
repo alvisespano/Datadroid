@@ -12,17 +12,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import it.unive.dais.cevid.aac.util.SupplierData;
+import it.unive.dais.cevid.aac.parser.SupplierParser;
 import it.unive.dais.cevid.datadroid.lib.util.MapItem;
 
 /**
  * Created by fbusolin on 13/11/17.
  */
 public class SupplierItem extends MapItem implements Serializable {
-    private final SupplierData data;
+    private final SupplierParser.Data data;
     private Position position;
 
-    public SupplierItem(Context context, SupplierData data) {
+    public SupplierItem(Context context, SupplierParser.Data data) {
         this.data = data;
         LatLng ll = getLatLngFromAddress(context, getAddress());
         this.position = new Position(ll.latitude, ll.longitude);
@@ -78,4 +78,5 @@ public class SupplierItem extends MapItem implements Serializable {
             return new LatLng(latitude,longitude);
         }
     }
+
 }

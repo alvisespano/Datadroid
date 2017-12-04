@@ -15,6 +15,6 @@
         android:id="@+id/menu_button_swap"
         android:title=""
         app:showAsAction="always"
-        android:icon="@drawable/ic_swap"
+        android:icon="@drawable/ic_view_list"
         />
 </menu>

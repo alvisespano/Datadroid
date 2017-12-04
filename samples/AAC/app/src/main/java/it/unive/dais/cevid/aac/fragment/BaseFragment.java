@@ -31,11 +31,6 @@ import it.unive.dais.cevid.aac.component.MainActivity;
  * A simple {@link Fragment} subclass.
  */
 public abstract  class BaseFragment extends Fragment {
-    public enum Mode {
-        UNIVERSITY,
-        MUNICIPALITY,
-        SUPPLIER
-    }
     public enum Type{
         MAP,
         LIST
@@ -116,6 +111,6 @@ public abstract  class BaseFragment extends Fragment {
         }
     }
 
-    public abstract void redraw(Mode mode);
+    public abstract void redraw(MainActivity.Mode mode);
     public abstract Type getType();
 }
