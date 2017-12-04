@@ -25,7 +25,7 @@ import it.unive.dais.cevid.datadroid.lib.parser.SoldipubbliciParser;
 /**
  * A simple {@link Fragment} subclass.
  */
-public  abstract class YearFragment extends Fragment {
+public abstract class YearFragment extends Fragment {
     ArrayAdapter<String> adapter;
     EditText inputSearch;
     ListView listView;
@@ -41,7 +41,7 @@ public  abstract class YearFragment extends Fragment {
         perCapitaSpendings = new ArrayList<>();
         View rootView = inflater.inflate(R.layout.fragment_year, container, false);
 
-        listView = (ListView) rootView.findViewById(R.id.list_view);
+        listView = (ListView) rootView.findViewById(R.id.year_list_view);
         inputSearch = (EditText) rootView.findViewById(R.id.search_input);
 
         for (SoldipubbliciParser.Data x : spendings) {

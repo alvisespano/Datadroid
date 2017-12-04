@@ -3,7 +3,7 @@ package it.unive.dais.cevid.aac.util;
 import java.io.Serializable;
 
 /**
- * Created by admin on 30/11/17.
+ * Created by fbusolin on 30/11/17.
  */
 public class SupplierData implements Serializable {
     public String n_abilitazioni,

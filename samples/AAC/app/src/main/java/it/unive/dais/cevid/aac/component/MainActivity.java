@@ -1,5 +1,6 @@
 package it.unive.dais.cevid.aac.component;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -29,6 +30,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import it.unive.dais.cevid.aac.R;
+import it.unive.dais.cevid.aac.fragment.BaseFragment;
+import it.unive.dais.cevid.aac.fragment.ListFragment;
 import it.unive.dais.cevid.aac.fragment.MapFragment;
 import it.unive.dais.cevid.aac.item.MunicipalityItem;
 import it.unive.dais.cevid.aac.item.SupplierItem;
@@ -44,19 +47,13 @@ public class MainActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
         BottomNavigationView.OnNavigationItemSelectedListener {
 
-    public enum Mode {
-        UNIVERSITY,
-        MUNICIPALITY,
-        SUPPLIER
-    }
-
-
     private static final String TAG = "MainActivity";
     protected static final int REQUEST_CHECK_SETTINGS = 500;
     protected static final int PERMISSIONS_REQUEST_ACCESS_BOTH_LOCATION = 501;
 
-    private MapFragment mapFragment;
+    private BaseFragment activeFragment;
     private BottomNavigationView bottomNavigation;
+    private FragmentManager fragmentManager = getSupportFragmentManager();
 
     @NonNull
     private final Collection<UniversityItem> universityItems = new ConcurrentLinkedQueue<>();
@@ -69,16 +66,40 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        mapFragment = new MapFragment();
-        fragmentManager.beginTransaction().replace(R.id.content_frame, mapFragment, mapFragment.getTag()).commit();
-
+        activeFragment = new MapFragment();
+        setContentFragment(R.id.content_frame,activeFragment);
         bottomNavigation = (BottomNavigationView) findViewById(R.id.navigation);
         bottomNavigation.setOnNavigationItemSelectedListener(this);
 
         setupSupplierItems();
         setupUniversityItems();
         setupMunicipalityItems();
+    }
+
+    private void setContentFragment(int container, @NonNull BaseFragment fragment) {
+        fragmentManager.beginTransaction()
+                .setCustomAnimations(android.R.anim.fade_in,android.R.anim.fade_out)
+                .replace(container,fragment, fragment.getTag())
+                .commit();
+
+    }
+    private void changeActiveFragment(@NonNull BaseFragment fragment){
+        this.activeFragment = fragment;
+        setContentFragment(R.id.content_frame,fragment);
+    }
+
+    //stub for change button onClick listener
+    public void onChangeType(){
+        switch (activeFragment.getType()){
+            case MAP:
+                changeActiveFragment(new ListFragment());
+                break;
+            case LIST:
+                changeActiveFragment(new MapFragment());
+                break;
+            default:
+                break;
+        }
     }
 
     private void setupSupplierItems() {
@@ -208,6 +229,9 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.menu_info:
                 startActivity(new Intent(this, InfoActivity.class));
                 break;
+            case R.id.menu_button_swap:
+                onChangeType();
+                break;
         }
         return false;
     }
@@ -276,26 +300,26 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        Mode mode = getModeByMenuItemId(item.getItemId());
+        BaseFragment.Mode mode = getModeByMenuItemId(item.getItemId());
         Log.d(TAG, String.format("entering mode %s", mode));
-        mapFragment.redrawMap(mode);
+        activeFragment.redraw(mode);
         return true;
     }
 
-    private static Mode getModeByMenuItemId(int id) {
+    private static BaseFragment.Mode getModeByMenuItemId(int id) {
         switch (id) {
             case R.id.menu_university:
-                return Mode.UNIVERSITY;
+                return BaseFragment.Mode.UNIVERSITY;
             case R.id.menu_municipality:
-                return Mode.MUNICIPALITY;
+                return BaseFragment.Mode.MUNICIPALITY;
             case R.id.menu_suppliers:
-                return Mode.SUPPLIER;
+                return BaseFragment.Mode.SUPPLIER;
             default:
                 throw new UnexpectedException(String.format("invalid menu item id: %d", id));
         }
     }
 
-    public Mode getCurrentMode() {
+    public BaseFragment.Mode getCurrentMode() {
         return getModeByMenuItemId(bottomNavigation.getSelectedItemId());
     }
 

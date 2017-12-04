@@ -4,16 +4,9 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <!-- Editext for Search -->
-    <EditText android:id="@+id/search_input"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/year_search_hint"
-        android:inputType="textVisiblePassword"/>
-
     <!-- List View -->
     <ListView
-        android:id="@+id/year_list_view"
+        android:id="@+id/fragment_list_view"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" />
 </LinearLayout>
