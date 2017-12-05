@@ -3,6 +3,7 @@ package it.unive.dais.cevid.aac.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -26,26 +27,23 @@ import it.unive.dais.cevid.datadroid.lib.parser.SoldipubbliciParser;
  * A simple {@link Fragment} subclass.
  */
 public abstract class YearFragment extends Fragment {
-    ArrayAdapter<String> adapter;
-    EditText inputSearch;
-    ListView listView;
-    List<String> spendings, perCapitaSpendings;
-    String inhabitants;
+    @Nullable
+    private ArrayAdapter<String> adapter;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         MunicipalityResultActivity activity = (MunicipalityResultActivity) getActivity();
 
-        inhabitants = activity.getNumero_abitanti();
+        String inhabitants = activity.getNumero_abitanti();
         final List<SoldipubbliciParser.Data> spendings = getSpendingListFromData();
-        this.spendings = new ArrayList<>();
-        perCapitaSpendings = new ArrayList<>();
+        List<String> perCapitaSpendings = new ArrayList<>();
         View rootView = inflater.inflate(R.layout.fragment_year, container, false);
 
-        listView = (ListView) rootView.findViewById(R.id.year_list_view);
-        inputSearch = (EditText) rootView.findViewById(R.id.search_input);
+        ListView listView = (ListView) rootView.findViewById(R.id.year_list_view);
+        EditText inputSearch = (EditText) rootView.findViewById(R.id.search_input);
 
         for (SoldipubbliciParser.Data x : spendings) {
-            double spendingItem = 0;
+            double spendingItem;
             try {
                 spendingItem = getSpendingItemFromData(x);
             } catch (NumberFormatException ex) {

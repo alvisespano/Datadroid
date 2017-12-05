@@ -47,7 +47,7 @@ public class SupplierSearchActivity extends AppCompatActivity {
         TextView titleView = (TextView) findViewById(R.id.supply_title);
         titleView.setText(supplier.getTitle());
 
-        TextView ivaView = (TextView) findViewById(R.id.supply_iva);
+        TextView ivaView = (TextView) findViewById(R.id.supply_vat);
         ivaView.setText(supplier.getPiva());
 
         TextView addressView = (TextView) findViewById(R.id.supply_address);

@@ -1,5 +1,6 @@
 package it.unive.dais.cevid.aac.component;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -24,15 +25,18 @@ import com.google.android.gms.location.LocationSettingsStates;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import it.unive.dais.cevid.aac.R;
+import it.unive.dais.cevid.aac.fragment.BaseFragment;
+import it.unive.dais.cevid.aac.fragment.ListFragment;
 import it.unive.dais.cevid.aac.item.MunicipalityItem;
 import it.unive.dais.cevid.aac.item.SupplierItem;
 import it.unive.dais.cevid.aac.item.UniversityItem;
 import it.unive.dais.cevid.aac.fragment.MapFragment;
 import it.unive.dais.cevid.aac.parser.SupplierParser;
-import it.unive.dais.cevid.datadroid.lib.util.Function;
 import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
 import it.unive.dais.cevid.datadroid.lib.util.UnexpectedException;
 
@@ -47,28 +51,26 @@ public class MainActivity extends AppCompatActivity implements
         SUPPLIER
     }
 
-
     private static final String TAG = "MainActivity";
     protected static final int REQUEST_CHECK_SETTINGS = 500;
     protected static final int PERMISSIONS_REQUEST_ACCESS_BOTH_LOCATION = 501;
 
-    private MapFragment mapFragment;
-    private BottomNavigationView bottomNavigation;
+    private @NonNull BaseFragment activeFragment = new MapFragment();
+    private @Nullable BottomNavigationView bottomNavigation;
+    private @NonNull FragmentManager fragmentManager = getSupportFragmentManager();
 
     @NonNull
-    private final List<UniversityItem> universityItems = new ArrayList<>();
+    private final Collection<UniversityItem> universityItems = new ConcurrentLinkedQueue<>();
     @NonNull
-    private final List<MunicipalityItem> municipalityItems = new ArrayList<>();
+    private final Collection<MunicipalityItem> municipalityItems = new ConcurrentLinkedQueue<>();
     @NonNull
-    private final List<SupplierItem> supplierItems = new ArrayList<>();
+    private final Collection<SupplierItem> supplierItems = new ConcurrentLinkedQueue<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        mapFragment = new MapFragment();
-        fragmentManager.beginTransaction().replace(R.id.content_frame, mapFragment, mapFragment.getTag()).commit();
+        setContentFragment(R.id.content_frame, activeFragment);
 
         bottomNavigation = (BottomNavigationView) findViewById(R.id.navigation);
         bottomNavigation.setOnNavigationItemSelectedListener(this);
@@ -76,6 +78,33 @@ public class MainActivity extends AppCompatActivity implements
         setupSupplierItems();
         setupUniversityItems();
         setupMunicipalityItems();
+    }
+
+    private void setContentFragment(int container, @NonNull BaseFragment fragment) {
+        fragmentManager.beginTransaction()
+                .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
+                .replace(container, fragment, fragment.getTag())
+                .commit();
+
+    }
+
+    private void changeActiveFragment(@NonNull BaseFragment fragment) {
+        this.activeFragment = fragment;
+        setContentFragment(R.id.content_frame, fragment);
+    }
+
+    //stub for change button onClick listener
+    public void onChangeType() {
+        switch (activeFragment.getType()) {
+            case MAP:
+                changeActiveFragment(new ListFragment());
+                break;
+            case LIST:
+                changeActiveFragment(new MapFragment());
+                break;
+            default:
+                break;
+        }
     }
 
     private void setupSupplierItems() {
@@ -89,61 +118,57 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void setupUniversityItems() {
-        synchronized (universityItems) {
-            //add Ca Foscari
-            try {
-                List<URL> urls = new ArrayList<>();
-                urls.add(new URL("http://www.unive.it/avcp/datiAppalti2016.xml"));
-                universityItems.add(new UniversityItem("Università Ca' Foscari", 45.437576, 12.3289554, "Università degli studi di Venezia", urls, "000704968000000"));
-            } catch (MalformedURLException e) {
-                Log.w(TAG, "malformed url");
-                e.printStackTrace();
-            }
+        //add Ca Foscari
+        try {
+            List<URL> urls = new ArrayList<>();
+            urls.add(new URL("http://www.unive.it/avcp/datiAppalti2016.xml"));
+            universityItems.add(new UniversityItem("Università Ca' Foscari", 45.437576, 12.3289554, "Università degli studi di Venezia", urls, "000704968000000"));
+        } catch (MalformedURLException e) {
+            Log.w(TAG, "malformed url");
+            e.printStackTrace();
+        }
 
-            //add Padova
-            try {
-                List<URL> urls = new ArrayList<>();
-                urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s1_01.xml"));
-                urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s1_02.xml"));
-                urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s1_03.xml"));
-                urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s2_01.xml"));
-                urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s2_02.xml"));
-                universityItems.add(new UniversityItem("Università di Padova", 45.406766, 11.8774462, "Università degli studi di Padova", urls, "000058546000000"));
-            } catch (MalformedURLException e) {
-                Log.w(TAG, "malformed url");
-                e.printStackTrace();
-            }
+        //add Padova
+        try {
+            List<URL> urls = new ArrayList<>();
+            urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s1_01.xml"));
+            urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s1_02.xml"));
+            urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s1_03.xml"));
+            urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s2_01.xml"));
+            urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s2_02.xml"));
+            universityItems.add(new UniversityItem("Università di Padova", 45.406766, 11.8774462, "Università degli studi di Padova", urls, "000058546000000"));
+        } catch (MalformedURLException e) {
+            Log.w(TAG, "malformed url");
+            e.printStackTrace();
+        }
 
-            //add Trento
-            try {
-                List<URL> urls = new ArrayList<>();
-                urls.add(new URL("http://approvvigionamenti.unitn.it/bandi-di-gara-e-contratti/2017/ricerca_2016.xml"));
-                urls.add(new URL("http://approvvigionamenti.unitn.it/bandi-di-gara-e-contratti/2017/amministrazione_2016.xml"));
-                universityItems.add(new UniversityItem("Università di Trento", 46.0694828, 11.1188738, "Università degli studi di Trento", urls, "000067046000000"));
-            } catch (MalformedURLException e) {
-                Log.w(TAG, "malformed url");
-                e.printStackTrace();
-            }
+        //add Trento
+        try {
+            List<URL> urls = new ArrayList<>();
+            urls.add(new URL("http://approvvigionamenti.unitn.it/bandi-di-gara-e-contratti/2017/ricerca_2016.xml"));
+            urls.add(new URL("http://approvvigionamenti.unitn.it/bandi-di-gara-e-contratti/2017/amministrazione_2016.xml"));
+            universityItems.add(new UniversityItem("Università di Trento", 46.0694828, 11.1188738, "Università degli studi di Trento", urls, "000067046000000"));
+        } catch (MalformedURLException e) {
+            Log.w(TAG, "malformed url");
+            e.printStackTrace();
         }
     }
 
     private void setupMunicipalityItems() {
-        synchronized (municipalityItems) {
-            municipalityItems.add(new MunicipalityItem("Venezia", 45.4375466, 12.3289983, "Comune di Venezia", "000066862"));
-            municipalityItems.add(new MunicipalityItem("Milano", 45.4628327, 9.1075204, "Comune di Milano", "800000013"));
+        municipalityItems.add(new MunicipalityItem("Venezia", 45.4375466, 12.3289983, "Comune di Venezia", "000066862"));
+        municipalityItems.add(new MunicipalityItem("Milano", 45.4628327, 9.1075204, "Comune di Milano", "800000013"));
 
-            municipalityItems.add(new MunicipalityItem("Torino", 45.0735885, 7.6053946, "Comune di Torino", "000098618"));
-            municipalityItems.add(new MunicipalityItem("Bologna", 44.4992191, 11.2614736, "Comune di Bologna", "000250878"));
+        municipalityItems.add(new MunicipalityItem("Torino", 45.0735885, 7.6053946, "Comune di Torino", "000098618"));
+        municipalityItems.add(new MunicipalityItem("Bologna", 44.4992191, 11.2614736, "Comune di Bologna", "000250878"));
 
-            municipalityItems.add(new MunicipalityItem("Genova", 44.4471368, 8.7504034, "Comune di Genova", "000164848"));
-            municipalityItems.add(new MunicipalityItem("Firenze", 43.7800606, 11.1707559, "Comune di Firenze", "800000038"));
+        municipalityItems.add(new MunicipalityItem("Genova", 44.4471368, 8.7504034, "Comune di Genova", "000164848"));
+        municipalityItems.add(new MunicipalityItem("Firenze", 43.7800606, 11.1707559, "Comune di Firenze", "800000038"));
 
-            municipalityItems.add(new MunicipalityItem("Roma", 41.9102411, 12.3955688, "Comune di Roma", "800000047"));
-            municipalityItems.add(new MunicipalityItem("Napoli", 40.854042, 14.1763903, "Comune di Napoli", "000708829"));
+        municipalityItems.add(new MunicipalityItem("Roma", 41.9102411, 12.3955688, "Comune di Roma", "800000047"));
+        municipalityItems.add(new MunicipalityItem("Napoli", 40.854042, 14.1763903, "Comune di Napoli", "000708829"));
 
-            municipalityItems.add(new MunicipalityItem("Palermo", 38.1406577, 13.2870764, "Comune di Palermo", "800000060"));
-            municipalityItems.add(new MunicipalityItem("Cagliari", 39.2254656, 9.0932726, "Comune di Cagliari", "000021556"));
-        }
+        municipalityItems.add(new MunicipalityItem("Palermo", 38.1406577, 13.2870764, "Comune di Palermo", "800000060"));
+        municipalityItems.add(new MunicipalityItem("Cagliari", 39.2254656, 9.0932726, "Comune di Cagliari", "000021556"));
     }
 
     @Override
@@ -188,10 +213,10 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.MENU_SETTINGS:
+            case R.id.menu_settings:
                 startActivity(new Intent(this, SettingsActivity.class));
                 break;
-            case R.id.MENU_INFO:
+            case R.id.menu_info:
                 startActivity(new Intent(this, InfoActivity.class));
                 break;
             case R.id.menu_button_swap:
@@ -203,7 +228,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void changeItemIcon(MenuItem item) {
-        switch (activeFragment.getType()){
+        switch (activeFragment.getType()) {
             case LIST:
                 item.setIcon(R.drawable.ic_view_list);
                 break;
@@ -283,6 +308,7 @@ public class MainActivity extends AppCompatActivity implements
         return true;
     }
 
+    @SuppressLint("DefaultLocale")
     private static Mode getModeByMenuItemId(int id) {
         switch (id) {
             case R.id.menu_university:
@@ -297,20 +323,24 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     public Mode getCurrentMode() {
+        assert bottomNavigation != null;
         return getModeByMenuItemId(bottomNavigation.getSelectedItemId());
     }
 
-
     @NonNull
-    public List<UniversityItem> getUniversityItems() {
+    public Collection<UniversityItem> getUniversityItems() {
         return universityItems;
     }
 
     @NonNull
-    public List<SupplierItem> getSupplierItems() { return supplierItems; }
+    public Collection<SupplierItem> getSupplierItems() {
+        return supplierItems;
+    }
 
     @NonNull
-    public List<MunicipalityItem> getMunicipalityItems() { return municipalityItems; }
+    public Collection<MunicipalityItem> getMunicipalityItems() {
+        return municipalityItems;
+    }
 
 
     // test stuff

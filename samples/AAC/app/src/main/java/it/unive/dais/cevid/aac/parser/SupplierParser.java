@@ -29,20 +29,7 @@ public class SupplierParser extends AbstractAsyncParser<SupplierParser.Data, Pro
             "FROM%20%22f476dccf-d60a-4301-b757-829b3e030ac6%22%20" +
             "ORDER%20BY%22Numero_Aggiudicazioni%22%20DESC%20LIMIT%20100";
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-
     public SupplierParser() {}
-=======
-    private final Function<SupplierData, Void> onItemParsed;
-=======
-    private transient final Function<Data, Void> onItemParsed;
->>>>>>> 62ea73f04f10f0a25288bded9aa890ab20b88273
-
-    public SupplierParser(Function<Data, Void> onItemParsed) {
-        this.onItemParsed = onItemParsed;
-    }
->>>>>>> 9b7b922164143d04a2a871b81557a23e67d289b5
 
     @NonNull
     @Override
