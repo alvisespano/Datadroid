@@ -295,11 +295,7 @@ public class MapFragment extends BaseFragment
             assert parentActivity != null;
             switch (mode) {
                 case MUNICIPALITY:
-<<<<<<< HEAD
-                    putItems(parentActivity.getMunicipalityItems(), BitmapDescriptorFactory.HUE_GREEN, municipalityMap);
-=======
                     putItems(parentActivity.getMunicipalityItems(), BitmapDescriptorFactory.HUE_GREEN);
->>>>>>> 9b7b922164143d04a2a871b81557a23e67d289b5
                     break;
                 case UNIVERSITY:
                     putItems(parentActivity.getUniversityItems(), BitmapDescriptorFactory.HUE_RED);
