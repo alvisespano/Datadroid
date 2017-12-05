@@ -5,4 +5,6 @@
     <integer name="zoomFactor_mid">10</integer>
     <integer name="zoomFactor_high">18</integer>
     <integer name="id_notification">777</integer>
+    <integer name="card_flip_time_full">250</integer>
+    <integer name="card_flip_time_half">125</integer>
 </resources>

@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements
             try {
                 List<URL> urls = new ArrayList<>();
                 urls.add(new URL("http://www.unive.it/avcp/datiAppalti2016.xml"));
-                universityItems.add(new UniversityItem("Ca'Foscari", 45.437576, 12.3289554, "Università degli studi di Venezia", urls, "000704968000000"));
+                universityItems.add(new UniversityItem("Università Ca' Foscari", 45.437576, 12.3289554, "Università degli studi di Venezia", urls, "000704968000000"));
             } catch (MalformedURLException e) {
                 Log.w(TAG, "malformed url");
                 e.printStackTrace();
@@ -194,8 +194,23 @@ public class MainActivity extends AppCompatActivity implements
             case R.id.MENU_INFO:
                 startActivity(new Intent(this, InfoActivity.class));
                 break;
+            case R.id.menu_button_swap:
+                changeItemIcon(item);
+                onChangeType();
+                break;
         }
         return false;
+    }
+
+    private void changeItemIcon(MenuItem item) {
+        switch (activeFragment.getType()){
+            case LIST:
+                item.setIcon(R.drawable.ic_view_list);
+                break;
+            case MAP:
+                item.setIcon(R.drawable.ic_view_map);
+                break;
+        }
     }
 
     /**
@@ -264,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         Mode mode = getModeByMenuItemId(item.getItemId());
         Log.d(TAG, String.format("entering mode %s", mode));
-        mapFragment.redrawMap(mode);
+        activeFragment.redraw(mode);
         return true;
     }
 
@@ -315,5 +330,4 @@ public class MainActivity extends AppCompatActivity implements
             Log.d(TAG, String.format("test progress: %d%%", (int) (p1.getPercent() * 100.)));
         }
     }
-
 }

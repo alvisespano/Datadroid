@@ -2,11 +2,8 @@ package it.unive.dais.cevid.aac.fragment;
 
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -22,16 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.LocationSettingsResult;
-import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -42,7 +30,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.Collection;
 
@@ -56,13 +43,10 @@ import it.unive.dais.cevid.aac.item.MunicipalityItem;
 import it.unive.dais.cevid.aac.item.SupplierItem;
 import it.unive.dais.cevid.aac.item.UniversityItem;
 import it.unive.dais.cevid.datadroid.lib.util.MapItem;
-
-import static it.unive.dais.cevid.aac.component.MainActivity.Mode;
-
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MapFragment extends Fragment
+public class MapFragment extends BaseFragment
         implements OnMapReadyCallback,
         GoogleMap.OnMapClickListener,
         GoogleMap.OnMapLongClickListener,
@@ -70,12 +54,8 @@ public class MapFragment extends Fragment
         GoogleMap.OnMarkerClickListener,
         BottomNavigationView.OnNavigationItemSelectedListener {
 
-    private static final String TAG = "MapFragment";
-    protected static final int REQUEST_CHECK_SETTINGS = 500;
-    protected static final int PERMISSIONS_REQUEST_ACCESS_BOTH_LOCATION = 501;
 
-    @Nullable
-    private MainActivity parentActivity;
+    private static final String TAG = "MapFragment";
     /**
      * Questo oggetto è la mappa di Google Maps. Viene inizializzato asincronamente dal metodo {@code onMapsReady}.
      */
@@ -86,15 +66,6 @@ public class MapFragment extends Fragment
      * fanno parte degli oggetti gestiti manualmente dal codice.
      */
     protected ImageButton button_here, button_car;
-    /**
-     * API per i servizi di localizzazione.
-     */
-    protected FusedLocationProviderClient fusedLocationClient;
-    /**
-     * Posizione corrente. Potrebbe essere null prima di essere calcolata la prima volta.
-     */
-    @Nullable
-    protected LatLng currentPosition = null;
     /**
      * Il marker che viene creato premendo il pulsante button_here (cioè quello dell'app, non quello di Google Maps).
      * E' utile avere un campo d'istanza che tiene il puntatore a questo marker perché così è possibile rimuoverlo se necessario.
@@ -107,12 +78,6 @@ public class MapFragment extends Fragment
 //    public void setParentActivity(@NonNull MainActivity activity) {
 //        this.parentActivity = activity;
 //    }
-
-    @Override
-    public void onAttach(Context ctx) {
-        super.onAttach(ctx);
-        parentActivity = (MainActivity) ctx;
-    }
 
     /**
      * Metodo proprietario che imposta la visibilità del pulsante HERE.
@@ -200,7 +165,7 @@ public class MapFragment extends Fragment
         uis.setZoomControlsEnabled(true);
         uis.setMapToolbarEnabled(true);
         assert parentActivity != null;
-        redrawMap(parentActivity.getCurrentMode());
+        redraw(parentActivity.getCurrentMode());
 
         gMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
@@ -231,40 +196,7 @@ public class MapFragment extends Fragment
         gMap.moveCamera(CameraUpdateFactory.newLatLngZoom(rome, 5));
     }
 
-    protected void gpsCheck() {
-        GoogleApiClient googleApiClient = new GoogleApiClient.Builder(getContext()).addApi(LocationServices.API).build();
-        googleApiClient.connect();
 
-        LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(locationRequest);
-        builder.setAlwaysShow(true);
-
-        PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
-        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-            @Override
-            public void onResult(@NonNull LocationSettingsResult result) {
-                final Status status = result.getStatus();
-                switch (status.getStatusCode()) {
-                    case LocationSettingsStatusCodes.SUCCESS:
-                        Log.i(TAG, "All location settings are satisfied.");
-                        break;
-                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                        Log.i(TAG, "Location settings are not satisfied. Show the user a dialog to upgrade location settings ");
-                        try {
-                            status.startResolutionForResult(getActivity(), REQUEST_CHECK_SETTINGS);
-                        } catch (IntentSender.SendIntentException e) {
-                            Log.i(TAG, "PendingIntent unable to execute request.");
-                        }
-                        break;
-                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                        Log.i(TAG, "Location settings are inadequate, and cannot be fixed here. Dialog not created.");
-                        break;
-                }
-            }
-        });
-    }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -323,24 +255,6 @@ public class MapFragment extends Fragment
         startActivity(navigation);
     }
 
-    public void updateCurrentPosition() {
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "requiring permission");
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_BOTH_LOCATION);
-        } else {
-            Log.d(TAG, "permission granted");
-            fusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(getActivity(), new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location loc) {
-                            if (loc != null) {
-                                currentPosition = new LatLng(loc.getLatitude(), loc.getLongitude());
-                                Log.i(TAG, "current position updated");
-                            }
-                        }
-                    });
-        }
-    }
 
     protected void applyMapSettings() {
         if (gMap != null) {
@@ -374,7 +288,8 @@ public class MapFragment extends Fragment
         if (gMap != null) gMap.clear();
     }
 
-    public void redrawMap(Mode mode) {
+    @Override
+    public void redraw(MainActivity.Mode mode) {
         if (gMap != null) {
             gMap.clear();
             assert parentActivity != null;
@@ -394,6 +309,11 @@ public class MapFragment extends Fragment
                     break;
             }
         }
+    }
+
+    @Override
+    public Type getType() {
+        return Type.MAP;
     }
 
     public <I extends MapItem> void putItems(@NonNull Collection<I> c, float hue) {

@@ -54,4 +54,9 @@ public abstract class MapItem implements Serializable {
         }
         return r;
     }
+
+    @Override
+    public String toString(){
+        return this.getTitle();
+    }
 }
