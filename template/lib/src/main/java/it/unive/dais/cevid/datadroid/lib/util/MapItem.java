@@ -7,6 +7,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -17,7 +18,7 @@ import java.util.List;
  *
  * @author Alvise Spanò, Università Ca' Foscari
  */
-public abstract class MapItem {
+public abstract class MapItem implements Serializable {
 
     /**
      * Ritorna la posizione.
@@ -53,5 +54,4 @@ public abstract class MapItem {
         }
         return r;
     }
-
 }

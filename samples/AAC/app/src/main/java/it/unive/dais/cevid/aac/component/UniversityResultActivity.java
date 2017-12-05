@@ -53,16 +53,16 @@ public class UniversityResultActivity extends AppCompatActivity {
 
         switch (Mode.ofIntent(i)) {
             case APPALTI: {
-                RecyclerView v = (RecyclerView) findViewById(R.id.lista_appalti);
+                RecyclerView v = (RecyclerView) findViewById(R.id.list_tenders);
                 v.setLayoutManager(layoutManager);
                 Serializable l0 = i.getSerializableExtra(LIST_APPALTI);
                 List<AppaltiParser.Data> l = (List<AppaltiParser.Data>) l0;
                 AppaltiAdapter ad = new AppaltiAdapter(l);
                 v.setAdapter(ad);
 
-                LinearLayout lo = (LinearLayout) findViewById(R.id.appalti_somma);
+                LinearLayout lo = (LinearLayout) findViewById(R.id.sum_tenders);
                 lo.setVisibility(View.VISIBLE);
-                TextView tv = (TextView) findViewById(R.id.spesa_totale);
+                TextView tv = (TextView) findViewById(R.id.sum_exp);
                 Double sum = DataManipulation.sumBy(l, new Function<AppaltiParser.Data, Double>() {
                     @Override
                     public Double apply(AppaltiParser.Data x) {
@@ -74,7 +74,7 @@ public class UniversityResultActivity extends AppCompatActivity {
             }
 
             case SOLDI_PUBBLICI: {
-                RecyclerView v = (RecyclerView) findViewById(R.id.lista_soldipubblici);
+                RecyclerView v = (RecyclerView) findViewById(R.id.list_exp);
                 v.setLayoutManager(layoutManager);
                 Serializable l0 = i.getSerializableExtra(LIST_SOLDIPUBBLICI);
                 List<SoldipubbliciParser.Data> l = (List<SoldipubbliciParser.Data>) l0;
@@ -86,8 +86,8 @@ public class UniversityResultActivity extends AppCompatActivity {
             case COMBINE:{
                 RecyclerView.LayoutManager layoutManager2 = new LinearLayoutManager(this);
 
-                RecyclerView v1 = (RecyclerView) findViewById(R.id.lista_soldipubblici);
-                RecyclerView v2 = (RecyclerView) findViewById(R.id.lista_appalti);
+                RecyclerView v1 = (RecyclerView) findViewById(R.id.list_exp);
+                RecyclerView v2 = (RecyclerView) findViewById(R.id.list_tenders);
                 v1.setLayoutManager(layoutManager);
                 v2.setLayoutManager(layoutManager2);
 
@@ -104,9 +104,9 @@ public class UniversityResultActivity extends AppCompatActivity {
                 v2.setAdapter(appaltiAdapter);
                 v2.setVisibility(View.VISIBLE);
 
-                LinearLayout lo = (LinearLayout) findViewById(R.id.appalti_somma);
+                LinearLayout lo = (LinearLayout) findViewById(R.id.sum_tenders);
                 lo.setVisibility(View.VISIBLE);
-                TextView tv = (TextView) findViewById(R.id.spesa_totale);
+                TextView tv = (TextView) findViewById(R.id.sum_exp);
                 Double sum = DataManipulation.sumBy(l3, new Function<AppaltiParser.Data, Double>() {
                     @Override
                     public Double apply(AppaltiParser.Data x) {

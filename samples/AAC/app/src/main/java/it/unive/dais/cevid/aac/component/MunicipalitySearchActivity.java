@@ -52,8 +52,8 @@ public class MunicipalitySearchActivity extends AppCompatActivity {
                 click();
             }
         });
-        ((TextView) findViewById(R.id.comuni_title)).setText(comune.getTitle());
-        ((TextView) findViewById(R.id.com_desc)).setText(comune.getDescription());
+        ((TextView) findViewById(R.id.municipality_title)).setText(comune.getTitle());
+        ((TextView) findViewById(R.id.municipality_desc)).setText(comune.getDescription());
     }
 
 

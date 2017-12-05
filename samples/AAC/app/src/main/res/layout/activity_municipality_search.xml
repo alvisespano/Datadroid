@@ -7,7 +7,7 @@
     <TextView style="@style/Field.Title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/comuni_title" />
+        android:id="@+id/municipality_title" />
 
     <View style="@style/Divider"/>
 
@@ -18,11 +18,11 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/com_desc"/>
+            android:text="@string/mun_description"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/com_desc"/>
+            android:id="@+id/municipality_desc"/>
     </LinearLayout>
 
     <View style="@style/Divider"/>
@@ -31,7 +31,7 @@
         android:id="@+id/municipality_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/municipality_button_text"
+        android:text="@string/mun_button_text"
         android:layout_gravity="end"
         />
     <ProgressBar

@@ -27,7 +27,7 @@ public class SoldiPubbliciAdapter extends RecyclerView.Adapter<SoldiPubbliciAdap
     public SoldiPubbliciItem onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView;
         itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.soldipubblici_element, parent, false);
+                .inflate(R.layout.element_public_expenditure, parent, false);
         return new SoldiPubbliciItem(itemView);
 
     }
@@ -48,8 +48,8 @@ public class SoldiPubbliciAdapter extends RecyclerView.Adapter<SoldiPubbliciAdap
 
         public SoldiPubbliciItem(View itemView) {
             super(itemView);
-            voceSpesa = (TextView) itemView.findViewById(R.id.descrizione_spesa_pubblica);
-            importo = (TextView) itemView.findViewById(R.id.spesa_pubblica_2016);
+            voceSpesa = (TextView) itemView.findViewById(R.id.description_exp);
+            importo = (TextView) itemView.findViewById(R.id.public_exp_2016);
         }
     }
 }

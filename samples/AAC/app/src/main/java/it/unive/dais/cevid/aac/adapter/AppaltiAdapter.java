@@ -25,7 +25,7 @@ public class AppaltiAdapter extends RecyclerView.Adapter<AppaltiAdapter.AppaltoI
     public AppaltoItem onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView;
         itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.appalti_element, parent, false);
+                .inflate(R.layout.element_appalti, parent, false);
         return new AppaltoItem(itemView);
     }
 
@@ -48,10 +48,10 @@ public class AppaltiAdapter extends RecyclerView.Adapter<AppaltiAdapter.AppaltoI
 
         public AppaltoItem(View itemView) {
             super(itemView);
-            importo = (TextView) itemView.findViewById(R.id.text_importo);
+            importo = (TextView) itemView.findViewById(R.id.text_cost);
             oggetto = (TextView) itemView.findViewById(R.id.text_oggetto);
-            aggiudicatario = (TextView) itemView.findViewById(R.id.text_aggiudicatario);
-            scelta = (TextView) itemView.findViewById(R.id.text_scelta);
+            aggiudicatario = (TextView) itemView.findViewById(R.id.text_supplier);
+            scelta = (TextView) itemView.findViewById(R.id.text_selection);
         }
     }
 }
