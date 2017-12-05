@@ -11,18 +11,19 @@ import it.unive.dais.cevid.datadroid.lib.parser.AbstractAsyncCsvParser;
 
 /**
  * Created by gianmarcocallegher on 05/12/17.
+ * TODO: modificare è uguale a EnrolledParser
  */
 
-public class GraduatesParser extends AbstractAsyncCsvParser<GraduatesParser.Data> {
-
-    public GraduatesParser(@NonNull File file, boolean hasActualHeader, @NonNull String sep) throws FileNotFoundException {
+public class GraduatedParser extends AbstractAsyncCsvParser<GraduatedParser.Data> {
+    
+    public GraduatedParser(@NonNull File file, boolean hasActualHeader, @NonNull String sep) throws FileNotFoundException {
         super(file, hasActualHeader, sep);
     }
 
     @NonNull
     @Override
-    protected Data parseColumns(@NonNull String[] columns) throws ParseException {
-        Data d = new Data();
+    protected GraduatedParser.Data parseColumns(@NonNull String[] columns) throws ParseException {
+        GraduatedParser.Data d = new GraduatedParser.Data();
 
         d.anno_solare = columns[0];
         d.codice_ateneo = columns[1];
