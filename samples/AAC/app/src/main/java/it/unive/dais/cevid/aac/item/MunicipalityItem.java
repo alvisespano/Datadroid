@@ -18,19 +18,20 @@ public class MunicipalityItem extends MapItem implements Serializable {
     private double longitude;
     private String description;
     private String codiceEnte;
+    List<URL> urls;
 
     private static final String codice_comparto = "PRO";
 
-    public MunicipalityItem(String title, double latitude, double longitude, String description, String codiceEnte){
+    public MunicipalityItem(String title, double latitude, double longitude, String description, List<URL> urls, String codiceEnte) {
         this.codiceEnte = codiceEnte;
         this.description = description;
         this.title = title;
-
+        this.urls = urls;
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
-    public LatLng getPosition(){
+    public LatLng getPosition() {
         return new LatLng(latitude, longitude);
     }
 
@@ -52,6 +53,10 @@ public class MunicipalityItem extends MapItem implements Serializable {
 
     public String getCodiceComparto() {
         return codice_comparto;
+    }
+
+    public List<URL> getUrls() {
+        return urls;
     }
 
 }

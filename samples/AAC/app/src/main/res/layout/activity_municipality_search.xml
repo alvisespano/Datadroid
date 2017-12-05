@@ -28,12 +28,20 @@
     <View style="@style/Divider"/>
 
     <Button
-        android:id="@+id/municipality_button"
+        android:id="@+id/municipality_balance_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/mun_button_text"
+        android:text="@string/mun_balance_button_text"
         android:layout_gravity="end"
         />
+    <Button
+        android:id="@+id/municipality_tender_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/mun_tender_button_text"
+        android:layout_gravity="end"
+        />
+
     <ProgressBar
         android:id="@+id/progress_bar_comuni"
         style="?android:attr/progressBarStyleHorizontal"

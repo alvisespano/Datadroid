@@ -155,21 +155,80 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     private void setupMunicipalityItems() {
-        municipalityItems.add(new MunicipalityItem("Venezia", 45.4375466, 12.3289983, "Comune di Venezia", "000066862"));
-        municipalityItems.add(new MunicipalityItem("Milano", 45.4628327, 9.1075204, "Comune di Milano", "800000013"));
 
-        municipalityItems.add(new MunicipalityItem("Torino", 45.0735885, 7.6053946, "Comune di Torino", "000098618"));
-        municipalityItems.add(new MunicipalityItem("Bologna", 44.4992191, 11.2614736, "Comune di Bologna", "000250878"));
 
-        municipalityItems.add(new MunicipalityItem("Genova", 44.4471368, 8.7504034, "Comune di Genova", "000164848"));
-        municipalityItems.add(new MunicipalityItem("Firenze", 43.7800606, 11.1707559, "Comune di Firenze", "800000038"));
+            //municipalityItems.add(new MunicipalityItem("Venezia", 45.4375466, 12.3289983, "Comune di Venezia", "000066862"));
+            //municipalityItems.add(new MunicipalityItem("Milano", 45.4628327, 9.1075204, "Comune di Milano", "800000013"));
+            //municipalityItems.add(new MunicipalityItem("Torino", 45.0735885, 7.6053946, "Comune di Torino", "000098618"));
+            //municipalityItems.add(new MunicipalityItem("Bologna", 44.4992191, 11.2614736, "Comune di Bologna", "000250878"));
+            //municipalityItems.add(new MunicipalityItem("Genova", 44.4471368, 8.7504034, "Comune di Genova", "000164848"));
 
-        municipalityItems.add(new MunicipalityItem("Roma", 41.9102411, 12.3955688, "Comune di Roma", "800000047"));
-        municipalityItems.add(new MunicipalityItem("Napoli", 40.854042, 14.1763903, "Comune di Napoli", "000708829"));
+            try {
+                List<URL> urls = new ArrayList<>();
+                urls.add(new URL ("https://www.comune.fi.it/export/sites/retecivica/01307110484/2016_L190_1.xml"));
+                urls.add(new URL ("https://www.comune.fi.it/export/sites/retecivica/01307110484/2016_L190_2.xml"));
+                municipalityItems.add(new MunicipalityItem("Firenze", 43.7800606, 11.1707559, "Comune di Firenze", urls, "800000038"));
+            }catch (MalformedURLException e) {
+                Log.w(TAG, "malformed url");
+                e.printStackTrace();
+            }
 
-        municipalityItems.add(new MunicipalityItem("Palermo", 38.1406577, 13.2870764, "Comune di Palermo", "800000060"));
-        municipalityItems.add(new MunicipalityItem("Cagliari", 39.2254656, 9.0932726, "Comune di Cagliari", "000021556"));
+            try {
+                List<URL> urls = new ArrayList<>();
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp_m02_2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp_m02_2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/Bandi_e_contratti_Elenchi_annuali_avcp_m03_2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-m04-2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp.m05.2016gen.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-m06-2016_1.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-m07-2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-m08-2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/AVCP_31dic16.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-m10-2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/Mun_XV_Elenco_Bandi_2016_xml.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/mun_12_avcp_2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-m13-2016_NUOVO.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-m14-2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-m15-2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/elenchi_annuali_avcp-d01-2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-D02-2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-d12-2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-d03-2016-2.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp_Dipartimento_Patrimonio_2016.xml\n"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/xmlnuovo.xml"));
+                urls.add(new URL ("http://www.urbanistica.comune.roma.it/images/dipartimento/elenchi-annuali-2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-d08-2016_gennaio2017.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-d09-2016_2.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp2016completo.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcpd11_2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-dip.tut.ambient-2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-d32-2016_new.xml"));
+                urls.add(new URL ("http://www.sovraintendenzaroma.it/content/download/20537/548162/version/5/file/avcp-d14-2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/Elenchi_annuali_2016_V1.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-d16-2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-d18-2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-d19-2016_DIT.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-ORU-2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-d21-2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/Elenco2016_Art1c32_L190_2012_avcp-d17-2016.xml"));
+                urls.add(new URL ("https://www.comune.roma.it/resources/cms/documents/avcp_d25_2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/Elenchi_ANAC_UfficioAssembleaCapitolina_2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-d26-2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/elenchi_annuali_DRS_2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/File_xml_gare_2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-d28-2016.xml"));
+                urls.add(new URL ("http://www.comune.roma.it/resources/cms/documents/avcp-d30-2016.xml"));
+                municipalityItems.add(new MunicipalityItem("Roma", 41.9102411, 12.3955688, "Comune di Roma", urls, "800000047"));
+            }catch (MalformedURLException e) {
+                Log.w(TAG, "malformed url");
+                e.printStackTrace();
+            }
+            //municipalityItems.add(new MunicipalityItem("Roma", 41.9102411, 12.3955688, "Comune di Roma", "800000047"));
+            //municipalityItems.add(new MunicipalityItem("Napoli", 40.854042, 14.1763903, "Comune di Napoli", "000708829"));
+            //municipalityItems.add(new MunicipalityItem("Palermo", 38.1406577, 13.2870764, "Comune di Palermo", "800000060"));
+            //municipalityItems.add(new MunicipalityItem("Cagliari", 39.2254656, 9.0932726, "Comune di Cagliari", "000021556"))
     }
+
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {

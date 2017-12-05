@@ -58,7 +58,8 @@
     <string name="mun_details_code">Institution fiscal code:\u0020</string>
     <string name="mun_details_expire">Expire date:\u0020</string>
     <string name="mun_details_siope">SIOPE code:\u0020</string>
-    <string name="mun_button_text">Show expenditures</string>
+    <string name="mun_balance_button_text">Show expenditures</string>
+    <string name="mun_tender_button_text">Show tenders</string>
     <string name="mun_details_procapite">Per capita expenditure:\u0020</string>
     <string name="year_search_hint">Filter by expenditure item\'s name</string>
 </resources>

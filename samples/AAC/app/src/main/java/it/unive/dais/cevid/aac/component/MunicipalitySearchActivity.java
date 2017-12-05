@@ -19,6 +19,7 @@ import java.util.concurrent.ExecutionException;
 import it.unive.dais.cevid.aac.R;
 import it.unive.dais.cevid.aac.item.MunicipalityItem;
 import it.unive.dais.cevid.aac.parser.MunicipalityParser;
+import it.unive.dais.cevid.datadroid.lib.parser.AppaltiParser;
 import it.unive.dais.cevid.datadroid.lib.parser.SoldipubbliciParser;
 import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
 
@@ -27,6 +28,7 @@ public class MunicipalitySearchActivity extends AppCompatActivity {
     private static final int MAX_SIZE = 100;
     SoldipubbliciParser soldipubbliciParser;
     MunicipalityParser comuniParser;
+    AppaltiParser appaltiParser;
     public static String CODICE_ENTE = "ENTE", CODICE_COMPARTO = "COMPARTO";
     MunicipalityItem comune;
     String ente;
@@ -37,27 +39,50 @@ public class MunicipalitySearchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_municipality_search);
+
         ente = getIntent().getStringExtra(CODICE_ENTE);
         comparto = getIntent().getStringExtra(CODICE_COMPARTO);
+
         progressBar = (ProgressBar) findViewById(R.id.progress_bar_comuni);
+
         comune = (MunicipalityItem) getIntent().getSerializableExtra(MUNICIPALITY_ITEM);
+
         soldipubbliciParser = new CustomSoldipubbliciParser(comparto, ente);
         soldipubbliciParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
         comuniParser = new MunicipalityParser(comune.getTitle());
         comuniParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        Button btn = (Button) findViewById(R.id.municipality_button);
-        btn.setOnClickListener(new View.OnClickListener() {
+
+        appaltiParser = new AppaltiParser(comune.getUrls());
+        appaltiParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        Button btnBalance = (Button) findViewById(R.id.municipality_balance_button);
+        Button btnTender = (Button) findViewById(R.id.municipality_tender_button);
+
+        btnBalance.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                click();
+                clickBalance();
             }
         });
+
+        btnTender.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                clickTender();
+            }
+        });
+
         ((TextView) findViewById(R.id.municipality_title)).setText(comune.getTitle());
         ((TextView) findViewById(R.id.municipality_desc)).setText(comune.getDescription());
     }
 
+    private void clickTender() {
 
-    protected void click() {
+    }
+
+
+    protected void clickBalance() {
         String numero_abitanti = "0", descrizione_ente = comune.getDescription();
         List spese_ente_2017 = new ArrayList<SoldipubbliciParser.Data>();
         List spese_ente_2016 = new ArrayList<SoldipubbliciParser.Data>();
@@ -164,3 +189,4 @@ public class MunicipalitySearchActivity extends AppCompatActivity {
         }
     }
 }
+
