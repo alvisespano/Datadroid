@@ -2,8 +2,10 @@ package it.unive.dais.cevid.aac.parser;
 
 import android.support.annotation.NonNull;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.Reader;
 import java.io.Serializable;
 import java.text.ParseException;
 
@@ -11,13 +13,16 @@ import it.unive.dais.cevid.datadroid.lib.parser.AbstractAsyncCsvParser;
 
 /**
  * Created by gianmarcocallegher on 05/12/17.
- * TODO: modificare è uguale a EnrolledParser
  */
 
 public class GraduatedParser extends AbstractAsyncCsvParser<GraduatedParser.Data> {
     
     public GraduatedParser(@NonNull File file, boolean hasActualHeader, @NonNull String sep) throws FileNotFoundException {
         super(file, hasActualHeader, sep);
+    }
+
+    public GraduatedParser(@NonNull Reader rd, boolean hasActualHeader, @NonNull String sep) {
+        super(rd, hasActualHeader, sep);
     }
 
     @NonNull

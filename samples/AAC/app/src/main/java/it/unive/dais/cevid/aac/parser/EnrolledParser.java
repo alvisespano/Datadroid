@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.Reader;
 import java.io.Serializable;
 import java.text.ParseException;
 
@@ -17,6 +18,10 @@ public class EnrolledParser extends AbstractAsyncCsvParser<EnrolledParser.Data> 
 
     public EnrolledParser(@NonNull File file, boolean hasActualHeader, @NonNull String sep) throws FileNotFoundException {
         super(file, hasActualHeader, sep);
+    }
+
+    public EnrolledParser(@NonNull Reader rd, boolean hasActualHeader, @NonNull String sep) {
+        super(rd, hasActualHeader, sep);
     }
 
     @NonNull
