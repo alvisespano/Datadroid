@@ -23,7 +23,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/public_exp_2016"
+            android:id="@+id/public_exp"
             android:textSize="@dimen/text_field"
             />
     </LinearLayout>

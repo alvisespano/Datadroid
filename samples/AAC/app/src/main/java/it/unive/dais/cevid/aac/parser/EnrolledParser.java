@@ -65,8 +65,5 @@ public class EnrolledParser extends AbstractAsyncCsvParser<EnrolledParser.Data> 
         sede_corso_regione,
         numero_immatricolati,
         numero_studenti;
-
-
-
     }
 }

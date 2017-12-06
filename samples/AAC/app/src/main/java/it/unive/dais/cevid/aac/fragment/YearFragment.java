@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -19,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.unive.dais.cevid.aac.R;
+import it.unive.dais.cevid.aac.adapter.SoldiPubbliciAdapter;
 import it.unive.dais.cevid.aac.component.MunicipalityDetailsActivity;
 import it.unive.dais.cevid.aac.component.MunicipalityResultActivity;
 import it.unive.dais.cevid.datadroid.lib.parser.SoldipubbliciParser;
@@ -33,13 +36,20 @@ public abstract class YearFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         MunicipalityResultActivity activity = (MunicipalityResultActivity) getActivity();
-
         String inhabitants = activity.getNumero_abitanti();
         final List<SoldipubbliciParser.Data> spendings = getSpendingListFromData();
         List<String> perCapitaSpendings = new ArrayList<>();
         View rootView = inflater.inflate(R.layout.fragment_year, container, false);
 
-        ListView listView = (ListView) rootView.findViewById(R.id.year_list_view);
+        RecyclerView v = (RecyclerView) rootView.findViewById(R.id.list_exp);
+
+        v.setLayoutManager(new LinearLayoutManager(activity));
+
+        SoldiPubbliciAdapter soldiPubbliciAdapter = new SoldiPubbliciAdapter(spendings);
+
+        v.setAdapter(soldiPubbliciAdapter);
+
+        /*ListView listView = (ListView) rootView.findViewById(R.id.year_list_view);
         EditText inputSearch = (EditText) rootView.findViewById(R.id.search_input);
 
         for (SoldipubbliciParser.Data x : spendings) {
@@ -82,7 +92,7 @@ public abstract class YearFragment extends Fragment {
             public void afterTextChanged(Editable s) {
 
             }
-        });
+        });*/
 
         return rootView;
     }
