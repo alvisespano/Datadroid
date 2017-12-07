@@ -43,6 +43,7 @@ import it.unive.dais.cevid.aac.item.MunicipalityItem;
 import it.unive.dais.cevid.aac.item.SupplierItem;
 import it.unive.dais.cevid.aac.item.UniversityItem;
 import it.unive.dais.cevid.datadroid.lib.util.MapItem;
+
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -181,7 +182,7 @@ public class MapFragment extends BaseFragment
                 } else if (markerTag instanceof MunicipalityItem) {
                     MunicipalityItem item = (MunicipalityItem) markerTag;
                     Intent intent = new Intent(getContext(), MunicipalitySearchActivity.class);
-                    intent.putExtra(MunicipalitySearchActivity.CODICE_ENTE, item.getCodiceEnte());
+                    intent.putExtra(MunicipalitySearchActivity.CODICE_ENTE, item.getId());
                     intent.putExtra(MunicipalitySearchActivity.CODICE_COMPARTO, item.getCodiceComparto());
                     intent.putExtra(MunicipalitySearchActivity.MUNICIPALITY_ITEM, item);
                     startActivity(intent);
@@ -295,13 +296,13 @@ public class MapFragment extends BaseFragment
             assert parentActivity != null;
             switch (mode) {
                 case MUNICIPALITY:
-                    putItems(parentActivity.getMunicipalityItems(), BitmapDescriptorFactory.HUE_GREEN);
+                    putMarkers(parentActivity.getMunicipalityItems(), BitmapDescriptorFactory.HUE_GREEN);
                     break;
                 case UNIVERSITY:
-                    putItems(parentActivity.getUniversityItems(), BitmapDescriptorFactory.HUE_RED);
+                    putMarkers(parentActivity.getUniversityItems(), BitmapDescriptorFactory.HUE_RED);
                     break;
                 case SUPPLIER:
-                    putItems(parentActivity.getSupplierItems(), BitmapDescriptorFactory.HUE_BLUE);
+                    putMarkers(parentActivity.getSupplierItems(), BitmapDescriptorFactory.HUE_BLUE);
                     break;
             }
         }
@@ -312,13 +313,13 @@ public class MapFragment extends BaseFragment
         return Type.MAP;
     }
 
-    public <I extends MapItem> void putItems(@NonNull Collection<I> c, float hue) {
+    public <I extends MapItem> void putMarkers(@NonNull Collection<I> c, float hue) {
         for (I i : c) {
-            putItem(hue, i);
+            putMarker(hue, i);
         }
     }
 
-    public <I extends MapItem> void putItem(float hue, I i) {
+    public <I extends MapItem> void putMarker(float hue, I i) {
         MarkerOptions opts = new MarkerOptions()
                 .position(i.getPosition())
                 .title(i.getTitle())

@@ -30,25 +30,23 @@ import it.unive.dais.cevid.datadroid.lib.util.MapItem;
  */
 public class ListFragment extends BaseFragment implements
         AdapterView.OnItemClickListener,
-        SwipeRefreshLayout.OnRefreshListener{
-    private View rootView;
+        SwipeRefreshLayout.OnRefreshListener {
+
     private ListView listView;
 
-
     public ListFragment() {
-        // Required empty public constructor
+        // Requires empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        rootView = inflater.inflate(R.layout.fragment_list, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_list, container, false);
         assert parentActivity != null;
-        listView =(ListView) rootView.findViewById(R.id.fragment_list_view);
+        listView = (ListView) rootView.findViewById(R.id.fragment_list_view);
         listView.setOnItemClickListener(this);
-        ((SwipeRefreshLayout)rootView.findViewById(R.id.refresh)).setOnRefreshListener(this);
+        ((SwipeRefreshLayout) rootView.findViewById(R.id.refresh)).setOnRefreshListener(this);
         redraw(parentActivity.getCurrentMode());
         return rootView;
 
@@ -57,33 +55,21 @@ public class ListFragment extends BaseFragment implements
     @Override
     public void redraw(MainActivity.Mode mode) {
         assert parentActivity != null;
-        switch (mode){
+        Collection<? extends MapItem> c = null;
+        switch (mode) {
             case SUPPLIER:
-                putItems(getDataFromItems(parentActivity.getSupplierItems()));
+                c = parentActivity.getSupplierItems();
                 break;
             case UNIVERSITY:
-                putItems(getDataFromItems(parentActivity.getUniversityItems()));
+                c = parentActivity.getUniversityItems();
                 break;
             case MUNICIPALITY:
-                putItems(getDataFromItems(parentActivity.getMunicipalityItems()));
-                break;
-            default:
+                c = parentActivity.getMunicipalityItems();
                 break;
         }
-    }
-
-    private <I extends MapItem> List<MapItem> getDataFromItems(Collection<I> collection) {
-        List<MapItem> list = new ArrayList<>();
-        for(I item : collection){
-            list.add(item);
-        }
-        return list;
-    }
-
-    public void putItems(@NonNull List<MapItem> items){
-        ArrayAdapter<MapItem> adapter = new ArrayAdapter<>(getContext(), R.layout.list_fragment, R.id.list_object,items);
-        listView.setAdapter(adapter);
-
+        List<MapItem> r = new ArrayList<>();
+        r.addAll(c);
+        listView.setAdapter(new ArrayAdapter<MapItem>(getContext(), R.layout.list_fragment, R.id.list_object, r));
     }
 
     @Override
@@ -96,11 +82,11 @@ public class ListFragment extends BaseFragment implements
         MapItem item = (MapItem) parent.getItemAtPosition(position);
         Intent intent;
         assert parentActivity != null;
-        switch (parentActivity.getCurrentMode()){
+        switch (parentActivity.getCurrentMode()) {
             case MUNICIPALITY:
                 MunicipalityItem municipalityItem = (MunicipalityItem) item;
                 intent = new Intent(getContext(), MunicipalitySearchActivity.class);
-                intent.putExtra(MunicipalitySearchActivity.CODICE_ENTE, municipalityItem.getCodiceEnte());
+                intent.putExtra(MunicipalitySearchActivity.CODICE_ENTE, municipalityItem.getId());
                 intent.putExtra(MunicipalitySearchActivity.CODICE_COMPARTO, municipalityItem.getCodiceComparto());
                 intent.putExtra(MunicipalitySearchActivity.MUNICIPALITY_ITEM, municipalityItem);
                 startActivity(intent);

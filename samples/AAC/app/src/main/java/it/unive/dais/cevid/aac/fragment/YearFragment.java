@@ -38,7 +38,6 @@ public abstract class YearFragment extends Fragment {
         MunicipalityResultActivity activity = (MunicipalityResultActivity) getActivity();
         String inhabitants = activity.getNumero_abitanti();
         final List<SoldipubbliciParser.Data> spendings = getSpendingListFromData();
-        List<String> perCapitaSpendings = new ArrayList<>();
         View rootView = inflater.inflate(R.layout.fragment_year, container, false);
 
         RecyclerView v = (RecyclerView) rootView.findViewById(R.id.list_exp);

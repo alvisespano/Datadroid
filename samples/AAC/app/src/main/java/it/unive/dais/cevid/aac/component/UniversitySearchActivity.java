@@ -169,7 +169,7 @@ public class UniversitySearchActivity extends AppCompatActivity {
         title.setText(university.getTitle());
 
         // TODO: salvare lo stato dei parser con un proxy serializzabile
-        soldiPubbliciParser = new MySoldipubbliciParser(UniversityItem.getCodiceComparto(), university.getCodiceEnte());
+        soldiPubbliciParser = new MySoldipubbliciParser(university.getCodiceComparto(), university.getId());
         appaltiParser = new MyAppaltiParser(university.getUrls());
         soldiPubbliciParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         appaltiParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
