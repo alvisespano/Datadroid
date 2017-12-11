@@ -1,2 +1,2 @@
 include ':app', ':lib'
-project(':lib').projectDir= new File('C:\\Users\\spano\\Documents\\GitHub\\Datadroid\\lib')
+project(':lib').projectDir= new File('../../lib')
