@@ -1,3 +1,2 @@
-include ':app'
-include ':datadroid.lib'
-project(':datadroid.lib').projectDir = new File('../../template/lib')
+include ':app', ':lib'
+project(':lib').projectDir= new File('C:\\Users\\spano\\Documents\\GitHub\\Datadroid\\lib')

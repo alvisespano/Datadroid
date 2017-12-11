@@ -1,7 +1,7 @@
 <resources>
     <!-- Customize your app's name here. -->
     <string name="app_name">AAC</string>
-    <string name="title_activity_maps">AAC Map</string>
+    <string name="title_activity_maps">AAC - Map</string>
     <!-- -->
 
     <string name="gps_disabled">GPS deactivated</string>
