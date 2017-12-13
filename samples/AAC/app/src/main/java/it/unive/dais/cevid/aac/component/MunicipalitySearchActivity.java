@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +54,10 @@ public class MunicipalitySearchActivity extends AppCompatActivityWithProgressBar
         ((CustomSoldipubbliciParser) soldipubbliciParser).setCallerActivity(this);
         soldipubbliciParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-        comuniParser = new MunicipalityParser(comune.getTitle());
+        comuniParser = new MunicipalityParser(new InputStreamReader(getResources().openRawResource(
+                getResources().getIdentifier("comuni",
+                        "raw", getPackageName()))));
+
         comuniParser.setCallerActivity(this);
         comuniParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
@@ -101,7 +105,7 @@ public class MunicipalitySearchActivity extends AppCompatActivityWithProgressBar
         try {
             List<SoldipubbliciParser.Data> l = new ArrayList<>(soldipubbliciParser.getAsyncTask().get());
             List<MunicipalityParser.Data> c = new ArrayList<>(comuniParser.getAsyncTask().get());
-            numero_abitanti = (c.isEmpty()) ? "0" : c.get(0).popolazione_residente;
+            //numero_abitanti = (c.isEmpty()) ? "0" : c.get(0).popolazione_residente;
             for (SoldipubbliciParser.Data x : l) {
                 if (!(x.importo_2017).equals("0") && !(x.importo_2017).equals("null") && !(x.importo_2017).equals("")) {
                     spese_ente_2017.add(x);
