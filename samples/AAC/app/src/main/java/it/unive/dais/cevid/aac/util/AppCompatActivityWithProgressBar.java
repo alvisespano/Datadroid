@@ -20,14 +20,14 @@ public abstract class AppCompatActivityWithProgressBar extends AppCompatActivity
         return progressBar;
     };
     public void requestProgressBar(AsyncTaskWithProgressBar requester){
-        if(this.progressBar.getVisibility() != View.VISIBLE){
+        this.tasks.add(requester);
+        if(this.tasks.size() > 0){
             progressBar.setVisibility(View.VISIBLE);
         }
-        this.tasks.add(requester);
     }
     public void releaseProgressBar(AsyncTaskWithProgressBar requester){
         this.tasks.remove(requester);
-        if(this.progressBar.getVisibility() != View.GONE){
+        if( (this.tasks.size() == 0)){
             this.progressBar.setVisibility(View.GONE);
         }
     };

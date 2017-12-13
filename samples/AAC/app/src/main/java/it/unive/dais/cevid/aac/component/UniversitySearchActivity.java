@@ -36,7 +36,7 @@ import it.unive.dais.cevid.datadroid.lib.util.Function;
 import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
 
 public class UniversitySearchActivity extends AppCompatActivityWithProgressBar {
-    private static final String TAG = "UniversitySearchActivity";
+    private static final String TAG = "UniSearchActivity";
 
     public static final String UNIVERSITY_ITEM = "UNI";
     private static final String BUNDLE_LIST = "LIST";
@@ -140,7 +140,7 @@ public class UniversitySearchActivity extends AppCompatActivityWithProgressBar {
                 case FINISHED:
                     savedInstanceState.putSerializable(BUNDLE_LIST, new ArrayList<T>(p.get()));
                     break;
-                default:soldiPubbliciParser
+                default:soldiPubbliciParser:
                     break;
             }
         } catch (InterruptedException | ExecutionException e) {

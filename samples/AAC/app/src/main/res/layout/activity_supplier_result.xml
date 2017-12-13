@@ -5,16 +5,18 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     tools:context="it.unive.dais.cevid.aac.component.SupplierResultActivity">
+    <ProgressBar
+        android:id="@+id/progress_bar_supplier_result"
+        style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/layout_margin_10"
         android:orientation="vertical">
-        <ProgressBar
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/progress_bar_supplier_result"/>
 
         <FrameLayout
             android:layout_width="match_parent"
