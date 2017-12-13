@@ -12,6 +12,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.unive.dais.cevid.aac.util.AppCompatActivityWithProgressBar;
+import it.unive.dais.cevid.aac.util.AsyncTaskWithProgressBar;
 import it.unive.dais.cevid.datadroid.lib.parser.AbstractAsyncParser;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
@@ -22,9 +24,10 @@ import okhttp3.RequestBody;
  * Created by gianmarcocallegher on 30/10/17.
  */
 
-public class EntitiesParser<Progress> extends AbstractAsyncParser<EntitiesParser.Data, Progress> {
+public class EntitiesParser<Progress> extends AbstractAsyncParser<EntitiesParser.Data, Progress> implements AsyncTaskWithProgressBar{
 
     private static final String TAG = "EntiParser";
+    private AppCompatActivityWithProgressBar caller;
 
     @NonNull
     @Override
@@ -69,6 +72,23 @@ public class EntitiesParser<Progress> extends AbstractAsyncParser<EntitiesParser
         }
         return r;
     }
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        caller.requestProgressBar(this);
+    }
+
+    @Override
+    protected void onPostExecute(@NonNull List<EntitiesParser.Data> r) {
+        super.onPostExecute(r);
+        caller.releaseProgressBar(this);
+    }
+
+    @Override
+    public void setCallerActivity(AppCompatActivityWithProgressBar caller) {
+        this.caller = caller;
+    }
+
 
     public static class Data implements Serializable {
         public String ripartizione_geografica;

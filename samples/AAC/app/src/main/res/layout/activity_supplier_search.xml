@@ -11,6 +11,10 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/layout_margin_20"
         android:orientation="vertical">
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/progress_bar_supplier_search"/>
 
         <TextView style="@style/Field.Title"
             android:layout_width="match_parent"

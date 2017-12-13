@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -37,13 +38,21 @@ import it.unive.dais.cevid.aac.item.SupplierItem;
 import it.unive.dais.cevid.aac.item.UniversityItem;
 import it.unive.dais.cevid.aac.fragment.MapFragment;
 import it.unive.dais.cevid.aac.parser.SupplierParser;
+import it.unive.dais.cevid.aac.util.AppCompatActivityWithProgressBar;
 import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
 import it.unive.dais.cevid.datadroid.lib.util.UnexpectedException;
 
-public class MainActivity extends AppCompatActivity implements
+public class MainActivity extends AppCompatActivityWithProgressBar implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         BottomNavigationView.OnNavigationItemSelectedListener {
+
+
+
+    @Override
+    public void setProgressBar() {
+        this.progressBar = (ProgressBar) findViewById(R.id.progress_bar_main);
+    }
 
     public enum Mode {
         UNIVERSITY,
@@ -73,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setProgressBar();
         setContentFragment(R.id.content_frame, activeFragment);
 
         bottomNavigation = (BottomNavigationView) findViewById(R.id.navigation);
@@ -117,6 +127,7 @@ public class MainActivity extends AppCompatActivity implements
                 supplierItems.add(new SupplierItem(MainActivity.this, x));
             }
         };
+        supplierParser.setCallerActivity(this);
         supplierParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 

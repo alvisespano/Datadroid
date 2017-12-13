@@ -25,6 +25,9 @@ import java.util.concurrent.ExecutionException;
 
 import it.unive.dais.cevid.aac.R;
 import it.unive.dais.cevid.aac.item.UniversityItem;
+import it.unive.dais.cevid.aac.parser.ParticipantParser;
+import it.unive.dais.cevid.aac.util.AppCompatActivityWithProgressBar;
+import it.unive.dais.cevid.aac.util.AsyncTaskWithProgressBar;
 import it.unive.dais.cevid.datadroid.lib.parser.AppaltiParser;
 import it.unive.dais.cevid.datadroid.lib.parser.AsyncParser;
 import it.unive.dais.cevid.datadroid.lib.parser.SoldipubbliciParser;
@@ -32,7 +35,7 @@ import it.unive.dais.cevid.datadroid.lib.util.DataManipulation;
 import it.unive.dais.cevid.datadroid.lib.util.Function;
 import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
 
-public class UniversitySearchActivity extends AppCompatActivity {
+public class UniversitySearchActivity extends AppCompatActivityWithProgressBar {
     private static final String TAG = "UniversitySearchActivity";
 
     public static final String UNIVERSITY_ITEM = "UNI";
@@ -44,15 +47,24 @@ public class UniversitySearchActivity extends AppCompatActivity {
     private LinearLayout mainView;
     private String soldiPubbliciText = " ";
     private String appaltiText = " ";
-    private ProgressBar progressBar1, progressBar2;
 
-    public class MyActivity extends AppCompatActivity {
-        private ProgressBar progressBar1;
+    @Override
+    public void setProgressBar() {
+        this.progressBar = (ProgressBar) findViewById(R.id.progress_bar1);
+    }
+
+    public class MyActivity extends AppCompatActivityWithProgressBar {
+
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            progressBar1 = (ProgressBar) findViewById(R.id.progress_bar1);
+            setProgressBar();
+        }
+
+        @Override
+        public void setProgressBar() {
+            this.progressBar = (ProgressBar) findViewById(R.id.progress_bar1);
         }
     }
 
@@ -60,65 +72,53 @@ public class UniversitySearchActivity extends AppCompatActivity {
     // simple progress management for both parsers
     //
 
-    protected class MyAppaltiParser extends AppaltiParser {
+    protected class MyAppaltiParser extends AppaltiParser implements AsyncTaskWithProgressBar {
         private static final String TAG = "MyAppaltiParser";
+        private AppCompatActivityWithProgressBar caller;
 
         public MyAppaltiParser(List<URL> urls) {
             super(urls);
-            progressBar1.setIndeterminate(false);
-            progressBar1.setMax(100);
-        }
-
-        @Override
-        public void onProgressUpdate(@NonNull ProgressStepper p) {
-            int progress = (int) (p.getPercent() * progressBar1.getMax());
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                progressBar1.setProgress(progress, true);
-            }
-            else {
-                progressBar1.setProgress(progress);
-            }
         }
 
         @Override
         protected void onPreExecute() {
-            progressBar1.setVisibility(View.VISIBLE);
+            super.onPreExecute();
+            caller.requestProgressBar(this);
         }
 
         @Override
-        protected void onPostExecute(@NonNull List<Data> r) {
-            progressBar1.setVisibility(View.GONE);
+        protected void onPostExecute(@NonNull List<AppaltiParser.Data> r) {
+            super.onPostExecute(r);
+            caller.releaseProgressBar(this);
+        }
+
+        @Override
+        public void setCallerActivity(AppCompatActivityWithProgressBar caller) {
+            this.caller = caller;
         }
     }
 
-    protected class MySoldipubbliciParser extends SoldipubbliciParser {
+    protected class MySoldipubbliciParser extends SoldipubbliciParser implements AsyncTaskWithProgressBar {
         private static final String TAG = "MySoldipubbliciParser";
-
+        private AppCompatActivityWithProgressBar caller;
         public MySoldipubbliciParser(String a, String b) {
             super(a, b);
-            progressBar2.setIndeterminate(false);
-            progressBar2.setMax(100);
         }
 
         @Override
-        public void onProgressUpdate(@NonNull ProgressStepper p) {
-            int progress = (int) (p.getPercent() * progressBar2.getMax());
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                progressBar2.setSecondaryProgress(progress);
-            }
-            else {
-                progressBar2.setProgress(progress);
-            }
+        public void setCallerActivity(AppCompatActivityWithProgressBar caller) {
+            this.caller = caller;
         }
-
         @Override
         protected void onPreExecute() {
-            progressBar2.setVisibility(View.VISIBLE);
+            super.onPreExecute();
+            caller.requestProgressBar(this);
         }
 
         @Override
-        protected void onPostExecute(@NonNull List<Data> r) {
-            progressBar2.setVisibility(View.GONE);
+        protected void onPostExecute(@NonNull List<SoldipubbliciParser.Data> r) {
+            super.onPostExecute(r);
+            caller.releaseProgressBar(this);
         }
     }
 
@@ -140,7 +140,7 @@ public class UniversitySearchActivity extends AppCompatActivity {
                 case FINISHED:
                     savedInstanceState.putSerializable(BUNDLE_LIST, new ArrayList<T>(p.get()));
                     break;
-                default:
+                default:soldiPubbliciParser
                     break;
             }
         } catch (InterruptedException | ExecutionException e) {
@@ -154,9 +154,7 @@ public class UniversitySearchActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_university_search);
         mainView = (LinearLayout) findViewById(R.id.search_activity);
-
-        progressBar1 = (ProgressBar) findViewById(R.id.progress_bar1);
-        progressBar2 = (ProgressBar) findViewById(R.id.progress_bar2);
+        setProgressBar();
 
         if (savedInstanceState == null) {
             // crea l'activity da zero
@@ -171,6 +169,8 @@ public class UniversitySearchActivity extends AppCompatActivity {
         // TODO: salvare lo stato dei parser con un proxy serializzabile
         soldiPubbliciParser = new MySoldipubbliciParser(university.getCodiceComparto(), university.getId());
         appaltiParser = new MyAppaltiParser(university.getUrls());
+        ((MySoldipubbliciParser)soldiPubbliciParser).setCallerActivity(this);
+        ((MyAppaltiParser)appaltiParser).setCallerActivity(this);
         soldiPubbliciParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         appaltiParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 

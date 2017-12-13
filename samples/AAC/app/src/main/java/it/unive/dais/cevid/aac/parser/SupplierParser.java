@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import it.unive.dais.cevid.aac.util.AppCompatActivityWithProgressBar;
+import it.unive.dais.cevid.aac.util.AsyncTaskWithProgressBar;
 import it.unive.dais.cevid.datadroid.lib.parser.AbstractAsyncParser;
 import it.unive.dais.cevid.datadroid.lib.util.Function;
 import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
@@ -22,15 +24,31 @@ import okhttp3.Request;
  * Created by fbusolin on 13/11/17.
  */
 
-public class SupplierParser extends AbstractAsyncParser<SupplierParser.Data, ProgressStepper> implements Serializable{
+public class SupplierParser extends AbstractAsyncParser<SupplierParser.Data, ProgressStepper> implements Serializable,AsyncTaskWithProgressBar{
     public static final String TAG = "SupplierParser";
+    private AppCompatActivityWithProgressBar caller;
     private static final String QUERY = "http://dati.consip.it/api/action/datastore_search_sql?" +
             "sql=SELECT%20*%20" +
             "FROM%20%22f476dccf-d60a-4301-b757-829b3e030ac6%22%20" +
             "ORDER%20BY%22Numero_Aggiudicazioni%22%20DESC%20LIMIT%20100";
 
     public SupplierParser() {}
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        caller.requestProgressBar(this);
+    }
 
+    @Override
+    protected void onPostExecute(@NonNull List<SupplierParser.Data> r) {
+        super.onPostExecute(r);
+        caller.releaseProgressBar(this);
+    }
+
+    @Override
+    public void setCallerActivity(AppCompatActivityWithProgressBar caller) {
+        this.caller = caller;
+    }
     @NonNull
     @Override
     public List<Data> parse() throws IOException {

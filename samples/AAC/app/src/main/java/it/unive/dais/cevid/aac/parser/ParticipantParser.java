@@ -11,6 +11,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.unive.dais.cevid.aac.util.AppCompatActivityWithProgressBar;
+import it.unive.dais.cevid.aac.util.AsyncTaskWithProgressBar;
 import it.unive.dais.cevid.datadroid.lib.parser.AbstractAsyncParser;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -24,8 +26,9 @@ import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
 /**
  * @author fbusolin
  */
-public class ParticipantParser extends AbstractAsyncParser<ParticipantParser.Data, ProgressStepper> {
+public class ParticipantParser extends AbstractAsyncParser<ParticipantParser.Data, ProgressStepper> implements AsyncTaskWithProgressBar {
     public static final String TAG = "ParticipantParser";
+    private AppCompatActivityWithProgressBar caller;
     private final String iva;
     private static String single = "%27";
     private static String pair = "%22";
@@ -112,6 +115,22 @@ public class ParticipantParser extends AbstractAsyncParser<ParticipantParser.Dat
             publishProgress(prog);
         }
         return r;
+    }
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        caller.requestProgressBar(this);
+    }
+
+    @Override
+    protected void onPostExecute(@NonNull List<ParticipantParser.Data> r) {
+        super.onPostExecute(r);
+        caller.releaseProgressBar(this);
+    }
+
+    @Override
+    public void setCallerActivity(AppCompatActivityWithProgressBar caller) {
+        this.caller = caller;
     }
 
     public static class Data implements Serializable {

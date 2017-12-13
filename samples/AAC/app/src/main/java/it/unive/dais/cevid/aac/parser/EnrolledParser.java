@@ -1,27 +1,36 @@
 package it.unive.dais.cevid.aac.parser;
 
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.Reader;
 import java.io.Serializable;
 import java.text.ParseException;
+import java.util.List;
 
+import it.unive.dais.cevid.aac.util.AppCompatActivityWithProgressBar;
+import it.unive.dais.cevid.aac.util.AsyncTaskWithProgressBar;
 import it.unive.dais.cevid.datadroid.lib.parser.AbstractAsyncCsvParser;
 
 /**
  * Created by gianmarcocallegher on 05/12/17.
  */
 
-public class EnrolledParser extends AbstractAsyncCsvParser<EnrolledParser.Data> {
+public class EnrolledParser extends AbstractAsyncCsvParser<EnrolledParser.Data> implements AsyncTaskWithProgressBar{
 
-    public EnrolledParser(@NonNull File file, boolean hasActualHeader, @NonNull String sep) throws FileNotFoundException {
+    private AppCompatActivityWithProgressBar caller;
+
+    public EnrolledParser(@NonNull File file, boolean hasActualHeader, @NonNull String sep, AppCompatActivityWithProgressBar caller) throws FileNotFoundException {
         super(file, hasActualHeader, sep);
+        this.caller = caller;
     }
 
-    public EnrolledParser(@NonNull Reader rd, boolean hasActualHeader, @NonNull String sep) {
+    public EnrolledParser(@NonNull Reader rd, boolean hasActualHeader, @NonNull String sep,AppCompatActivityWithProgressBar caller) {
         super(rd, hasActualHeader, sep);
+        this.caller = caller;
     }
 
     @NonNull
@@ -48,6 +57,23 @@ public class EnrolledParser extends AbstractAsyncCsvParser<EnrolledParser.Data> 
         d.numero_studenti = columns[12 + displacement];
 
         return d;
+    }
+
+    @Override
+    public void setCallerActivity(AppCompatActivityWithProgressBar caller) {
+        this.caller = caller;
+    }
+
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        caller.requestProgressBar(this);
+    }
+
+    @Override
+    protected void onPostExecute(@NonNull List<Data> r) {
+        super.onPostExecute(r);
+        caller.releaseProgressBar(this);
     }
 
     public static class Data implements Serializable {

@@ -19,11 +19,14 @@ import java.util.concurrent.ExecutionException;
 import it.unive.dais.cevid.aac.R;
 import it.unive.dais.cevid.aac.item.MunicipalityItem;
 import it.unive.dais.cevid.aac.parser.MunicipalityParser;
+import it.unive.dais.cevid.aac.parser.SupplierParser;
+import it.unive.dais.cevid.aac.util.AppCompatActivityWithProgressBar;
+import it.unive.dais.cevid.aac.util.AsyncTaskWithProgressBar;
 import it.unive.dais.cevid.datadroid.lib.parser.AppaltiParser;
 import it.unive.dais.cevid.datadroid.lib.parser.SoldipubbliciParser;
 import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
 
-public class MunicipalitySearchActivity extends AppCompatActivity {
+public class MunicipalitySearchActivity extends AppCompatActivityWithProgressBar {
     public static final String MUNICIPALITY_ITEM = "MUNICIPALITY_ITEM";
     private static final int MAX_SIZE = 100;
     SoldipubbliciParser soldipubbliciParser;
@@ -33,7 +36,6 @@ public class MunicipalitySearchActivity extends AppCompatActivity {
     MunicipalityItem comune;
     String ente;
     String comparto;
-    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,14 +45,16 @@ public class MunicipalitySearchActivity extends AppCompatActivity {
         ente = getIntent().getStringExtra(CODICE_ENTE);
         comparto = getIntent().getStringExtra(CODICE_COMPARTO);
 
-        progressBar = (ProgressBar) findViewById(R.id.progress_bar_comuni);
+        setProgressBar();
 
         comune = (MunicipalityItem) getIntent().getSerializableExtra(MUNICIPALITY_ITEM);
 
         soldipubbliciParser = new CustomSoldipubbliciParser(comparto, ente);
+        ((CustomSoldipubbliciParser) soldipubbliciParser).setCallerActivity(this);
         soldipubbliciParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         comuniParser = new MunicipalityParser(comune.getTitle());
+        comuniParser.setCallerActivity(this);
         comuniParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         appaltiParser = new AppaltiParser(comune.getUrls());
@@ -154,38 +158,37 @@ public class MunicipalitySearchActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    protected class CustomSoldipubbliciParser extends SoldipubbliciParser {
+    @Override
+    public void setProgressBar() {
+        progressBar = (ProgressBar) findViewById(R.id.progress_bar_comuni);
+    }
+
+    protected class CustomSoldipubbliciParser extends SoldipubbliciParser implements AsyncTaskWithProgressBar {
 
         private static final String TAG = "CustomSoldipubbliciParser";
+        private AppCompatActivityWithProgressBar caller;
 
         protected String codiceComparto;
         protected String codiceEnte;
 
         public CustomSoldipubbliciParser(String codiceComparto, String codiceEnte) {
             super(codiceComparto, codiceEnte);
-            progressBar.setIndeterminate(false);
-            progressBar.setMax(100);
         }
-
-        @Override
-        public void onProgressUpdate(@NonNull ProgressStepper p) {
-            super.onProgressUpdate(p);
-            int progress = (int) (p.getPercent() * progressBar.getMax());
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                progressBar.setProgress(progress, true);
-            } else {
-                progressBar.setProgress(progress);
-            }
-        }
-
         @Override
         protected void onPreExecute() {
-            progressBar.setVisibility(View.VISIBLE);
+            super.onPreExecute();
+            caller.requestProgressBar(this);
         }
 
         @Override
-        protected void onPostExecute(@NonNull List<Data> r) {
-            progressBar.setVisibility(View.GONE);
+        protected void onPostExecute(@NonNull List<SoldipubbliciParser.Data> r) {
+            super.onPostExecute(r);
+            caller.releaseProgressBar(this);
+        }
+
+        @Override
+        public void setCallerActivity(AppCompatActivityWithProgressBar caller) {
+            this.caller = caller;
         }
     }
 }

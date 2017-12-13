@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -17,8 +18,9 @@ import java.util.concurrent.ExecutionException;
 import it.unive.dais.cevid.aac.R;
 import it.unive.dais.cevid.aac.item.SupplierItem;
 import it.unive.dais.cevid.aac.parser.ParticipantParser;
+import it.unive.dais.cevid.aac.util.AppCompatActivityWithProgressBar;
 
-public class SupplierSearchActivity extends AppCompatActivity {
+public class SupplierSearchActivity extends AppCompatActivityWithProgressBar {
     public static final String TAG = "SupplierSearchActivity";
     public static String SUPPLIER_ITEM = "SUPPLY";
     private SupplierItem supplier;
@@ -41,7 +43,9 @@ public class SupplierSearchActivity extends AppCompatActivity {
 
 
         this.mainView = findViewById(R.id.supply_info_activity);
+        setProgressBar();
         parser = new ParticipantParser(supplier.getPiva());
+        parser.setCallerActivity(this);
         parser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         TextView titleView = (TextView) findViewById(R.id.supply_title);
@@ -82,4 +86,8 @@ public class SupplierSearchActivity extends AppCompatActivity {
         Snackbar.make(mainView, msg, Snackbar.LENGTH_SHORT).show();
     }
 
+    @Override
+    public void setProgressBar() {
+        this.progressBar = (ProgressBar) findViewById(R.id.progress_bar_supplier_search);
+    }
 }
