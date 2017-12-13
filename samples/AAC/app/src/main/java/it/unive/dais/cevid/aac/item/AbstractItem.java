@@ -55,6 +55,11 @@ public abstract class AbstractItem implements MapItem, Serializable {
         return urls;
     }
 
+    @Override
+    public String toString(){
+        return this.title;
+    }
+
 
 
 }

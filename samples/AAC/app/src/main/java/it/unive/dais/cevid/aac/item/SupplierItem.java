@@ -90,5 +90,9 @@ public class SupplierItem implements MapItem, Serializable {
             return new LatLng(latitude, longitude);
         }
     }
+    @Override
+    public String toString(){
+        return this.getTitle();
+    }
 
 }
