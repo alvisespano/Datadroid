@@ -92,7 +92,7 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
     @Override
     @NonNull
     public List<Data> parse() throws IOException {
-        if (hasActualHeader()) setHeader(reader.readLine().split(getSeparator()));
+        if (hasActualHeader()) setHeader(split(reader.readLine()));
         List<Data> r = new ArrayList<>();
         String line;
         int linen;
@@ -108,13 +108,19 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
         return r;
     }
 
+    protected String[] split(String line) {
+        String[] r = line.split(String.format("%s(?=([^\"]*\"[^\"]*\")*[^\"]*$)", getSeparator())); // TODO: testare meglio questa regex con altri separatori e altri casi
+//        Log.d("split", String.format("INPUT: %s\nOUTPUT: %s", line, r));
+        return r;
+    }
+
     /**
      * Imposta l'header di default quando non ce n'è uno nel CSV.
      * Dall'implementazione della {@code parse} viene chiamato una volta sola dopo aver parsato la prima linea.
      * @param line stringa che contiene la linea del CSV da cui estrapolare il numero di colonne per generare l'header.
      */
     protected void setDefaultHeader(String line) {
-        String[] hd = line.split(getSeparator());
+        String[] hd = split(line);
         for (int j = 0; j < hd.length; ++j) {
             hd[j] = String.valueOf(j);
         }
@@ -130,7 +136,7 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
      */
     @NonNull
     protected Data parseLine(@NonNull String line) throws ParseException {
-        return parseColumns(line.split(getSeparator()));
+        return parseColumns(split(line));
     }
 
     /**
