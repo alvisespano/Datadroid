@@ -55,7 +55,6 @@ public class UniversitySearchActivity extends AppCompatActivityWithProgressBar {
 
     public class MyActivity extends AppCompatActivityWithProgressBar {
 
-
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);

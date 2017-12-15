@@ -12,11 +12,6 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/public_expense"
-            />
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:id="@+id/description_exp"
             android:textSize="@dimen/text_title"
             />
@@ -24,6 +19,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/public_exp"
+            android:textSize="@dimen/text_field"
+            />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/pro_capite"
             android:textSize="@dimen/text_field"
             />
     </LinearLayout>

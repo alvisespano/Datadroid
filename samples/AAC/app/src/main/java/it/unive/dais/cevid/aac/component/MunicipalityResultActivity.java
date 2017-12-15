@@ -7,7 +7,6 @@ import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.util.Log;
 
 import it.unive.dais.cevid.aac.R;
 import it.unive.dais.cevid.aac.adapter.PagerAdapter;
@@ -15,7 +14,7 @@ import it.unive.dais.cevid.aac.adapter.PagerAdapter;
 import java.io.Serializable;
 import java.util.List;
 
-import it.unive.dais.cevid.datadroid.lib.parser.SoldipubbliciParser;
+import it.unive.dais.cevid.aac.util.EntitieExpenditure;
 
 public class MunicipalityResultActivity extends AppCompatActivity {
 
@@ -24,8 +23,8 @@ public class MunicipalityResultActivity extends AppCompatActivity {
 
 
     private ViewPager mViewPager;
-    private List<SoldipubbliciParser.Data> spese_ente_2017, spese_ente_2016, spese_ente_2015, spese_ente_2014, spese_ente_2013;
-    private String numero_abitanti, descrizione_ente;
+    private List<EntitieExpenditure> spese_ente_2017, spese_ente_2016, spese_ente_2015, spese_ente_2014, spese_ente_2013;
+    private String descrizione_ente, numero_abitanti;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,13 +41,11 @@ public class MunicipalityResultActivity extends AppCompatActivity {
         Serializable sl15 = i.getSerializableExtra("spese_ente_2015");
         Serializable sl14 = i.getSerializableExtra("spese_ente_2014");
         Serializable sl13 = i.getSerializableExtra("spese_ente_2013");
-        spese_ente_2017 = (List<SoldipubbliciParser.Data>) sl17;
-        spese_ente_2016 = (List<SoldipubbliciParser.Data>) sl16;
-        spese_ente_2015 = (List<SoldipubbliciParser.Data>) sl15;
-        spese_ente_2014 = (List<SoldipubbliciParser.Data>) sl14;
-        spese_ente_2013 = (List<SoldipubbliciParser.Data>) sl13;
-
-        Log.d("ABITANTI", numero_abitanti);
+        spese_ente_2017 = (List<EntitieExpenditure>) sl17;
+        spese_ente_2016 = (List<EntitieExpenditure>) sl16;
+        spese_ente_2015 = (List<EntitieExpenditure>) sl15;
+        spese_ente_2014 = (List<EntitieExpenditure>) sl14;
+        spese_ente_2013 = (List<EntitieExpenditure>) sl13;
 
         getSupportActionBar().setElevation(0);
 
@@ -87,23 +84,23 @@ public class MunicipalityResultActivity extends AppCompatActivity {
         return numero_abitanti;
     }
 
-    public List<SoldipubbliciParser.Data> getSpese_Ente_2017 () {
+    public List<EntitieExpenditure> getSpese_Ente_2017 () {
         return spese_ente_2017;
     }
 
-    public List<SoldipubbliciParser.Data> getSpese_Ente_2016 () {
+    public List<EntitieExpenditure> getSpese_Ente_2016 () {
         return spese_ente_2016;
     }
 
-    public List<SoldipubbliciParser.Data> getSpese_Ente_2015 () {
+    public List<EntitieExpenditure> getSpese_Ente_2015 () {
         return spese_ente_2015;
     }
 
-    public List<SoldipubbliciParser.Data> getSpese_Ente_2014 () {
+    public List<EntitieExpenditure> getSpese_Ente_2014 () {
         return spese_ente_2014;
     }
 
-    public List<SoldipubbliciParser.Data> getSpese_Ente_2013 () {
+    public List<EntitieExpenditure> getSpese_Ente_2013 () {
         return spese_ente_2013;
     }
 }

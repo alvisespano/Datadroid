@@ -8,7 +8,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import it.unive.dais.cevid.datadroid.lib.parser.SoldipubbliciParser;
+import it.unive.dais.cevid.aac.util.EntitieExpenditure;
 import it.unive.dais.cevid.aac.R;
 
 /**
@@ -17,10 +17,12 @@ import it.unive.dais.cevid.aac.R;
 
 public class SoldiPubbliciAdapter extends RecyclerView.Adapter<SoldiPubbliciAdapter.SoldiPubbliciItem> {
     private static final String TAG = "SoldiPubbliciAdapter";
-    private List<SoldipubbliciParser.Data> dataList;
+    private List<EntitieExpenditure> dataList;
+    private String capite;
 
-    public SoldiPubbliciAdapter(List<SoldipubbliciParser.Data> dataList) {
+    public SoldiPubbliciAdapter(List<EntitieExpenditure> dataList, String capite) {
         this.dataList = dataList;
+        this.capite = capite;
     }
 
     @Override
@@ -34,8 +36,10 @@ public class SoldiPubbliciAdapter extends RecyclerView.Adapter<SoldiPubbliciAdap
 
     @Override
     public void onBindViewHolder(SoldiPubbliciItem holder, int position) {
-        holder.importo.setText(String.valueOf(Double.parseDouble(dataList.get(position).importo_2016) / 100) + "€");
-        holder.voceSpesa.setText(dataList.get(position).descrizione_codice);
+        Double importo = Double.parseDouble(dataList.get(position).getImporto()) / 100;
+        holder.voceSpesa.setText(dataList.get(position).getDescrizione_codice());
+        holder.importo.setText(importo + "€");
+        holder.procapite.setText(String.valueOf(importo / Double.parseDouble((capite))) + "€");
     }
 
     @Override
@@ -44,12 +48,13 @@ public class SoldiPubbliciAdapter extends RecyclerView.Adapter<SoldiPubbliciAdap
     }
 
     public class SoldiPubbliciItem extends RecyclerView.ViewHolder{
-        private TextView voceSpesa, importo;
+        private TextView voceSpesa, importo, procapite;
 
         public SoldiPubbliciItem(View itemView) {
             super(itemView);
             voceSpesa = (TextView) itemView.findViewById(R.id.description_exp);
             importo = (TextView) itemView.findViewById(R.id.public_exp);
+            procapite = (TextView) itemView.findViewById(R.id.pro_capite);
         }
     }
 }

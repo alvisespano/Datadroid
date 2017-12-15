@@ -12,8 +12,8 @@ import java.util.List;
 public class MunicipalityItem extends AbstractItem {
     private static final String CODICE_COMPARTO = "PRO";
 
-    public MunicipalityItem(@NonNull String id, @NonNull String title, @NonNull String description, double latitude, double longitude, @NonNull List<URL> urls) {
-        super(id, title, description, latitude, longitude, urls);
+    public MunicipalityItem(@NonNull String id, @NonNull String title, @NonNull String description, String capite, double latitude, double longitude, @NonNull List<URL> urls) {
+        super(id, title, description, capite, latitude, longitude, urls);
     }
 
     @NonNull

@@ -15,8 +15,8 @@ import it.unive.dais.cevid.datadroid.lib.util.MapItem;
 public class UniversityItem extends AbstractItem implements MapItem, Serializable{
     private static final String CODICE_COMPARTO = "UNI";
 
-    public UniversityItem(@NonNull String id, @NonNull String title, @NonNull String description, double latitude, double longitude, @NonNull List<URL> urls) {
-        super(id, title, description, latitude, longitude, urls);
+    public UniversityItem(@NonNull String id, @NonNull String title, @NonNull String description, @NonNull String capite, double latitude, double longitude, @NonNull List<URL> urls) {
+        super(id, title, description, capite, latitude, longitude, urls);
     }
 
     @NonNull

@@ -11,11 +11,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import it.unive.dais.cevid.aac.R;
 import it.unive.dais.cevid.aac.adapter.AppaltiAdapter;
 import it.unive.dais.cevid.aac.adapter.SoldiPubbliciAdapter;
+import it.unive.dais.cevid.aac.util.EntitieExpenditure;
 import it.unive.dais.cevid.datadroid.lib.parser.AppaltiParser;
 import it.unive.dais.cevid.datadroid.lib.parser.SoldipubbliciParser;
 import it.unive.dais.cevid.datadroid.lib.util.DataManipulation;
@@ -78,7 +80,12 @@ public class UniversityResultActivity extends AppCompatActivity {
                 v.setLayoutManager(layoutManager);
                 Serializable l0 = i.getSerializableExtra(LIST_SOLDIPUBBLICI);
                 List<SoldipubbliciParser.Data> l = (List<SoldipubbliciParser.Data>) l0;
-                SoldiPubbliciAdapter soldiPubbliciAdapter = new SoldiPubbliciAdapter(l);
+                List el = new ArrayList<EntitieExpenditure>();
+
+                for (SoldipubbliciParser.Data x : l)
+                    el.add(new EntitieExpenditure(x, "2016"));
+
+                SoldiPubbliciAdapter soldiPubbliciAdapter = new SoldiPubbliciAdapter(el, "1");
                 v.setAdapter(soldiPubbliciAdapter);
                 break;
             }
@@ -96,7 +103,12 @@ public class UniversityResultActivity extends AppCompatActivity {
                 List<SoldipubbliciParser.Data> l2 = (List<SoldipubbliciParser.Data>) l0;
                 List<AppaltiParser.Data> l3 = (List<AppaltiParser.Data>) l1;
 
-                SoldiPubbliciAdapter soldiPubbliciAdapter = new SoldiPubbliciAdapter(l2);
+                List el = new ArrayList<EntitieExpenditure>();
+
+                for (SoldipubbliciParser.Data x : l2)
+                    el.add(new EntitieExpenditure(x, "2016"));
+
+                SoldiPubbliciAdapter soldiPubbliciAdapter = new SoldiPubbliciAdapter(el, "1");
                 v1.setAdapter(soldiPubbliciAdapter);
                 v1.setVisibility(View.VISIBLE);
 
@@ -118,7 +130,7 @@ public class UniversityResultActivity extends AppCompatActivity {
             }
             
             default: {
-                Log.e(TAG, "unknown mode");
+                Log.e("URA", "unknown mode");
             }
 
         }

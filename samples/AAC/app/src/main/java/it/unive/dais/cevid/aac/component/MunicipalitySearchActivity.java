@@ -2,9 +2,7 @@ package it.unive.dais.cevid.aac.component;
 
 import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -18,14 +16,13 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.dais.cevid.aac.R;
+import it.unive.dais.cevid.aac.util.EntitieExpenditure;
 import it.unive.dais.cevid.aac.item.MunicipalityItem;
 import it.unive.dais.cevid.aac.parser.MunicipalityParser;
-import it.unive.dais.cevid.aac.parser.SupplierParser;
 import it.unive.dais.cevid.aac.util.AppCompatActivityWithProgressBar;
 import it.unive.dais.cevid.aac.util.AsyncTaskWithProgressBar;
 import it.unive.dais.cevid.datadroid.lib.parser.AppaltiParser;
 import it.unive.dais.cevid.datadroid.lib.parser.SoldipubbliciParser;
-import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
 
 public class MunicipalitySearchActivity extends AppCompatActivityWithProgressBar {
     public static final String MUNICIPALITY_ITEM = "MUNICIPALITY_ITEM";
@@ -91,12 +88,12 @@ public class MunicipalitySearchActivity extends AppCompatActivityWithProgressBar
 
 
     protected void clickBalance() {
-        String numero_abitanti = "0", descrizione_ente = comune.getDescription();
-        List spese_ente_2017 = new ArrayList<SoldipubbliciParser.Data>();
-        List spese_ente_2016 = new ArrayList<SoldipubbliciParser.Data>();
-        List spese_ente_2015 = new ArrayList<SoldipubbliciParser.Data>();
-        List spese_ente_2014 = new ArrayList<SoldipubbliciParser.Data>();
-        List spese_ente_2013 = new ArrayList<SoldipubbliciParser.Data>();
+        String descrizione_ente = comune.getDescription(), numero_abitanti = comune.getCapite();
+        List spese_ente_2017 = new ArrayList<EntitieExpenditure>();
+        List spese_ente_2016 = new ArrayList<EntitieExpenditure>();
+        List spese_ente_2015 = new ArrayList<EntitieExpenditure>();
+        List spese_ente_2014 = new ArrayList<EntitieExpenditure>();
+        List spese_ente_2013 = new ArrayList<EntitieExpenditure>();
 
         /** codice_comparto = findCodiceCompartoByDescrizioneEnte(descrizione_ente);
          codice_ente = findCodiceEnteByDescrizioneEnte(descrizione_ente);
@@ -104,23 +101,21 @@ public class MunicipalitySearchActivity extends AppCompatActivityWithProgressBar
 
         try {
             List<SoldipubbliciParser.Data> l = new ArrayList<>(soldipubbliciParser.getAsyncTask().get());
-            List<MunicipalityParser.Data> c = new ArrayList<>(comuniParser.getAsyncTask().get());
-            //numero_abitanti = (c.isEmpty()) ? "0" : c.get(0).popolazione_residente;
             for (SoldipubbliciParser.Data x : l) {
                 if (!(x.importo_2017).equals("0") && !(x.importo_2017).equals("null") && !(x.importo_2017).equals("")) {
-                    spese_ente_2017.add(x);
+                    spese_ente_2017.add(new EntitieExpenditure(x, "2017"));
                 }
                 if (!(x.importo_2016).equals("0") && !(x.importo_2016).equals("null") && !(x.importo_2016).equals("")) {
-                    spese_ente_2016.add(x);
+                    spese_ente_2016.add(new EntitieExpenditure(x, "2016"));
                 }
                 if (!(x.importo_2015).equals("0") && !(x.importo_2015).equals("null") && !(x.importo_2015).equals("")) {
-                    spese_ente_2015.add(x);
+                    spese_ente_2015.add(new EntitieExpenditure(x, "2015"));
                 }
                 if (!(x.importo_2014).equals("0") && !(x.importo_2014).equals("null") && !(x.importo_2014).equals("")) {
-                    spese_ente_2014.add(x);
+                    spese_ente_2014.add(new EntitieExpenditure(x, "2014"));
                 }
                 if (!(x.importo_2013).equals("0") && !(x.importo_2013).equals("null") && !(x.importo_2013).equals("")) {
-                    spese_ente_2013.add(x);
+                    spese_ente_2013.add(new EntitieExpenditure(x, "2013"));
                 }
             }
 
@@ -129,8 +124,8 @@ public class MunicipalitySearchActivity extends AppCompatActivityWithProgressBar
         }
 
         Intent intent = new Intent(MunicipalitySearchActivity.this, MunicipalityResultActivity.class);
-/*
-        //crop size, quick fix for crash
+
+        /*//crop size, quick fix for crash
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Collections.sort(spese_ente_2013,new EntiComparator("2013"));
             Collections.sort(spese_ente_2014,new EntiComparator("2014"));
@@ -149,8 +144,8 @@ public class MunicipalitySearchActivity extends AppCompatActivityWithProgressBar
         if(spese_ente_2014.size() > MAX_SIZE)spese_ente_2014.subList(MAX_SIZE,spese_ente_2014.size()).clear();
         if(spese_ente_2015.size() > MAX_SIZE)spese_ente_2015.subList(MAX_SIZE,spese_ente_2015.size()).clear();
         if(spese_ente_2016.size() > MAX_SIZE)spese_ente_2016.subList(MAX_SIZE,spese_ente_2016.size()).clear();
-        if(spese_ente_2017.size() > MAX_SIZE)spese_ente_2017.subList(MAX_SIZE,spese_ente_2017.size()).clear();
-*/
+        if(spese_ente_2017.size() > MAX_SIZE)spese_ente_2017.subList(MAX_SIZE,spese_ente_2017.size()).clear();*/
+
         intent.putExtra("numero_abitanti", numero_abitanti);
         intent.putExtra("descrizione_ente", descrizione_ente);
         intent.putExtra("spese_ente_2017", (Serializable) spese_ente_2017);

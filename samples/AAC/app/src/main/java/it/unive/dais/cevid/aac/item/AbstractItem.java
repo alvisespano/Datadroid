@@ -14,15 +14,16 @@ import it.unive.dais.cevid.datadroid.lib.util.MapItem;
  */
 public abstract class AbstractItem implements MapItem, Serializable {
     @NonNull
-    private final String title, description, id;
+    private final String title, description, id, capite;
     private final double latitude, longitude;
     @NonNull
     private final List<URL> urls;
 
-    public AbstractItem(@NonNull String id, @NonNull String title, @NonNull String description, double latitude, double longitude, @NonNull List<URL> urls) {
+    public AbstractItem(@NonNull String id, @NonNull String title, @NonNull String description, @NonNull String capite, double latitude, double longitude, @NonNull List<URL> urls) {
         this.id = id;
         this.description = description;
         this.title = title;
+        this.capite = capite;
         this.urls = urls;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -51,6 +52,11 @@ public abstract class AbstractItem implements MapItem, Serializable {
     public abstract String getCodiceComparto();
 
     @NonNull
+    public String getCapite() {
+        return capite;
+    }
+
+    @NonNull
     public List<URL> getUrls() {
         return urls;
     }
@@ -59,7 +65,6 @@ public abstract class AbstractItem implements MapItem, Serializable {
     public String toString(){
         return this.title;
     }
-
 
 
 }

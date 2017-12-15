@@ -10,7 +10,6 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -29,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
 
 import it.unive.dais.cevid.aac.R;
 import it.unive.dais.cevid.aac.fragment.BaseFragment;
@@ -37,8 +37,11 @@ import it.unive.dais.cevid.aac.item.MunicipalityItem;
 import it.unive.dais.cevid.aac.item.SupplierItem;
 import it.unive.dais.cevid.aac.item.UniversityItem;
 import it.unive.dais.cevid.aac.fragment.MapFragment;
+import it.unive.dais.cevid.aac.util.AsyncTaskWithProgressBar;
+import it.unive.dais.cevid.datadroid.lib.parser.EntitiesParser;
 import it.unive.dais.cevid.aac.parser.SupplierParser;
 import it.unive.dais.cevid.aac.util.AppCompatActivityWithProgressBar;
+import it.unive.dais.cevid.datadroid.lib.parser.SoldipubbliciParser;
 import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
 import it.unive.dais.cevid.datadroid.lib.util.UnexpectedException;
 
@@ -47,22 +50,10 @@ public class MainActivity extends AppCompatActivityWithProgressBar implements
         GoogleApiClient.OnConnectionFailedListener,
         BottomNavigationView.OnNavigationItemSelectedListener {
 
-
-
-    @Override
-    public void setProgressBar() {
-        this.progressBar = (ProgressBar) findViewById(R.id.progress_bar_main);
-    }
-
-    public enum Mode {
-        UNIVERSITY,
-        MUNICIPALITY,
-        SUPPLIER
-    }
-
     private static final String TAG = "MainActivity";
     protected static final int REQUEST_CHECK_SETTINGS = 500;
     protected static final int PERMISSIONS_REQUEST_ACCESS_BOTH_LOCATION = 501;
+    protected EntitiesParser<?> entitiesParser;
 
     private @NonNull
     BaseFragment activeFragment = new MapFragment();
@@ -70,6 +61,18 @@ public class MainActivity extends AppCompatActivityWithProgressBar implements
     BottomNavigationView bottomNavigation;
     private @NonNull
     FragmentManager fragmentManager = getSupportFragmentManager();
+
+    public enum Mode {
+        UNIVERSITY,
+        MUNICIPALITY,
+        SUPPLIER
+    }
+
+    @Override
+    public void setProgressBar() {
+        this.progressBar = (ProgressBar) findViewById(R.id.progress_bar_main);
+    }
+
 
     @NonNull
     private final Collection<UniversityItem> universityItems = new ConcurrentLinkedQueue<>();
@@ -136,7 +139,7 @@ public class MainActivity extends AppCompatActivityWithProgressBar implements
         try {
             List<URL> urls = new ArrayList<>();
             urls.add(new URL("http://www.unive.it/avcp/datiAppalti2016.xml"));
-            universityItems.add(new UniversityItem("000704968000000", "Università Ca' Foscari", "Università degli studi di Venezia", 45.437576, 12.3289554, urls));
+            universityItems.add(new UniversityItem("000704968000000", "Università Ca' Foscari", "Università degli studi di Venezia", "1", 45.437576, 12.3289554, urls));
         } catch (MalformedURLException e) {
             Log.w(TAG, "malformed url");
             e.printStackTrace();
@@ -150,7 +153,7 @@ public class MainActivity extends AppCompatActivityWithProgressBar implements
             urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s1_03.xml"));
             urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s2_01.xml"));
             urls.add(new URL("http://www.unipd.it/sites/unipd.it/files/dataset_2016_s2_02.xml"));
-            universityItems.add(new UniversityItem("000058546000000", "Università di Padova", "Università degli studi di Padova", 45.406766, 11.8774462, urls));
+            universityItems.add(new UniversityItem("000058546000000", "Università di Padova", "Università degli studi di Padova", "1", 45.406766, 11.8774462, urls));
         } catch (MalformedURLException e) {
             Log.w(TAG, "malformed url");
             e.printStackTrace();
@@ -161,7 +164,7 @@ public class MainActivity extends AppCompatActivityWithProgressBar implements
             List<URL> urls = new ArrayList<>();
             urls.add(new URL("http://approvvigionamenti.unitn.it/bandi-di-gara-e-contratti/2017/ricerca_2016.xml"));
             urls.add(new URL("http://approvvigionamenti.unitn.it/bandi-di-gara-e-contratti/2017/amministrazione_2016.xml"));
-            universityItems.add(new UniversityItem("000067046000000", "Università di Trento", "Università degli studi di Trento", 46.0694828, 11.1188738, urls));
+            universityItems.add(new UniversityItem("000067046000000", "Università di Trento", "Università degli studi di Trento", "1", 46.0694828, 11.1188738, urls));
         } catch (MalformedURLException e) {
             Log.w(TAG, "malformed url");
             e.printStackTrace();
@@ -170,6 +173,23 @@ public class MainActivity extends AppCompatActivityWithProgressBar implements
 
     private void setupMunicipalityItems() {
 
+        entitiesParser = new EntitiesParser();
+        entitiesParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        List<EntitiesParser.Data> entities = new ArrayList();
+
+        try {
+            List<EntitiesParser.Data> el = new ArrayList<>(entitiesParser.getAsyncTask().get());
+            for (EntitiesParser.Data x : el) {
+                if (x.descrizione_ente.equals("COMUNE DI ROMA"))
+                    entities.add(x);
+
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            Log.e(TAG, String.format("exception caught during parser %s", entitiesParser.getName()));
+            e.printStackTrace();
+        }
+
+
 
         //municipalityItems.add(new MunicipalityItem("Venezia", 45.4375466, 12.3289983, "Comune di Venezia", "000066862"));
         //municipalityItems.add(new MunicipalityItem("Milano", 45.4628327, 9.1075204, "Comune di Milano", "800000013"));
@@ -177,7 +197,7 @@ public class MainActivity extends AppCompatActivityWithProgressBar implements
         //municipalityItems.add(new MunicipalityItem("Bologna", 44.4992191, 11.2614736, "Comune di Bologna", "000250878"));
         //municipalityItems.add(new MunicipalityItem("Genova", 44.4471368, 8.7504034, "Comune di Genova", "000164848"));
 
-        try {
+        /*try {
             List<URL> urls = new ArrayList<>();
             urls.add(new URL("https://www.comune.fi.it/export/sites/retecivica/01307110484/2016_L190_1.xml"));
             urls.add(new URL("https://www.comune.fi.it/export/sites/retecivica/01307110484/2016_L190_2.xml"));
@@ -185,9 +205,14 @@ public class MainActivity extends AppCompatActivityWithProgressBar implements
         } catch (MalformedURLException e) {
             Log.w(TAG, "malformed url");
             e.printStackTrace();
-        }
+        }*/
 
         try {
+            EntitiesParser.Data roma = new EntitiesParser.Data();
+            for (EntitiesParser.Data x : entities)
+                if (x.descrizione_ente.equals("COMUNE DI ROMA"))
+                    roma = x;
+
             List<URL> urls = new ArrayList<>();
             urls.add(new URL("http://www.comune.roma.it/resources/cms/documents/avcp_m02_2016.xml"));
             urls.add(new URL("http://www.comune.roma.it/resources/cms/documents/avcp_m02_2016.xml"));
@@ -232,7 +257,7 @@ public class MainActivity extends AppCompatActivityWithProgressBar implements
             urls.add(new URL("http://www.comune.roma.it/resources/cms/documents/File_xml_gare_2016.xml"));
             urls.add(new URL("http://www.comune.roma.it/resources/cms/documents/avcp-d28-2016.xml"));
             urls.add(new URL("http://www.comune.roma.it/resources/cms/documents/avcp-d30-2016.xml"));
-            municipalityItems.add(new MunicipalityItem("800000047", "Roma", "Comune di Roma", 41.9102411, 12.3955688, urls));
+            municipalityItems.add(new MunicipalityItem(roma.codice_ente, "Roma", roma.descrizione_ente, roma.numero_abitanti ,41.9102411, 12.3955688, urls));
         } catch (MalformedURLException e) {
             Log.w(TAG, "malformed url");
             e.printStackTrace();

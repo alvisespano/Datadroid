@@ -67,8 +67,8 @@ public class MunicipalityParser extends AbstractAsyncJsonParser<MunicipalityPars
                 default:
                     reader.skipValue();
             }
-            reader.endObject();
         }
+        reader.endObject();
         return data;
     }
 
