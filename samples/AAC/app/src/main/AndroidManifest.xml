@@ -109,7 +109,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".component.MunicipalityDetailsActivity"></activity>
+        <activity android:name=".component.MunicipalityDetailsActivity" />
+        <activity android:name=".component.MunicipalityTenderActivity"></activity>
     </application>
 
 </manifest>

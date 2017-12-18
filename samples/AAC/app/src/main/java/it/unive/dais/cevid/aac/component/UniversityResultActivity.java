@@ -50,7 +50,6 @@ public class UniversityResultActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_university_result);
         Intent i = getIntent();
-//        Mode mode = (Mode) i.getSerializableExtra(MODE);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
 
         switch (Mode.ofIntent(i)) {

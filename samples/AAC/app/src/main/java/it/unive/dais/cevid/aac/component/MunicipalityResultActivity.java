@@ -12,9 +12,11 @@ import it.unive.dais.cevid.aac.R;
 import it.unive.dais.cevid.aac.adapter.PagerAdapter;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import it.unive.dais.cevid.aac.util.EntitieExpenditure;
+import it.unive.dais.cevid.datadroid.lib.parser.AppaltiParser;
 
 public class MunicipalityResultActivity extends AppCompatActivity {
 
@@ -34,6 +36,7 @@ public class MunicipalityResultActivity extends AppCompatActivity {
         Intent i = getIntent();
 
         // TODO: rendere robusti questi lookup, qualora dovessero fallire
+
         numero_abitanti = i.getStringExtra("numero_abitanti");
         descrizione_ente = i.getStringExtra("descrizione_ente");
         Serializable sl17 = i.getSerializableExtra("spese_ente_2017");
@@ -46,6 +49,7 @@ public class MunicipalityResultActivity extends AppCompatActivity {
         spese_ente_2015 = (List<EntitieExpenditure>) sl15;
         spese_ente_2014 = (List<EntitieExpenditure>) sl14;
         spese_ente_2013 = (List<EntitieExpenditure>) sl13;
+
 
         getSupportActionBar().setElevation(0);
 

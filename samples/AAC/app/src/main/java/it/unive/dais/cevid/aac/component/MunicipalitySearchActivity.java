@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -32,8 +33,7 @@ public class MunicipalitySearchActivity extends AppCompatActivityWithProgressBar
     AppaltiParser appaltiParser;
     public static String CODICE_ENTE = "ENTE", CODICE_COMPARTO = "COMPARTO";
     MunicipalityItem comune;
-    String ente;
-    String comparto;
+    String ente, comparto;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,6 +59,7 @@ public class MunicipalitySearchActivity extends AppCompatActivityWithProgressBar
         comuniParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         appaltiParser = new AppaltiParser(comune.getUrls());
+        //((CustomAppaltiParser) appaltiParser).setCallerActivity(this);
         appaltiParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         Button btnBalance = (Button) findViewById(R.id.municipality_balance_button);
@@ -83,7 +84,12 @@ public class MunicipalitySearchActivity extends AppCompatActivityWithProgressBar
     }
 
     private void clickTender() {
-
+        Intent intent = new Intent(MunicipalitySearchActivity.this, MunicipalityTenderActivity.class);
+        try {
+            intent.putExtra("appalti_ente", (Serializable) appaltiParser.getAsyncTask().get());
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -173,6 +179,7 @@ public class MunicipalitySearchActivity extends AppCompatActivityWithProgressBar
         public CustomSoldipubbliciParser(String codiceComparto, String codiceEnte) {
             super(codiceComparto, codiceEnte);
         }
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -181,6 +188,32 @@ public class MunicipalitySearchActivity extends AppCompatActivityWithProgressBar
 
         @Override
         protected void onPostExecute(@NonNull List<SoldipubbliciParser.Data> r) {
+            super.onPostExecute(r);
+            caller.releaseProgressBar(this);
+        }
+
+        @Override
+        public void setCallerActivity(AppCompatActivityWithProgressBar caller) {
+            this.caller = caller;
+        }
+    }
+
+    protected class CustomAppaltiParser extends AppaltiParser implements AsyncTaskWithProgressBar {
+        private static final String TAG = "MyAppaltiParser";
+        private AppCompatActivityWithProgressBar caller;
+
+        public CustomAppaltiParser(List<URL> urls) {
+            super(urls);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            caller.requestProgressBar(this);
+        }
+
+        @Override
+        protected void onPostExecute(@NonNull List<AppaltiParser.Data> r) {
             super.onPostExecute(r);
             caller.releaseProgressBar(this);
         }
