@@ -27,21 +27,21 @@ import it.unive.dais.cevid.datadroid.lib.parser.SoldipubbliciParser;
 
 public class MunicipalitySearchActivity extends AppCompatActivityWithProgressBar {
     public static final String MUNICIPALITY_ITEM = "MUNICIPALITY_ITEM";
-    private static final int MAX_SIZE = 100;
-    SoldipubbliciParser soldipubbliciParser;
-    MunicipalityParser comuniParser;
-    AppaltiParser appaltiParser;
     public static String CODICE_ENTE = "ENTE", CODICE_COMPARTO = "COMPARTO";
-    MunicipalityItem comune;
-    String ente, comparto;
+
+    private SoldipubbliciParser soldipubbliciParser;
+    private AppaltiParser appaltiParser;
+    private MunicipalityParser municipalityParser; // TODO: dobbiamo ancora usarlo ma intanto è un attributo di classe
+
+    private MunicipalityItem comune;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_municipality_search);
 
-        ente = getIntent().getStringExtra(CODICE_ENTE);
-        comparto = getIntent().getStringExtra(CODICE_COMPARTO);
+        String ente = getIntent().getStringExtra(CODICE_ENTE);
+        String comparto = getIntent().getStringExtra(CODICE_COMPARTO);
 
         setProgressBar();
 
@@ -51,12 +51,12 @@ public class MunicipalitySearchActivity extends AppCompatActivityWithProgressBar
         ((CustomSoldipubbliciParser) soldipubbliciParser).setCallerActivity(this);
         soldipubbliciParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-        comuniParser = new MunicipalityParser(new InputStreamReader(getResources().openRawResource(
+        municipalityParser = new MunicipalityParser(new InputStreamReader(getResources().openRawResource(
                 getResources().getIdentifier("comuni",
                         "raw", getPackageName()))));
 
-        comuniParser.setCallerActivity(this);
-        comuniParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        municipalityParser.setCallerActivity(this);
+        municipalityParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         appaltiParser = new AppaltiParser(comune.getUrls());
         //((CustomAppaltiParser) appaltiParser).setCallerActivity(this);
@@ -95,11 +95,11 @@ public class MunicipalitySearchActivity extends AppCompatActivityWithProgressBar
 
     protected void clickBalance() {
         String descrizione_ente = comune.getDescription(), numero_abitanti = comune.getCapite();
-        List spese_ente_2017 = new ArrayList<EntitieExpenditure>();
-        List spese_ente_2016 = new ArrayList<EntitieExpenditure>();
-        List spese_ente_2015 = new ArrayList<EntitieExpenditure>();
-        List spese_ente_2014 = new ArrayList<EntitieExpenditure>();
-        List spese_ente_2013 = new ArrayList<EntitieExpenditure>();
+        List<EntitieExpenditure> spese_ente_2017 = new ArrayList<>();
+        List<EntitieExpenditure> spese_ente_2016 = new ArrayList<>();
+        List<EntitieExpenditure> spese_ente_2015 = new ArrayList<>();
+        List<EntitieExpenditure> spese_ente_2014 = new ArrayList<>();
+        List<EntitieExpenditure> spese_ente_2013 = new ArrayList<>();
 
         /** codice_comparto = findCodiceCompartoByDescrizioneEnte(descrizione_ente);
          codice_ente = findCodiceEnteByDescrizioneEnte(descrizione_ente);
@@ -130,28 +130,6 @@ public class MunicipalitySearchActivity extends AppCompatActivityWithProgressBar
         }
 
         Intent intent = new Intent(MunicipalitySearchActivity.this, MunicipalityResultActivity.class);
-
-        /*//crop size, quick fix for crash
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            Collections.sort(spese_ente_2013,new EntiComparator("2013"));
-            Collections.sort(spese_ente_2014,new EntiComparator("2014"));
-            Collections.sort(spese_ente_2015,new EntiComparator("2015"));
-            Collections.sort(spese_ente_2016,new EntiComparator("2016"));
-            Collections.sort(spese_ente_2017,new EntiComparator("2017"));
-            //non serve, il Comparator è già decrescente.
-            Collections.reverse(spese_ente_2013);
-            Collections.reverse(spese_ente_2014);
-            Collections.reverse(spese_ente_2015);
-            Collections.reverse(spese_ente_2016);
-            Collections.reverse(spese_ente_2017);
-
-        }
-        if(spese_ente_2013.size() > MAX_SIZE)spese_ente_2013.subList(MAX_SIZE,spese_ente_2013.size()).clear();
-        if(spese_ente_2014.size() > MAX_SIZE)spese_ente_2014.subList(MAX_SIZE,spese_ente_2014.size()).clear();
-        if(spese_ente_2015.size() > MAX_SIZE)spese_ente_2015.subList(MAX_SIZE,spese_ente_2015.size()).clear();
-        if(spese_ente_2016.size() > MAX_SIZE)spese_ente_2016.subList(MAX_SIZE,spese_ente_2016.size()).clear();
-        if(spese_ente_2017.size() > MAX_SIZE)spese_ente_2017.subList(MAX_SIZE,spese_ente_2017.size()).clear();*/
-
         intent.putExtra("numero_abitanti", numero_abitanti);
         intent.putExtra("descrizione_ente", descrizione_ente);
         intent.putExtra("spese_ente_2017", (Serializable) spese_ente_2017);
@@ -159,7 +137,6 @@ public class MunicipalitySearchActivity extends AppCompatActivityWithProgressBar
         intent.putExtra("spese_ente_2015", (Serializable) spese_ente_2015);
         intent.putExtra("spese_ente_2014", (Serializable) spese_ente_2014);
         intent.putExtra("spese_ente_2013", (Serializable) spese_ente_2013);
-
         startActivity(intent);
     }
 
@@ -168,13 +145,10 @@ public class MunicipalitySearchActivity extends AppCompatActivityWithProgressBar
         progressBar = (ProgressBar) findViewById(R.id.progress_bar_comuni);
     }
 
-    protected class CustomSoldipubbliciParser extends SoldipubbliciParser implements AsyncTaskWithProgressBar {
+    protected static class CustomSoldipubbliciParser extends SoldipubbliciParser implements AsyncTaskWithProgressBar {
 
         private static final String TAG = "CustomSoldipubbliciParser";
         private AppCompatActivityWithProgressBar caller;
-
-        protected String codiceComparto;
-        protected String codiceEnte;
 
         public CustomSoldipubbliciParser(String codiceComparto, String codiceEnte) {
             super(codiceComparto, codiceEnte);
@@ -198,7 +172,8 @@ public class MunicipalitySearchActivity extends AppCompatActivityWithProgressBar
         }
     }
 
-    protected class CustomAppaltiParser extends AppaltiParser implements AsyncTaskWithProgressBar {
+    // TODO: serve questa classe?
+    protected static class CustomAppaltiParser extends AppaltiParser implements AsyncTaskWithProgressBar {
         private static final String TAG = "MyAppaltiParser";
         private AppCompatActivityWithProgressBar caller;
 

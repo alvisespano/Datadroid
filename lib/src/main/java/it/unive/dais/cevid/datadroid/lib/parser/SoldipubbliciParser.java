@@ -104,8 +104,6 @@ public class SoldipubbliciParser extends AbstractAsyncParser<SoldipubbliciParser
             publishProgress(prog);
         }
         return r;
-
-        // TODO: 13/09/17  aggiungere controlli
     }
 
 

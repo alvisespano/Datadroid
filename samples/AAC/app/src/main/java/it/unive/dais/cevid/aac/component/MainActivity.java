@@ -382,12 +382,6 @@ public class MainActivity extends AppCompatActivityWithProgressBar implements
     @Override
     protected void onPause() {
         super.onPause();
-
-        // TODO: questo probabilmente non serve più se non si usa il notification manager
-//        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-//        int id = this.getBaseContext().getResources().getInteger(R.integer.id_notification);
-//        assert mNotificationManager != null;
-//        mNotificationManager.cancel(id);
     }
 
     /**
