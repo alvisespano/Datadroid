@@ -108,6 +108,11 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
         return r;
     }
 
+    /**
+     * Splitta una linea CSV secondo il separatore impostato e rispettando le regole di escaping nelle quotation.
+     * @param line la stringa da splittare.
+     * @return l'array di stringhe splittate.
+     */
     protected String[] split(String line) {
         String[] r = line.split(String.format("%s(?=([^\"]*\"[^\"]*\")*[^\"]*$)", getSeparator())); // TODO: testare meglio questa regex con altri separatori e altri casi
 //        Log.d("split", String.format("INPUT: %s\nOUTPUT: %s", line, r));

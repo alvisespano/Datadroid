@@ -77,7 +77,9 @@ public abstract class AbstractAsyncParser<Data, Progress> implements AsyncParser
 
     @Override
     @NonNull
-    public String getName() { return AbstractAsyncParser.class.getName(); }
+    public String getName() {
+        return getClass().getSimpleName();
+    }
 
     /**
      * Restituisce l'oggetto interno di tipo AsyncTask.
