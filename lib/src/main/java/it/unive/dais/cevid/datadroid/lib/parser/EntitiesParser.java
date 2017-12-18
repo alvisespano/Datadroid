@@ -1,7 +1,6 @@
-package it.unive.dais.cevid.aac.parser;
+package it.unive.dais.cevid.datadroid.lib.parser;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -12,22 +11,17 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.unive.dais.cevid.aac.util.AppCompatActivityWithProgressBar;
-import it.unive.dais.cevid.aac.util.AsyncTaskWithProgressBar;
-import it.unive.dais.cevid.datadroid.lib.parser.AbstractAsyncParser;
-import okhttp3.FormBody;
+import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 
 /**
  * Created by gianmarcocallegher on 30/10/17.
  */
 
-public class EntitiesParser<Progress> extends AbstractAsyncParser<EntitiesParser.Data, Progress> implements AsyncTaskWithProgressBar{
+public class EntitiesParser<Progress> extends AbstractAsyncParser<EntitiesParser.Data, ProgressStepper> {
 
-    private static final String TAG = "EntiParser";
-    private AppCompatActivityWithProgressBar caller;
+    private static final String TAG = "EntitiesParser";
 
     @NonNull
     @Override
@@ -72,7 +66,8 @@ public class EntitiesParser<Progress> extends AbstractAsyncParser<EntitiesParser
         }
         return r;
     }
-    @Override
+
+    /*@Override
     protected void onPreExecute() {
         super.onPreExecute();
         caller.requestProgressBar(this);
@@ -87,7 +82,7 @@ public class EntitiesParser<Progress> extends AbstractAsyncParser<EntitiesParser
     @Override
     public void setCallerActivity(AppCompatActivityWithProgressBar caller) {
         this.caller = caller;
-    }
+    }*/
 
 
     public static class Data implements Serializable {
