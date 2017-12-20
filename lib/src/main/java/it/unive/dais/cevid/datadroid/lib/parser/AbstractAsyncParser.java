@@ -85,6 +85,7 @@ public abstract class AbstractAsyncParser<Data, Progress> implements AsyncParser
      * Restituisce l'oggetto interno di tipo AsyncTask.
      * @return oggetto di tipo AsyncTask.
      */
+    @NonNull
     @Override
     public AsyncTask<Void, Progress, List<Data>> getAsyncTask() {
         return asyncTask;
@@ -119,15 +120,15 @@ public abstract class AbstractAsyncParser<Data, Progress> implements AsyncParser
         }
 
         @Override
-        protected void onPreExecute() {
+        protected final void onPreExecute() {
             parent.onPreExecute();
         }
 
         @Override
-        protected void onProgressUpdate(@NonNull Progress... p) { parent.onProgressUpdate(p[0]); }
+        protected final void onProgressUpdate(@NonNull Progress... p) { parent.onProgressUpdate(p[0]); }
 
         @Override
-        protected void onPostExecute(@NonNull List<Data> r) { parent.onPostExecute(r); }
+        protected final void onPostExecute(@NonNull List<Data> r) { parent.onPostExecute(r); }
 
         /**
          * Questo metodo è solamente uno stub di {@code publishProgress}.
@@ -135,17 +136,21 @@ public abstract class AbstractAsyncParser<Data, Progress> implements AsyncParser
          * dalle sottoclassi della enclosing class {@code AbstractAsyncParser}-.
          * @param p varargs di tipo Progress
          */
-        void _publishProgress(@NonNull Progress... p) { this.publishProgress(p); }
+        final void _publishProgress(@NonNull Progress... p) { this.publishProgress(p); }
     }
 
-    protected final void publishProgress(Progress p) {
+    @Override
+    public final void publishProgress(Progress p) {
         asyncTask._publishProgress(p);
     }
 
-    // AsyncTask-like hooks
-    protected void onPreExecute() {}
-    protected void onProgressUpdate(@NonNull Progress p) {}
-    protected void onItemParsed(@NonNull Data d) {}
-    protected void onPostExecute(@NonNull List<Data> r) {}
+    @Override
+    public void onPreExecute() {}
+    @Override
+    public void onProgressUpdate(@NonNull Progress p) {}
+    @Override
+    public void onItemParsed(@NonNull Data d) {}
+    @Override
+    public void onPostExecute(@NonNull List<Data> r) {}
 
 }

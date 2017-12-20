@@ -31,7 +31,6 @@ public class AppaltiParser extends AbstractAsyncParser<AppaltiParser.Data, Progr
         this.urls = urls;
     }
 
-
     @NonNull
     @Override
     public List<Data> parse() throws IOException {

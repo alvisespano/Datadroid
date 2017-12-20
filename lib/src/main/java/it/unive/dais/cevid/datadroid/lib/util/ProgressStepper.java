@@ -3,7 +3,6 @@ package it.unive.dais.cevid.datadroid.lib.util;
 /**
  * Created by spano on 30/10/2017.
  */
-
 public class ProgressStepper {
 
     private final int size;

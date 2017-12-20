@@ -1,8 +1,11 @@
 package it.unive.dais.cevid.datadroid.lib.parser;
 
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 
 import java.util.List;
+
+import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
 
 /**
  * Interfaccia che rappresenta un parser asincrono.
@@ -10,5 +13,10 @@ import java.util.List;
  * @param <Progress>
  */
 public interface AsyncParser<Data, Progress> extends Parser<Data> {
-    AsyncTask<Void, Progress, List<Data>> getAsyncTask();
+    @NonNull AsyncTask<Void, Progress, List<Data>> getAsyncTask();
+    void onPreExecute();
+    void onProgressUpdate(@NonNull Progress p);
+    void onItemParsed(@NonNull Data d);
+    void onPostExecute(@NonNull List<Data> r);
+    void publishProgress(Progress p);
 }
