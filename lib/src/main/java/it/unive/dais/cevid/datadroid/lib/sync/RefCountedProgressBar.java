@@ -1,16 +1,14 @@
-package it.unive.dais.cevid.datadroid.lib.util;
+package it.unive.dais.cevid.datadroid.lib.sync;
 
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.ProgressBar;
 
-import it.unive.dais.cevid.datadroid.lib.util.Shared;
-
 /**
  * Created by spano on 20/12/2017.
  */
-public class SharedProgressBar extends Shared<ProgressBar> {
-    public SharedProgressBar(@NonNull ProgressBar x) {
+public class RefCountedProgressBar extends RefCounter<ProgressBar> {
+    public RefCountedProgressBar(@NonNull ProgressBar x) {
         super(x);
     }
 

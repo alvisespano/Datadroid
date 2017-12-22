@@ -3,35 +3,33 @@ package it.unive.dais.cevid.datadroid.lib.parser;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.widget.ProgressBar;
 
 import java.io.IOException;
 import java.util.List;
 
-import it.unive.dais.cevid.datadroid.lib.util.Shared;
-import it.unive.dais.cevid.datadroid.lib.util.SharedProgressBar;
+import it.unive.dais.cevid.datadroid.lib.sync.Handle;
+import it.unive.dais.cevid.datadroid.lib.sync.RefCountedProgressBar;
 
 /**
  * Created by spano on 20/12/2017.
  */
-public class SharedProgressBarParser<Data, Progress, P extends AsyncParser<Data, Progress>>
-        implements AsyncParser<Data, Progress> {
+public class ProgressBarParser<Data, P extends AsyncParser<Data, Integer>> implements AsyncParser<Data, Integer> {
 
     @NonNull
-    private final SharedProgressBar sharedProgressBar;
+    private final RefCountedProgressBar sharedProgressBar;
     @Nullable
-    private Shared<ProgressBar>.Handle handle;
+    private Handle handle;
     @NonNull
     private final P parser;
 
-    public SharedProgressBarParser(@NonNull P parser, @NonNull SharedProgressBar sharedProgressBar) {
+    public ProgressBarParser(@NonNull P parser, @NonNull RefCountedProgressBar sharedProgressBar) {
         this.parser = parser;
         this.sharedProgressBar = sharedProgressBar;
     }
 
     @NonNull
     @Override
-    public AsyncTask<Void, Progress, List<Data>> getAsyncTask() {
+    public AsyncTask<Void, Integer, List<Data>> getAsyncTask() {
         return parser.getAsyncTask();
     }
 
@@ -54,7 +52,7 @@ public class SharedProgressBarParser<Data, Progress, P extends AsyncParser<Data,
     }
 
     @Override
-    public void onProgressUpdate(@NonNull Progress p) {
+    public void onProgressUpdate(@NonNull Integer p) {
         parser.onProgressUpdate(p);
     }
 
@@ -70,7 +68,7 @@ public class SharedProgressBarParser<Data, Progress, P extends AsyncParser<Data,
     }
 
     @Override
-    public void publishProgress(Progress prog) {
+    public void publishProgress(Integer prog) {
         parser.publishProgress(prog);
     }
 }
