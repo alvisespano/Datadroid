@@ -1,6 +1,10 @@
 package it.unive.dais.cevid.datadroid.lib.sync;
 
+import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresApi;
+
+import java.util.function.Consumer;
 
 import it.unive.dais.cevid.datadroid.lib.util.Function;
 
@@ -43,4 +47,10 @@ public abstract class Handle<T> implements AutoCloseable {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    public void modify(@NonNull Consumer<T> f) {
+        synchronized (this) {
+            f.accept(x);
+        }
+    }
 }

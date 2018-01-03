@@ -11,7 +11,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
+import it.unive.dais.cevid.datadroid.lib.util.PercentProgressStepper;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
@@ -19,7 +19,7 @@ import okhttp3.Request;
  * Created by gianmarcocallegher on 30/10/17.
  */
 
-public class EntitiesParser<Progress> extends AbstractAsyncParser<EntitiesParser.Data, ProgressStepper> {
+public class EntitiesParser<Progress> extends AbstractAsyncParser<EntitiesParser.Data, PercentProgressStepper> {
 
     private static final String TAG = "EntitiesParser";
 

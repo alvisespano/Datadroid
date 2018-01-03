@@ -5,12 +5,12 @@ import android.support.annotation.NonNull;
 /**
  * Created by spano on 13/12/17.
  */
-public class RefCounter<T> implements Producer<T> {
+public class RefCountedSingletonPool<T> implements Pool<T> {
     @NonNull
     protected final T x;
     private int cnt = 0;
 
-    public RefCounter(@NonNull T x) {
+    public RefCountedSingletonPool(@NonNull T x) {
         this.x = x;
     }
 
@@ -23,7 +23,7 @@ public class RefCounter<T> implements Producer<T> {
             return new Handle<T>(x) {
                 @Override
                 public void close() {
-                    RefCounter.this.release(x);
+                    RefCountedSingletonPool.this.release(x);
                 }
             };
         }

@@ -7,7 +7,7 @@ import android.widget.ProgressBar;
 /**
  * Created by spano on 20/12/2017.
  */
-public class RefCountedProgressBar extends RefCounter<ProgressBar> {
+public class RefCountedProgressBar extends RefCountedSingletonPool<ProgressBar> {
     public RefCountedProgressBar(@NonNull ProgressBar x) {
         super(x);
     }
