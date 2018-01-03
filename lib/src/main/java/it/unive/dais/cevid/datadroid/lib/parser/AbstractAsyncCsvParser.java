@@ -4,6 +4,7 @@ package it.unive.dais.cevid.datadroid.lib.parser;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.ProgressBar;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,6 +17,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.unive.dais.cevid.datadroid.lib.sync.Pool;
 import it.unive.dais.cevid.datadroid.lib.util.Prelude;
 
 /**
@@ -39,7 +41,7 @@ import it.unive.dais.cevid.datadroid.lib.util.Prelude;
  * @param <Data> tipo di una riga di dati.
  * @author Alvise Spanò, Università Ca' Foscari
  */
-public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<Data, Integer> {
+public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<Data> {
 
     private static final String TAG = "AbstractAsyncCsvParser";
 
@@ -54,7 +56,8 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
      * @param hasActualHeader flag booleano che indica se il CSV ha un header alla prima riga.
      * @param sep       separatore tra le colonne del CSV (ad esempio il punto e virgola ";" oppure la virgola ",").
      */
-    protected AbstractAsyncCsvParser(@NonNull Reader rd, boolean hasActualHeader, @NonNull String sep) {
+    protected AbstractAsyncCsvParser(@NonNull Reader rd, boolean hasActualHeader, @NonNull String sep, @Nullable Pool<ProgressBar> pool) {
+        super(pool);
         this.reader = new BufferedReader(rd);
         this.sep = sep;
         this.hasActualHeader = hasActualHeader;
@@ -67,8 +70,8 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
      * @param sep       separatore tra le colonne del CSV (ad esempio il punto e virgola ";" oppure la virgola ",").
      * @throws FileNotFoundException lanciata se il file non esiste.
      */
-    protected AbstractAsyncCsvParser(@NonNull File file, boolean hasActualHeader, @NonNull String sep) throws FileNotFoundException {
-        this(new FileReader(file), hasActualHeader, sep);
+    protected AbstractAsyncCsvParser(@NonNull File file, boolean hasActualHeader, @NonNull String sep, @Nullable Pool<ProgressBar> pool) throws FileNotFoundException {
+        this(new FileReader(file), hasActualHeader, sep, pool);
     }
 
     /**
@@ -78,8 +81,8 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
      * @param sep       separatore tra le colonne del CSV (ad esempio il punto e virgola ";" oppure la virgola ",").
      * @throws IOException lanciata quando la conversione da URL a reader fallisce.
      */
-    protected AbstractAsyncCsvParser(@NonNull URL url, boolean hasActualHeader, @NonNull String sep) throws IOException {
-        this(urlToReader(url), hasActualHeader, sep);
+    protected AbstractAsyncCsvParser(@NonNull URL url, boolean hasActualHeader, @NonNull String sep, @Nullable Pool<ProgressBar> pool) throws IOException {
+        this(urlToReader(url), hasActualHeader, sep, pool);
     }
 
     /**

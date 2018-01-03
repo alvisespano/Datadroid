@@ -11,7 +11,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.unive.dais.cevid.datadroid.lib.util.PercentProgressStepper;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
@@ -19,13 +18,13 @@ import okhttp3.Request;
  * Created by gianmarcocallegher on 30/10/17.
  */
 
-public class EntitiesParser<Progress> extends AbstractAsyncParser<EntitiesParser.Data, PercentProgressStepper> {
+public class SoldipubbliciEntiParser<Progress> extends AbstractAsyncParser<SoldipubbliciEntiParser.Data, Progress> {
 
-    private static final String TAG = "EntitiesParser";
+    private static final String TAG = "SoldipubbliciEntiParser";
 
     @NonNull
     @Override
-    public List<EntitiesParser.Data> parse() throws IOException {
+    public List<SoldipubbliciEntiParser.Data> parse() throws IOException {
 
         Request request = new Request.Builder()
                 .url("http://soldipubblici.gov.it/it/chi/search/%20")
@@ -40,12 +39,12 @@ public class EntitiesParser<Progress> extends AbstractAsyncParser<EntitiesParser
         }
     }
 
-    protected List<EntitiesParser.Data> parseJSON(String data) throws JSONException {
-        List<EntitiesParser.Data> r = new ArrayList<>();
+    protected List<SoldipubbliciEntiParser.Data> parseJSON(String data) throws JSONException {
+        List<SoldipubbliciEntiParser.Data> r = new ArrayList<>();
         JSONArray ja = new JSONArray(data);
-        for (int i = 0; i < ja.length(); i++){
+        for (int i = 0; i < ja.length(); i++) {
             JSONObject j = ja.getJSONObject(i);
-            EntitiesParser.Data d = new EntitiesParser.Data();
+            SoldipubbliciEntiParser.Data d = new SoldipubbliciEntiParser.Data();
             d.ripartizione_geografica = j.getString("ripartizione_geografica");
             d.descrizione_provincia = j.getString("descrizione_provincia");
             d.data_ingresso_siope = j.getString("data_ingresso_siope");
@@ -66,24 +65,6 @@ public class EntitiesParser<Progress> extends AbstractAsyncParser<EntitiesParser
         }
         return r;
     }
-
-    /*@Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-        caller.requestProgressBar(this);
-    }
-
-    @Override
-    protected void onPostExecute(@NonNull List<EntitiesParser.Data> r) {
-        super.onPostExecute(r);
-        caller.releaseProgressBar(this);
-    }
-
-    @Override
-    public void setCallerActivity(AppCompatActivityWithProgressBar caller) {
-        this.caller = caller;
-    }*/
-
 
     public static class Data implements Serializable {
         public String ripartizione_geografica;

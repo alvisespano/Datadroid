@@ -58,7 +58,7 @@ public class SoldipubbliciParser extends AbstractAsyncParser<SoldipubbliciParser
 
         Request request = new Request.Builder()
                 .url("http://soldipubblici.gov.it/it/ricerca")
-                .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
+                .addHeader("Content-Type", "application/content-www-form-urlencoded; charset=UTF-8")
                 .addHeader("Accept", "Application/json")
                 .addHeader("X-Requested-With", "XMLHttpRequest")
                 .post(fromRequest)

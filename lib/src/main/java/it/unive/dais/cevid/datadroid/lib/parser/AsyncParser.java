@@ -5,16 +5,16 @@ import android.support.annotation.NonNull;
 
 import java.util.List;
 
+import it.unive.dais.cevid.datadroid.lib.util.PercentProgress;
+
 /**
  * Interfaccia che rappresenta un parser asincrono.
- * @param <Data>
- * @param <Progress>
  */
-public interface AsyncParser<Data, Progress> extends Parser<Data> {
-    @NonNull AsyncTask<Void, Progress, List<Data>> getAsyncTask();
+public interface AsyncParser<Data> extends Parser<Data> {
+    @NonNull AsyncTask<Void, PercentProgress, List<Data>> getAsyncTask();
     void onPreExecute();
-    void onProgressUpdate(@NonNull Progress p);
+    void onProgressUpdate(@NonNull Integer p);
     void onItemParsed(@NonNull Data d);
     void onPostExecute(@NonNull List<Data> r);
-    void publishProgress(Progress p);
+    void publishProgress(Integer p);
 }

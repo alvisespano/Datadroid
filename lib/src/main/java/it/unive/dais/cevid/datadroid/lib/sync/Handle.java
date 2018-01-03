@@ -35,6 +35,9 @@ public abstract class Handle<T> implements AutoCloseable {
 
     public abstract void close() throws Exception;
 
+    @NonNull
+    public T get() { return x; }
+
     public <R> R apply(@NonNull Function<T, R> f) {
         synchronized (this) {
             return f.apply(x);
@@ -48,7 +51,7 @@ public abstract class Handle<T> implements AutoCloseable {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    public void modify(@NonNull Consumer<T> f) {
+    public void apply(@NonNull Consumer<T> f) {
         synchronized (this) {
             f.accept(x);
         }

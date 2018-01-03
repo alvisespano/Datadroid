@@ -5,25 +5,25 @@ import android.support.annotation.NonNull;
 /**
  * Created by spano on 13/12/17.
  */
-public class RefCountedSingletonPool<T> implements Pool<T> {
+public class SingletonPool<T> implements Pool<T> {
     @NonNull
-    protected final T x;
+    protected final T content;
     private int cnt = 0;
 
-    public RefCountedSingletonPool(@NonNull T x) {
-        this.x = x;
+    public SingletonPool(@NonNull T x) {
+        this.content = x;
     }
 
     @NonNull
     public Handle<T> acquire() {
         synchronized (this) {
             if (++cnt > 0) {
-                onActualAcquire();
+                onFirstAcquire();
             }
-            return new Handle<T>(x) {
+            return new Handle<T>(content) {
                 @Override
                 public void close() {
-                    RefCountedSingletonPool.this.release(x);
+                    SingletonPool.this.release(x);
                 }
             };
         }
@@ -34,13 +34,13 @@ public class RefCountedSingletonPool<T> implements Pool<T> {
         synchronized (this) {
             if (--cnt <= 0) {
                 cnt = 0;
-                onActualRelease();
+                onLastRelease();
             }
         }
     }
 
-    protected void onActualAcquire() {}
-    protected void onActualRelease() {}
+    protected void onFirstAcquire() {}
+    protected void onLastRelease() {}
 
 
 }

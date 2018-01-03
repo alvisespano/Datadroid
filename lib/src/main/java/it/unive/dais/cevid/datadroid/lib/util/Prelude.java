@@ -26,7 +26,7 @@ public final class Prelude {
     }
 
     /**
-     * Limita il parametro x all'interno dell'intervallo tra a e b dato un oggetto comparatore non-nullo.
+     * Limita il parametro content all'interno dell'intervallo tra a e b dato un oggetto comparatore non-nullo.
      * Questa funzione è generica sul tipo numerico e richiede un Comparator per eseguire i confronti tra i valori.
      * @param a estremo sinistro dell'intervallo.
      * @param b estremo destro dell'intervallo.
@@ -40,7 +40,7 @@ public final class Prelude {
     }
 
     /**
-     * Limita il parametro x all'interno dell'intervallo tra a e b.
+     * Limita il parametro content all'interno dell'intervallo tra a e b.
      * Questa funzione è generica sul tipo numerico, richiedento che implementi l'interfaccia {@code Comparable<T>}.
      * Ad esempio è possibile chiamare questa funzione con gli int, i double ed altri tipi builtin.
      * @param a estremo sinistro dell'intervallo.
@@ -54,10 +54,10 @@ public final class Prelude {
     }
 
     /**
-     * Dato un parametro x definito nell'intervallo tra a0 e b0, proietta x entro l'intervallo tra a1 e b1 mantenendo le proporzioni.
-     * Chiamato y il risultato della proiezione, garantisce che {@code (x - a0) / (b0 - a0) = (y - a1) / (b1 - a1)}.
+     * Dato un parametro content definito nell'intervallo tra a0 e b0, proietta content entro l'intervallo tra a1 e b1 mantenendo le proporzioni.
+     * Chiamato y il risultato della proiezione, garantisce che {@code (content - a0) / (b0 - a0) = (y - a1) / (b1 - a1)}.
      * In altre parole, garantisce che la distanza
-     * relativa di x dall'estremo sinistro dell'intervallo di partenza sta alla lunghezza di quest'ultimo come la distanza di
+     * relativa di content dall'estremo sinistro dell'intervallo di partenza sta alla lunghezza di quest'ultimo come la distanza di
      * y dall'estremo sinistro dell'intervallo di destinazione sta alla lunghezza di quest'ultimo.
      * Per esempio, {@code proj(0, 10, 100, 200, 6) = 160} poiché la proporzione tra 6 e l'intervallo {@code [0, 10]} è uguale
      * alla proporzione tra 160 e {@code [100, 200]}.

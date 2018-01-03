@@ -8,6 +8,9 @@ public interface PercentProgress {
     double getPercent();
 
     default int getPercent100() {
-        return (int) (getPercent() * 100.);
+        double p = getPercent();
+        if (p < 0. || p > 1.)
+            throw new UnexpectedException(String.format("PercentProgress.getPercent() return %d", p));
+        return (int) (p * 100.);
     }
 }

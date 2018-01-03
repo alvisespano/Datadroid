@@ -10,6 +10,7 @@ public abstract class GettableHandle<T> extends Handle<T> {
         super(x);
     }
 
+    @NonNull
     public T get() {
         return x;
     }
