@@ -1,10 +1,10 @@
 package it.unive.dais.cevid.datadroid.lib.parser;
 
-import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.ProgressBar;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,22 +13,33 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 
+import it.unive.dais.cevid.datadroid.lib.sync.Handle;
+import it.unive.dais.cevid.datadroid.lib.sync.Pool;
+import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
+
 /**
  * Clase astratta parametrica che rappresenta un parser di dati in senso generale, sottoclasse di AsyncTask.
  * L'utente deve ereditare questa classe ed implementarne i metodi mancanti oppure utilizzare direttamente alcune sottoclassi non astratte
  * già contenute in questa libreria.
  *
  * @param <Data> il tipo di una riga di dati (non dell'intera collezione dei dati).
- * @param <Progress> tipo Progress inoltrato alla classe parametrica AsyncTask.
- *                  Da usare per rappresentare il progresso del parsing, come una progress bar.
- *                  Per ignorarlo passare il tipo Void come parametro Progress a questa classe.
+ *               Da usare per rappresentare il progresso del parsing, come una progress bar.
+ *               Per ignorarlo passare il tipo Void come parametro Progress a questa classe.
  * @author Alvise Spanò, Università Ca' Foscari
  */
 @SuppressWarnings("unchecked")
-public abstract class AbstractAsyncParser<Data, Progress> implements AsyncParser<Data, Progress> {
+public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> implements AsyncParser<Data, P> {
 
-    private static final String TAG = "AbstractAsyncParser";
-    protected final MyAsyncTask asyncTask = new MyAsyncTask();
+    private final MyAsyncTask<Data, P> asyncTask = new MyAsyncTask<>(this);
+
+    @Nullable
+    private final Pool<ProgressBar> pool;
+    @Nullable
+    private Handle<ProgressBar> handle;
+
+    protected AbstractAsyncParser(@Nullable Pool<ProgressBar> pool) {
+        this.pool = pool;
+    }
 
     /**
      * Converte una URL in un {@code InputStreamReader}.
@@ -41,17 +52,18 @@ public abstract class AbstractAsyncParser<Data, Progress> implements AsyncParser
      *      protected MyDataParser(InputStreamReader rd) {
      *          super(rd);
      *      }
-     *
+     * <p>
      *      protected MyDataParser(URL url) throws IOException {
      *          super(urlToReader(url));
      *      }
-     *
+     * <p>
      *      protected List<MapItem> parse(InputStreamReader rd) throws IOException {
      *          // fai qualcosa usando rd
      *      }
      * }
      * }
      * </pre></blockquote>
+     *
      * @param url parametro di tipo URL.
      * @return risultato di tipo InputStreamReader.
      * @throws IOException lancia questa eccezione quando sorgono problemi di I/O.
@@ -67,7 +79,8 @@ public abstract class AbstractAsyncParser<Data, Progress> implements AsyncParser
     /**
      * Metodo di cui è necessario fare override nelle sottoclassi.
      * Deve occuparsi del parsing vero e proprio.
-//     * @param input parametro di tipo Input.
+     * //     * @param input parametro di tipo Input.
+     *
      * @return ritorna una lista di oggetti di tipo FiltrableData.
      * @throws IOException lanciata se il parser incontra problemi.
      */
@@ -78,21 +91,26 @@ public abstract class AbstractAsyncParser<Data, Progress> implements AsyncParser
     @Override
     @NonNull
     public String getName() {
-        return getClass().getSimpleName();
+        return getClass().getName();
     }
 
     /**
      * Restituisce l'oggetto interno di tipo AsyncTask.
+     *
      * @return oggetto di tipo AsyncTask.
      */
+    @NonNull
     @Override
-    public AsyncTask<Void, Progress, List<Data>> getAsyncTask() {
+    public AsyncTask<Void, P, List<Data>> getAsyncTask() {
         return asyncTask;
     }
 
-    @SuppressLint("StaticFieldLeak")
-    protected class MyAsyncTask extends AsyncTask<Void, Progress, List<Data>> {
-        private final AbstractAsyncParser parent = AbstractAsyncParser.this;
+    protected static class MyAsyncTask<Data, P extends ProgressStepper> extends AsyncTask<Void, P, List<Data>> {
+        private final AbstractAsyncParser<Data, P> enclosing;
+
+        private MyAsyncTask(@NonNull AbstractAsyncParser<Data, P> enclosing) {
+            this.enclosing = enclosing;
+        }
 
         /**
          * Metodo interno che invoca {@code parse} all'interno di un blocco try..catch.
@@ -105,47 +123,69 @@ public abstract class AbstractAsyncParser<Data, Progress> implements AsyncParser
         @Override
         @Nullable
         protected List<Data> doInBackground(Void... params) {
-            final String name = parent.getName();
+            final String name = enclosing.getName(), tag = enclosing.getName();
             try {
-                Log.v(TAG, String.format("started parser %s", name));
-                List<Data> r = parse();
-                Log.v(TAG, String.format("parser %s finished (%d elements)", name, r.size()));
+                Log.v(tag, String.format("started parser %s", name));
+                List<Data> r = enclosing.parse();
+                Log.v(tag, String.format("parser %s finished (%d elements)", name, r.size()));
                 return r;
             } catch (IOException e) {
-                Log.e(TAG, String.format("exception caught during parser %s: %s", name, e));
+                Log.e(tag, String.format("exception caught during parser %s: %s", name, e));
                 e.printStackTrace();
                 return null;
             }
         }
 
         @Override
-        protected void onPreExecute() {
-            parent.onPreExecute();
+        protected final void onPreExecute() {
+            enclosing.onPreExecute();
         }
 
         @Override
-        protected void onProgressUpdate(@NonNull Progress... p) { parent.onProgressUpdate(p[0]); }
+        protected final void onProgressUpdate(@NonNull P... p) {
+            enclosing.onProgressUpdate(p[0]);
+        }
 
         @Override
-        protected void onPostExecute(@NonNull List<Data> r) { parent.onPostExecute(r); }
+        protected final void onPostExecute(@NonNull List<Data> r) {
+            enclosing.onPostExecute(r);
+        }
 
         /**
          * Questo metodo è solamente uno stub di {@code publishProgress}.
          * E' necessario perché {@code publishProgress} ha visibilità {@code protected} e quindi non può essere chiamato
          * dalle sottoclassi della enclosing class {@code AbstractAsyncParser}-.
+         *
          * @param p varargs di tipo Progress
          */
-        void _publishProgress(@NonNull Progress... p) { this.publishProgress(p); }
+        private void _publishProgress(@NonNull P... p) {
+            this.publishProgress(p);
+        }
     }
 
-    protected final void publishProgress(Progress p) {
+    @Override
+    public final void publishProgress(P p) {
         asyncTask._publishProgress(p);
     }
 
-    // AsyncTask-like hooks
-    protected void onPreExecute() {}
-    protected void onProgressUpdate(@NonNull Progress p) {}
-    protected void onItemParsed(@NonNull Data d) {}
-    protected void onPostExecute(@NonNull List<Data> r) {}
+    @Override
+    public void onPreExecute() {
+        if (pool != null) {
+            handle = pool.acquire();
+        }
+    }
+
+    @Override
+    public void onProgressUpdate(@NonNull P p) {
+        if (handle != null) {
+            handle.apply(pb -> { pb.setProgress(p.getCurrentProgress()); return null; });
+//            handle.get().setProgress(p.getCurrentProgress());
+        }
+    }
+
+    @Override
+    public void onPostExecute(@NonNull List<Data> r) {
+        if (handle != null) handle.release();
+    }
 
 }
