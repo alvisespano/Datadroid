@@ -21,7 +21,7 @@ public abstract class Handle<T> implements AutoCloseable {
     }
 
     @Override
-    public void finalize() {
+    protected void finalize() {
         release();
     }
 
@@ -36,7 +36,7 @@ public abstract class Handle<T> implements AutoCloseable {
     public abstract void close() throws Exception;
 
     @NonNull
-    public T get() { return x; }
+    T get() { return x; }
 
     public <R> R apply(@NonNull Function<T, R> f) {
         synchronized (this) {

@@ -1,13 +1,18 @@
 package it.unive.dais.cevid.datadroid.lib.parser;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.JsonReader;
+import android.widget.ProgressBar;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+import it.unive.dais.cevid.datadroid.lib.sync.Pool;
+import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
 
 /**
  * Classe astratta che rappresenta un parser JSON generico.
@@ -17,10 +22,10 @@ import java.util.List;
  * definire un parser specifico per un formato particolare, ritornando una lista unitaria.
  * @param <Item> il tipo di un elemento del JSON, ad esempio un tipo definito dall'utente che rappresenta una singola
  *              riga di dati.
- * @param <Progress> tipo Progress che viene inoltrato alla superclasse AsyncTask.
+ * @param <P> tipo Progress che viene inoltrato alla superclasse AsyncTask.
  * @author Alvise Spanò, Università Ca' Foscari
  */
-public abstract class AbstractAsyncJsonParser<Item, Progress> extends AbstractAsyncParser<Item, Progress> {
+public abstract class AbstractAsyncJsonParser<Item, P extends ProgressStepper> extends AbstractAsyncParser<Item, P> {
 
     @NonNull protected final JsonReader reader;
 
@@ -28,7 +33,8 @@ public abstract class AbstractAsyncJsonParser<Item, Progress> extends AbstractAs
      * Costruttore protected via Reader.
      * @param rd oggetto Reader usato come input.
      */
-    protected AbstractAsyncJsonParser(@NonNull Reader rd) {
+    protected AbstractAsyncJsonParser(@NonNull Reader rd, @Nullable Pool<ProgressBar> pool) {
+        super(pool);
         this.reader = new JsonReader(rd);
     }
 
@@ -36,8 +42,8 @@ public abstract class AbstractAsyncJsonParser<Item, Progress> extends AbstractAs
      * Costruttore protected via URL.
      * @param url oggetto URL usato come input.
      */
-    protected AbstractAsyncJsonParser(@NonNull URL url) throws IOException {
-        this(urlToReader(url));
+    protected AbstractAsyncJsonParser(@NonNull URL url, @Nullable Pool<ProgressBar> pool) throws IOException {
+        this(urlToReader(url), pool);
     }
 
     /**

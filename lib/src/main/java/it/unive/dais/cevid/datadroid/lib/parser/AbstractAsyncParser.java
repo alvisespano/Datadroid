@@ -15,7 +15,7 @@ import java.util.List;
 
 import it.unive.dais.cevid.datadroid.lib.sync.Handle;
 import it.unive.dais.cevid.datadroid.lib.sync.Pool;
-import it.unive.dais.cevid.datadroid.lib.util.PercentProgress;
+import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
 
 /**
  * Clase astratta parametrica che rappresenta un parser di dati in senso generale, sottoclasse di AsyncTask.
@@ -28,9 +28,9 @@ import it.unive.dais.cevid.datadroid.lib.util.PercentProgress;
  * @author Alvise Spanò, Università Ca' Foscari
  */
 @SuppressWarnings("unchecked")
-public abstract class AbstractAsyncParser<Data> implements AsyncParser<Data> {
+public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> implements AsyncParser<Data, P> {
 
-    private final MyAsyncTask asyncTask = new MyAsyncTask(this);
+    private final MyAsyncTask<Data, P> asyncTask = new MyAsyncTask<>(this);
 
     @Nullable
     private final Pool<ProgressBar> pool;
@@ -101,14 +101,14 @@ public abstract class AbstractAsyncParser<Data> implements AsyncParser<Data> {
      */
     @NonNull
     @Override
-    public AsyncTask<Void, PercentProgress, List<Data>> getAsyncTask() {
+    public AsyncTask<Void, P, List<Data>> getAsyncTask() {
         return asyncTask;
     }
 
-    protected static class MyAsyncTask<Data> extends AsyncTask<Void, PercentProgress, List<Data>> {
-        private final AbstractAsyncParser enclosing;
+    protected static class MyAsyncTask<Data, P extends ProgressStepper> extends AsyncTask<Void, P, List<Data>> {
+        private final AbstractAsyncParser<Data, P> enclosing;
 
-        private MyAsyncTask(@NonNull AbstractAsyncParser enclosing) {
+        private MyAsyncTask(@NonNull AbstractAsyncParser<Data, P> enclosing) {
             this.enclosing = enclosing;
         }
 
@@ -142,7 +142,7 @@ public abstract class AbstractAsyncParser<Data> implements AsyncParser<Data> {
         }
 
         @Override
-        protected final void onProgressUpdate(@NonNull PercentProgress... p) {
+        protected final void onProgressUpdate(@NonNull P... p) {
             enclosing.onProgressUpdate(p[0]);
         }
 
@@ -158,13 +158,13 @@ public abstract class AbstractAsyncParser<Data> implements AsyncParser<Data> {
          *
          * @param p varargs di tipo Progress
          */
-        private void _publishProgress(@NonNull PercentProgress... p) {
+        private void _publishProgress(@NonNull P... p) {
             this.publishProgress(p);
         }
     }
 
     @Override
-    public final void publishProgress(Integer p) {
+    public final void publishProgress(P p) {
         asyncTask._publishProgress(p);
     }
 
@@ -176,20 +176,16 @@ public abstract class AbstractAsyncParser<Data> implements AsyncParser<Data> {
     }
 
     @Override
-    public void onProgressUpdate(@NonNull PercentProgress p) {
+    public void onProgressUpdate(@NonNull P p) {
         if (handle != null) {
-//            handle.apply(pb -> { pb.setProgress(p.getPercent100()); return null; });
-            handle.get().setProgress(p.getPercent100());
+            handle.apply(pb -> { pb.setProgress(p.getCurrentProgress()); return null; });
+//            handle.get().setProgress(p.getCurrentProgress());
         }
     }
 
     @Override
     public void onPostExecute(@NonNull List<Data> r) {
         if (handle != null) handle.release();
-    }
-
-    @Override
-    public void onItemParsed(@NonNull Data d) {
     }
 
 }

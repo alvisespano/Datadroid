@@ -1,6 +1,7 @@
 package it.unive.dais.cevid.datadroid.lib.sync;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 
@@ -14,11 +15,13 @@ public class ProgressBarSingletonPool extends SingletonPool<ProgressBar> {
 
     @Override
     protected void onLastRelease() {
-        content.setVisibility(View.GONE);
+//        content.setVisibility(View.GONE);
+        Log.d("BAR", "gone");
     }
 
     @Override
     protected void onFirstAcquire() {
-        content.setVisibility(View.VISIBLE);
+//        content.setVisibility(View.VISIBLE);
+        Log.d("BAR", "visible");
     }
 }

@@ -19,8 +19,8 @@ public class ConcurrentPool<T> implements Pool<T> {
 
     @Override
     @NonNull
-    public GettableHandle<T> acquire() {
-        return new GettableHandle<T>(q.poll()) {
+    public Handle<T> acquire() {
+        return new Handle<T>(q.poll()) {
             @Override
             public void close() throws Exception {
                 ConcurrentPool.this.release(this);
@@ -28,12 +28,8 @@ public class ConcurrentPool<T> implements Pool<T> {
         };
     }
 
-    public void release(@NonNull T x) {
-        q.add(x);
-    }
-
-    public void release(@NonNull GettableHandle<T> x) {
-        release(x.get());
+    public void release(@NonNull Handle<T> h) {
+        q.add(h.get());
     }
 
 }

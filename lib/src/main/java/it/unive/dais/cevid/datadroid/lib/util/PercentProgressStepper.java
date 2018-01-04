@@ -3,10 +3,9 @@ package it.unive.dais.cevid.datadroid.lib.util;
 /**
  * Created by spano on 30/10/2017.
  */
-public class PercentProgressStepper implements PercentProgress {
+public class PercentProgressStepper extends ProgressStepper {
 
     private final int size;
-    private int cnt = 0;
     private final double base, scale;
 
     public PercentProgressStepper(int size) {
@@ -23,17 +22,17 @@ public class PercentProgressStepper implements PercentProgress {
         return new PercentProgressStepper(newSize, getPercent(), 1.0 / (double) size);
     }
 
-    public void step() {
-        ++cnt;
-    }
-
     public double getPercent() {
         double p = (double) cnt / (double) size;
         return base + p * scale;
     }
 
     public int getPercent100() {
-        return (int) (getPercent() * 100.);
+        double p = getPercent();
+        if (p < 0. || p > 1.)
+            throw new UnexpectedException(String.format("ProgressStepper.getPercent() return %d", p));
+        return (int) (p * 100.);
     }
+
 }
 

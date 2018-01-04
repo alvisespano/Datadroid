@@ -589,7 +589,7 @@ public class MapsActivity extends AppCompatActivity
     private void demo() {
         try {
             InputStream is = getResources().openRawResource(R.raw.piattaforme);
-            CsvRowParser p = new CsvRowParser(new InputStreamReader(is), true, ";");
+            CsvRowParser p = new CsvRowParser(new InputStreamReader(is), true, ";", null);
             List<CsvRowParser.Row> rows = p.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
             List<MapItem> l = new ArrayList<>();
             for (final CsvRowParser.Row r : rows) {

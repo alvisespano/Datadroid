@@ -23,14 +23,14 @@ public class SingletonPool<T> implements Pool<T> {
             return new Handle<T>(content) {
                 @Override
                 public void close() {
-                    SingletonPool.this.release(x);
+                    SingletonPool.this.release(this);
                 }
             };
         }
     }
 
     @Override
-    public void release(@NonNull T x) {
+    public void release(@NonNull Handle<T> x) {
         synchronized (this) {
             if (--cnt <= 0) {
                 cnt = 0;
@@ -41,6 +41,5 @@ public class SingletonPool<T> implements Pool<T> {
 
     protected void onFirstAcquire() {}
     protected void onLastRelease() {}
-
 
 }
