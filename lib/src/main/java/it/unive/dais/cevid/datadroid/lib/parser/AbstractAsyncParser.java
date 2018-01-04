@@ -128,7 +128,7 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> imple
                 Log.v(tag, String.format("started parser %s", name));
                 List<Data> r = enclosing.parse();
                 Log.v(tag, String.format("parser %s finished (%d elements)", name, r.size()));
-                return r;
+                return enclosing.onPostParse(r);
             } catch (IOException e) {
                 Log.e(tag, String.format("exception caught during parser %s: %s", name, e));
                 e.printStackTrace();
@@ -179,9 +179,10 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> imple
     public void onProgressUpdate(@NonNull P p) {
         if (handle != null) {
             handle.apply(pb -> { pb.setProgress(p.getCurrentProgress()); return null; });
-//            handle.get().setProgress(p.getCurrentProgress());
         }
     }
+
+    public List<Data> onPostParse(List<Data> r) { return r; }
 
     @Override
     public void onPostExecute(@NonNull List<Data> r) {
