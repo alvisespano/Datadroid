@@ -13,9 +13,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 
-import it.unive.dais.cevid.datadroid.lib.sync.Handle;
-import it.unive.dais.cevid.datadroid.lib.sync.Pool;
-import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
+import it.unive.dais.cevid.datadroid.lib.parser.progress.Handle;
+import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressBarManager;
+import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressStepper;
 
 /**
  * Clase astratta parametrica che rappresenta un parser di dati in senso generale, sottoclasse di AsyncTask.
@@ -33,12 +33,12 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> imple
     private final MyAsyncTask<Data, P> asyncTask = new MyAsyncTask<>(this);
 
     @Nullable
-    private final Pool<ProgressBar> pool;
+    private final ProgressBarManager pbm;
     @Nullable
-    private Handle<ProgressBar> handle;
+    private Handle<ProgressBar> handle = null;
 
-    protected AbstractAsyncParser(@Nullable Pool<ProgressBar> pool) {
-        this.pool = pool;
+    protected AbstractAsyncParser(@Nullable ProgressBarManager pbm) {
+        this.pbm = pbm;
     }
 
     /**
@@ -170,8 +170,8 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> imple
 
     @Override
     public void onPreExecute() {
-        if (pool != null) {
-            handle = pool.acquire();
+        if (pbm != null) {
+            handle = pbm.acquire(this);
         }
     }
 
@@ -182,11 +182,15 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> imple
         }
     }
 
-    public List<Data> onPostParse(List<Data> r) { return r; }
+    @NonNull
+    public List<Data> onPostParse(@NonNull List<Data> r) { return r; }
 
     @Override
     public void onPostExecute(@NonNull List<Data> r) {
-        if (handle != null) handle.release();
+        if (handle != null) {
+            handle.release();
+            handle = null;
+        }
     }
 
 }

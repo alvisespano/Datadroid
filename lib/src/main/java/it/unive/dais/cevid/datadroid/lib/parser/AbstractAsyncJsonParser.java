@@ -3,16 +3,13 @@ package it.unive.dais.cevid.datadroid.lib.parser;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.JsonReader;
-import android.widget.ProgressBar;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-
-import it.unive.dais.cevid.datadroid.lib.sync.Pool;
-import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
+import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressBarManager;
+import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressStepper;
 
 /**
  * Classe astratta che rappresenta un parser JSON generico.
@@ -27,14 +24,15 @@ import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
  */
 public abstract class AbstractAsyncJsonParser<Item, P extends ProgressStepper> extends AbstractAsyncParser<Item, P> {
 
-    @NonNull protected final JsonReader reader;
+    @NonNull
+    protected final JsonReader reader;
 
     /**
      * Costruttore protected via Reader.
      * @param rd oggetto Reader usato come input.
      */
-    protected AbstractAsyncJsonParser(@NonNull Reader rd, @Nullable Pool<ProgressBar> pool) {
-        super(pool);
+    protected AbstractAsyncJsonParser(@NonNull Reader rd, @Nullable ProgressBarManager pbm) {
+        super(pbm);
         this.reader = new JsonReader(rd);
     }
 
@@ -42,8 +40,8 @@ public abstract class AbstractAsyncJsonParser<Item, P extends ProgressStepper> e
      * Costruttore protected via URL.
      * @param url oggetto URL usato come input.
      */
-    protected AbstractAsyncJsonParser(@NonNull URL url, @Nullable Pool<ProgressBar> pool) throws IOException {
-        this(urlToReader(url), pool);
+    protected AbstractAsyncJsonParser(@NonNull URL url, @Nullable ProgressBarManager pbm) throws IOException {
+        this(urlToReader(url), pbm);
     }
 
     /**

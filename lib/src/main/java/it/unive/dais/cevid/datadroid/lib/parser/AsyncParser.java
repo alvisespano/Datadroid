@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 
 import java.util.List;
 
-import it.unive.dais.cevid.datadroid.lib.util.ProgressStepper;
+import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressStepper;
 
 /**
  * Interfaccia che rappresenta un parser asincrono.
