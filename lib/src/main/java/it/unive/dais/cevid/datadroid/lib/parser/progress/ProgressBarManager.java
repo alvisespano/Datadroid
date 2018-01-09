@@ -1,10 +1,8 @@
 package it.unive.dais.cevid.datadroid.lib.parser.progress;
 
 import android.app.Activity;
-import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -24,7 +22,7 @@ public class ProgressBarManager {
         @NonNull
         public final ProgressBar progressBar;
         @Nullable
-        public Object owner;
+        private Object owner;
 
         public Descr(@NonNull ProgressBar progressBar, @Nullable Object owner) {
             this.progressBar = progressBar;
@@ -33,8 +31,31 @@ public class ProgressBarManager {
 
         @Override
         public String toString() {
-            return String.format("[bar(%s) owner(%s)]", System.identityHashCode(progressBar), System.identityHashCode(owner));
+            return String.format("[bar(%s) owner(%s:%s)]", System.identityHashCode(progressBar), System.identityHashCode(getOwner()),
+                    getOwner() != null ? getOwner().getClass().getSimpleName() : null);
         }
+
+        public boolean isOwner(@NonNull Object owner) {
+            return System.identityHashCode(this.getOwner()) == System.identityHashCode(owner);
+        }
+
+        public boolean hasOwner() {
+            return getOwner() != null;
+        }
+
+        @Nullable
+        protected Object getOwner() {
+            return owner;
+        }
+
+        protected void setOwner(@NonNull Object owner) {
+            this.owner = owner;
+        }
+
+        protected void cleanOwner() {
+            this.owner = null;
+        }
+
     }
 
     private static final String TAG = "ProgressBarManager";
@@ -51,7 +72,7 @@ public class ProgressBarManager {
     }
 
     public ProgressBarManager(@NonNull Activity ctx, @NonNull ProgressBar progressBar) {
-        this(ctx, new ProgressBar[] { progressBar });
+        this(ctx, new ProgressBar[]{progressBar});
     }
 
 
@@ -61,72 +82,67 @@ public class ProgressBarManager {
 
     @NonNull
     public Handle<ProgressBar> acquire(@NonNull Object owner) {
+        findOwned(owner);   // just try to allocate a descr at first acquire
+        return new Handle<ProgressBar>() {
+            @Override
+            public void close() {
+                synchronized (q) {
+                    for (Descr d : q) {
+                        if (d.isOwner(owner)) {
+                            Log.d(TAG, String.format("releasing descr %s", d));
+                            d.cleanOwner();
+                            onLastRelease(d.progressBar);
+                        }
+                    }
+                }
+            }
+
+            @Override
+            @Nullable
+            public <R> R apply(@NonNull Function<ProgressBar, R> f) {
+                synchronized (q) {
+                    Descr d = findOwned(owner);
+                    if (d != null) {
+                        return f.apply(d.progressBar);
+                    } else return null;
+                }
+            }
+        };
+
+    }
+
+    @Nullable
+    private Descr findOwned(@NonNull Object owner) {
         synchronized (q) {
-            Descr d = findOwned(owner);
-//            if (owners.isEmpty()) onFirstAcquire();
-//            owners.add(owner);
-            return new Handle<ProgressBar>() {
-                @Override
-                public void close() {
-                    synchronized (q) {
-                        for (Descr d : q) {
-                            if (d.owner == owner) {
-                                Log.d(TAG, String.format("releasing descr %s", d));
-                                d.owner = null;
-                            }
-                        }
-                    }
+            for (Descr d : q) {
+                if (d.isOwner(owner)) {
+                    Log.d(TAG, String.format("found descr %s already owned by %s", d, System.identityHashCode(owner)));
+                    return d;
                 }
-
-                @Override
-                @Nullable
-                public <R> R apply(@NonNull Function<ProgressBar, R> f) {
-                    synchronized (q) {
-                        Descr d = findOwned(owner);
-                        if (d != null) {
-                            return f.apply(d.progressBar);
-                        }
-                        else return null;
-                    }
+            }
+            for (Descr d : q) {
+                if (!d.hasOwner()) {
+                    d.setOwner(owner);
+                    onFirstAcquire(d.progressBar);
+                    Log.d(TAG, String.format("allocated descr %s", d));
+                    return d;
                 }
-            };
-        }
-    }
-
-    @Nullable
-    private Descr findOwned(Object owner) {
-        for (Descr d : q) {
-            if (d.owner == owner) {
-                Log.d(TAG, String.format("found descr %s already owned by %s", d, System.identityHashCode(owner)));
-                return d;
             }
+            Log.d(TAG, String.format("cannot allocate bar now (owner %s is waiting)", System.identityHashCode(owner)));
+            return null;
         }
-        return allocateUnused(owner);
-    }
-
-    @Nullable
-    private Descr allocateUnused(Object owner) {
-        for (Descr d : q) {
-            if (d.owner == null) {
-                d.owner = owner;
-                Log.d(TAG, String.format("allocated descr %s", d));
-                return d;
-            }
-        }
-        Log.d(TAG, String.format("cannot allocate bar now (owner %s is waiting)", System.identityHashCode(owner)));
-        return null;
     }
 
     public void release(@NonNull Handle<ProgressBar> h) {
         h.release();
     }
 
-    protected void onLastRelease() {
+    protected void onLastRelease(@NonNull ProgressBar progressBar) {
         Log.d(TAG, "parser progressbar: GONE");
         ctx.runOnUiThread(() -> progressBar.setVisibility(View.GONE));
     }
 
-    protected void onFirstAcquire() {
+    protected void onFirstAcquire(@NonNull ProgressBar progressBar) {
         Log.d(TAG, "parser progressbar: VISIBLE");
         ctx.runOnUiThread(() -> progressBar.setVisibility(View.VISIBLE));
     }
