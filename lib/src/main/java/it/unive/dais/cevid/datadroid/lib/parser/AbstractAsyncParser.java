@@ -171,7 +171,7 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> imple
     @Override
     public void onPreExecute() {
         if (pbm != null) {
-            handle = pbm.acquire(this);
+            handle = pbm.acquire();
         }
     }
 

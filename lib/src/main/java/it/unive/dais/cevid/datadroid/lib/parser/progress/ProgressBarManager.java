@@ -8,7 +8,6 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import it.unive.dais.cevid.datadroid.lib.util.Function;
@@ -19,43 +18,43 @@ import it.unive.dais.cevid.datadroid.lib.util.Function;
 public class ProgressBarManager {
 
     protected static class Descr {
+        private static int cnt = 1;
         @NonNull
         public final ProgressBar progressBar;
-        @Nullable
-        private Object owner;
+        private int owner = 0;
 
-        public Descr(@NonNull ProgressBar progressBar, @Nullable Object owner) {
+        public Descr(@NonNull ProgressBar progressBar) {
             this.progressBar = progressBar;
-            this.owner = owner;
         }
 
         @Override
         public String toString() {
-            return String.format("[bar(%s) owner(%s:%s)]", System.identityHashCode(progressBar), System.identityHashCode(getOwner()),
-                    getOwner() != null ? getOwner().getClass().getSimpleName() : null);
+            return String.format("[bar:%s owner:%d]", System.identityHashCode(progressBar), getOwner());
         }
 
-        public boolean isOwner(@NonNull Object owner) {
-            return System.identityHashCode(this.getOwner()) == System.identityHashCode(owner);
+        public boolean isOwner(int owner) {
+            return getOwner() == owner;
         }
 
         public boolean hasOwner() {
-            return getOwner() != null;
+            return getOwner() > 0;
         }
 
-        @Nullable
-        protected Object getOwner() {
+        public int getOwner() {
             return owner;
         }
 
-        protected void setOwner(@NonNull Object owner) {
+        public void setOwner(int owner) {
             this.owner = owner;
         }
 
-        protected void cleanOwner() {
-            this.owner = null;
+        public void cleanOwner() {
+            this.owner = 0;
         }
 
+        public static int newOwner() {
+            return cnt++;
+        }
     }
 
     private static final String TAG = "ProgressBarManager";
@@ -68,7 +67,7 @@ public class ProgressBarManager {
         this.ctx = ctx;
         this.q = new ConcurrentLinkedQueue<>();
         for (ProgressBar p : progressBars)
-            this.q.add(new Descr(p, null));
+            this.q.add(new Descr(p));
     }
 
     public ProgressBarManager(@NonNull Activity ctx, @NonNull ProgressBar progressBar) {
@@ -81,8 +80,9 @@ public class ProgressBarManager {
     }
 
     @NonNull
-    public Handle<ProgressBar> acquire(@NonNull Object owner) {
-        findOwned(owner);   // just try to allocate a descr at first acquire
+    public Handle<ProgressBar> acquire() {
+        final int owner = Descr.newOwner();
+        findOwned(owner);   // just allocate a descr asap
         return new Handle<ProgressBar>() {
             @Override
             public void close() {
@@ -112,11 +112,11 @@ public class ProgressBarManager {
     }
 
     @Nullable
-    private Descr findOwned(@NonNull Object owner) {
+    private Descr findOwned(int owner) {
         synchronized (q) {
             for (Descr d : q) {
                 if (d.isOwner(owner)) {
-                    Log.d(TAG, String.format("found descr %s already owned by %s", d, System.identityHashCode(owner)));
+                    Log.d(TAG, String.format("found descr %s already owned by %d", d, owner));
                     return d;
                 }
             }
@@ -128,7 +128,7 @@ public class ProgressBarManager {
                     return d;
                 }
             }
-            Log.d(TAG, String.format("cannot allocate bar now (owner %s is waiting)", System.identityHashCode(owner)));
+            Log.d(TAG, String.format("cannot allocate bar now (owner %d is waiting)", owner));
             return null;
         }
     }
