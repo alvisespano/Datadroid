@@ -6,9 +6,6 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
-
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import it.unive.dais.cevid.datadroid.lib.util.Function;
@@ -18,6 +15,7 @@ import it.unive.dais.cevid.datadroid.lib.util.Function;
  */
 public class ProgressBarManager {
 
+<<<<<<< HEAD
     protected static class Descr {
         @NonNull
         public final ProgressBar progressBar;
@@ -58,30 +56,33 @@ public class ProgressBarManager {
 
     }
 
+=======
+>>>>>>> parent of 3f51caf... Multiple progress bar support for ProgressBarManager
     private static final String TAG = "ProgressBarManager";
     @NonNull
-    protected final ConcurrentLinkedQueue<Descr> q;
+    protected final ProgressBar progressBar;
+    @NonNull
+    protected final ConcurrentLinkedQueue<Object> owners = new ConcurrentLinkedQueue<>();
     @NonNull
     protected final Activity ctx;
 
-    public ProgressBarManager(@NonNull Activity ctx, @NonNull Collection<ProgressBar> progressBars) {
-        this.ctx = ctx;
-        this.q = new ConcurrentLinkedQueue<>();
-        for (ProgressBar p : progressBars)
-            this.q.add(new Descr(p, null));
-    }
-
     public ProgressBarManager(@NonNull Activity ctx, @NonNull ProgressBar progressBar) {
+<<<<<<< HEAD
         this(ctx, new ProgressBar[]{progressBar});
     }
 
 
     public ProgressBarManager(Activity ctx, ProgressBar[] progressBars) {
         this(ctx, Arrays.asList(progressBars));
+=======
+        this.progressBar = progressBar;
+        this.ctx = ctx;
+>>>>>>> parent of 3f51caf... Multiple progress bar support for ProgressBarManager
     }
 
     @NonNull
     public Handle<ProgressBar> acquire(@NonNull Object owner) {
+<<<<<<< HEAD
         findOwned(owner);   // just try to allocate a descr at first acquire
         return new Handle<ProgressBar>() {
             @Override
@@ -93,10 +94,22 @@ public class ProgressBarManager {
                             d.cleanOwner();
                             onLastRelease(d.progressBar);
                         }
+=======
+        synchronized (owners) {
+            if (owners.isEmpty()) onFirstAcquire();
+            owners.add(owner);
+            return new Handle<ProgressBar>() {
+                @Override
+                public void close() {
+                    synchronized (owners) {
+                        owners.remove(owner);
+                        if (owners.isEmpty()) onLastRelease();
+>>>>>>> parent of 3f51caf... Multiple progress bar support for ProgressBarManager
                     }
                 }
             }
 
+<<<<<<< HEAD
             @Override
             @Nullable
             public <R> R apply(@NonNull Function<ProgressBar, R> f) {
@@ -130,6 +143,22 @@ public class ProgressBarManager {
             }
             Log.d(TAG, String.format("cannot allocate bar now (owner %s is waiting)", System.identityHashCode(owner)));
             return null;
+=======
+                @Override
+                @Nullable
+                public <R> R apply(@NonNull Function<ProgressBar, R> f) {
+                    synchronized (owners) {
+                        Object top = owners.peek();
+                        if (top != null && owner == top)
+                            return f.apply(progressBar);
+                        else {
+                            Log.d(TAG, String.format("owner(%s) != myself(%s): apply skipped", owner, this));
+                            return null;
+                        }
+                    }
+                }
+            };
+>>>>>>> parent of 3f51caf... Multiple progress bar support for ProgressBarManager
         }
     }
 
