@@ -102,9 +102,7 @@ public class ProgressBarManager {
             public <R> R apply(@NonNull Function<ProgressBar, R> f) {
                 synchronized (q) {
                     Descr d = findOwned(owner);
-                    if (d != null) {
-                        return f.apply(d.progressBar);
-                    } else return null;
+                    return d == null ? null : f.apply(d.progressBar);
                 }
             }
         };
