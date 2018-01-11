@@ -127,9 +127,9 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> imple
         protected List<Data> doInBackground(Void... params) {
             final String name = enclosing.getName(), tag = enclosing.getName();
             try {
-                Log.v(tag, String.format("started parser %s", name));
+                Log.v(tag, String.format("started async parser %s", name));
                 List<Data> r = enclosing.parse();
-                Log.v(tag, String.format("parser %s finished (%d elements)", name, r.size()));
+                Log.v(tag, String.format("async parser %s finished (%d elements)", name, r.size()));
                 return enclosing.onPostParse(r);
             } catch (IOException e) {
                 Log.e(tag, String.format("exception caught during parser %s: %s", name, e));
@@ -142,7 +142,10 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> imple
         protected final void onPreExecute() {
             if (pbm != null) {
                 handle = pbm.acquire();
-                handle.apply(pb -> { pb.setMax(100); return null; });
+                handle.apply(pb -> {
+                    pb.setMax(100);
+                    return null;
+                });
             }
             enclosing.onPreExecute();
         }
@@ -151,7 +154,10 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> imple
         protected final void onProgressUpdate(@NonNull P... ps) {
             final P p = ps[0];
             if (handle != null) {
-                handle.apply(pb -> { pb.setProgress(p.getCurrentProgress()); return null; });
+                handle.apply(pb -> {
+                    pb.setProgress(p.getCurrentProgress());
+                    return null;
+                });
             }
             enclosing.onProgressUpdate(p);
         }
@@ -177,35 +183,26 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> imple
         }
     }
 
-//    @Override
     public final void publishProgress(P p) {
         asyncTask._publishProgress(p);
     }
 
     @Override
     public void onPreExecute() {
-//        if (pbm != null) {
-//            handle = pbm.acquire();
-//        }
     }
 
     @Override
     public void onProgressUpdate(@NonNull P p) {
-//        if (handle != null) {
-//            handle.apply(pb -> { pb.setProgress(p.getCurrentProgress()); return null; });
-//        }
     }
 
     @Override
     public void onPostExecute(@NonNull List<Data> r) {
-//        if (handle != null) {
-//            handle.release();
-//            handle = null;
-//        }
     }
 
     @NonNull
-    public List<Data> onPostParse(@NonNull List<Data> r) { return r; }
+    public List<Data> onPostParse(@NonNull List<Data> r) {
+        return r;
+    }
 
 
 }

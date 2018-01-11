@@ -156,7 +156,6 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
         public void put(String[] values) throws RecoverableParseException {
             String[] h = getHeader();
             if (values.length != h.length)
-//                Log.w(TAG, String.format("CSV has %d columns but header has %d", values.length, h.length));
                 throw new RecoverableParseException(String.format("CSV has %d columns but header has %d", values.length, h.length));
             this.values = trimStrings(values);
         }

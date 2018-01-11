@@ -105,8 +105,9 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
         if (hasActualHeader()) setHeader(split(reader.readLine()));
         List<Data> r = new ArrayList<>();
         String line;
+        int linen = 0;
         for (ProgressStepper prog = new ProgressStepper(); (line = reader.readLine()) != null; prog.step()) {
-            int linen = prog.getCurrentProgress();
+            linen = prog.getCurrentProgress();
             try {
                 if (linen == 0 && !hasActualHeader()) setDefaultHeader(line);
                 r.add(parseLine(line));
@@ -115,6 +116,7 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
                 Log.w(TAG, String.format("recoverable parse error at line %d: %s", linen, e.getLocalizedMessage()));
             }
         }
+        Log.v(TAG, String.format("parsed %d/%d lines", r.size(), linen));
         return r;
     }
 
