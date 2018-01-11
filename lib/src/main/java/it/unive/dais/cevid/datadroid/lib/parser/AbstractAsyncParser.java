@@ -177,7 +177,7 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> imple
         }
     }
 
-    @Override
+//    @Override
     public final void publishProgress(P p) {
         asyncTask._publishProgress(p);
     }
