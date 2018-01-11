@@ -1,5 +1,7 @@
 package it.unive.dais.cevid.datadroid.lib.parser.progress;
 
+import android.util.Log;
+
 import it.unive.dais.cevid.datadroid.lib.util.UnexpectedException;
 
 /**
@@ -7,6 +9,7 @@ import it.unive.dais.cevid.datadroid.lib.util.UnexpectedException;
  */
 public class PercentProgressStepper extends ProgressStepper {
 
+    private static final String TAG = "PercentProgressStepper";
     private final int size;
     private final double base, scale;
 
@@ -29,11 +32,14 @@ public class PercentProgressStepper extends ProgressStepper {
         return base + p * scale;
     }
 
-    public int getPercent100() {
+    @Override
+    public int getCurrentProgress() {
         double p = getPercent();
         if (p < 0. || p > 1.)
-            throw new UnexpectedException(String.format("ProgressStepper.getPercent() return %d", p));
-        return (int) (p * 100.);
+            throw new UnexpectedException(String.format("ProgressStepper.getPercent() return %f", p));
+        int r = (int) (p * 100.);
+        Log.d(TAG, String.format("getCurrentProgress(): %d", r));
+        return r;
     }
 
 }

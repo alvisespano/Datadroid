@@ -66,8 +66,10 @@ public class ProgressBarManager {
     public ProgressBarManager(@NonNull Activity ctx, @NonNull Iterable<ProgressBar> progressBars) {
         this.ctx = ctx;
         this.q = new ConcurrentLinkedQueue<>();
-        for (ProgressBar p : progressBars)
+        for (ProgressBar p : progressBars) {
             this.q.add(new Descr(p));
+            ctx.runOnUiThread(() -> p.setVisibility(View.GONE));
+        }
     }
 
     public ProgressBarManager(@NonNull Activity ctx, @NonNull ProgressBar progressBar) {

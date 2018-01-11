@@ -142,6 +142,7 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> imple
         protected final void onPreExecute() {
             if (pbm != null) {
                 handle = pbm.acquire();
+                handle.apply(pb -> { pb.setMax(100); return null; });
             }
             enclosing.onPreExecute();
         }
