@@ -15,5 +15,5 @@ public interface AsyncParser<Data, P extends ProgressStepper> extends Parser<Dat
     void onPreExecute();
     void onProgressUpdate(@NonNull P p);
     void onPostExecute(@NonNull List<Data> r);
-    void publishProgress(P p);
+//    void publishProgress(P p);
 }

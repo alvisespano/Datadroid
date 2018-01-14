@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.Reader;
-import java.text.ParseException;
 
 import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressBarManager;
 import it.unive.dais.cevid.datadroid.lib.util.UnexpectedException;
@@ -63,14 +62,13 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
      *
      * @param columns array di stringhe in cui ogni elemento contiene il contenuto (sotto forma di stringa) di ogni colonna.
      * @return ritorna un oggetto Row.
-     * @throws ParseException        lanciata dal parser.
-     * @throws NumberFormatException lanciata dal parser.
      */
     @NonNull
     @Override
-    protected Row parseColumns(@NonNull String[] columns) throws ParseException {
+    protected Row parseColumns(@NonNull String[] columns) throws RecoverableParseException {
         return new Row(columns);
     }
+
 
     /**
      * Classe che rappresenta una singola riga del CSV parsata dal {@code CsvRowParser}.
@@ -90,7 +88,7 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
          *
          * @param values array con i valori da impostare per tutte le colonne.
          */
-        protected Row(String[] values) {
+        protected Row(String[] values) throws RecoverableParseException {
             put(values);
         }
 
@@ -100,7 +98,7 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
          * @param column il nome della colonna.
          * @param value  il valore da impostare.
          */
-        public void put(String column, String value) {
+        public void put(String column, String value) throws RecoverableParseException {
             put(indexOfColumn(column), value);
         }
 
@@ -112,7 +110,7 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
          * @return ritorna il numero della colonna a cui corrisponde il nome dato (dove 0 è la prima); oppure
          * una eccezione {@code IllegalArgumentException} nel caso in cui il nome non esista.
          */
-        protected int indexOfColumn(String column) {
+        protected int indexOfColumn(String column) throws RecoverableParseException {
             column = trimString(column);
             String[] h = getHeader();
             for (int i = 0; i < h.length; i++) {
@@ -121,7 +119,7 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
                     return i;
                 }
             }
-            throw new IllegalArgumentException(String.format("cannot find column '%s' in header", column));
+            throw new RecoverableParseException(String.format("cannot find column '%s' in header", column));
         }
 
         /**
@@ -155,10 +153,10 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
          *
          * @param values valori da impostare.
          */
-        public void put(String[] values) {
+        public void put(String[] values) throws RecoverableParseException {
             String[] h = getHeader();
             if (values.length != h.length)
-                throw new IllegalArgumentException(String.format("CSV has %d columns but header has %d", values.length, h.length));
+                throw new RecoverableParseException(String.format("CSV has %d columns but header has %d", values.length, h.length));
             this.values = trimStrings(values);
         }
 
@@ -169,7 +167,7 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
          * @return ritorna il valore (stringa) contenuto alla colonna data.
          */
         @NonNull
-        public String get(String column) {
+        public String get(String column) throws RecoverableParseException {
             return trimString(get(indexOfColumn(column)));
         }
 

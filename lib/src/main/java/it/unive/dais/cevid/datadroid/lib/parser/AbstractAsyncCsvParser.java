@@ -105,17 +105,18 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
         if (hasActualHeader()) setHeader(split(reader.readLine()));
         List<Data> r = new ArrayList<>();
         String line;
+        int linen = 0;
         for (ProgressStepper prog = new ProgressStepper(); (line = reader.readLine()) != null; prog.step()) {
-            int linen = prog.getCurrentProgress();
+            linen = prog.getCurrentProgress();
             try {
                 if (linen == 0 && !hasActualHeader()) setDefaultHeader(line);
                 r.add(parseLine(line));
                 publishProgress(prog);
-
-            } catch (ParseException e) {
+            } catch (RecoverableParseException e) {
                 Log.w(TAG, String.format("recoverable parse error at line %d: %s", linen, e.getLocalizedMessage()));
             }
         }
+        Log.v(TAG, String.format("parsed %d/%d lines", r.size(), linen));
         return r;
     }
 
@@ -149,10 +150,9 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
      *
      * @param line stringa con la linea da parsare.
      * @return ritorna un singolo oggetto di tipo FiltrableData.
-     * @throws ParseException lanciata se il parser fallisce.
      */
     @NonNull
-    protected Data parseLine(@NonNull String line) throws ParseException {
+    protected Data parseLine(@NonNull String line) throws RecoverableParseException {
         return parseColumns(split(line));
     }
 
@@ -161,10 +161,9 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
      *
      * @param columns array di stringhe che contiene ogni colonna di una riga del CSV.
      * @return ritorna un singolo oggetto di tipo FiltrableData.
-     * @throws ParseException lanciata se il parser fallisce.
      */
     @NonNull
-    protected abstract Data parseColumns(@NonNull String[] columns) throws ParseException;
+    protected abstract Data parseColumns(@NonNull String[] columns) throws RecoverableParseException;
 
     /**
      * Getter del separatore.
