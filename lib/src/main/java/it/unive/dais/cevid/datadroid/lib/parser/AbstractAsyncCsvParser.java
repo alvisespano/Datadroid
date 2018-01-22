@@ -12,7 +12,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -112,7 +111,7 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
                 if (linen == 0 && !hasActualHeader()) setDefaultHeader(line);
                 r.add(parseLine(line));
                 publishProgress(prog);
-            } catch (RecoverableParseException e) {
+            } catch (ParserException e) {
                 Log.w(TAG, String.format("recoverable parse error at line %d: %s", linen, e.getLocalizedMessage()));
             }
         }
@@ -152,7 +151,7 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
      * @return ritorna un singolo oggetto di tipo FiltrableData.
      */
     @NonNull
-    protected Data parseLine(@NonNull String line) throws RecoverableParseException {
+    protected Data parseLine(@NonNull String line) throws ParserException {
         return parseColumns(split(line));
     }
 
@@ -163,7 +162,7 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
      * @return ritorna un singolo oggetto di tipo FiltrableData.
      */
     @NonNull
-    protected abstract Data parseColumns(@NonNull String[] columns) throws RecoverableParseException;
+    protected abstract Data parseColumns(@NonNull String[] columns) throws ParserException;
 
     /**
      * Getter del separatore.

@@ -30,7 +30,6 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
@@ -49,16 +48,15 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import it.unive.dais.cevid.datadroid.lib.parser.AsyncParser;
 import it.unive.dais.cevid.datadroid.lib.parser.CsvRowParser;
+import it.unive.dais.cevid.datadroid.lib.parser.ParserException;
 import it.unive.dais.cevid.datadroid.lib.util.MapItem;
 
 /**
@@ -270,8 +268,8 @@ public class MapsActivity extends AppCompatActivity
             case R.id.MENU_SETTINGS:
                 startActivity(new Intent(this, SettingsActivity.class));
                 break;
-            case R.id.MENU_INFO:
-                startActivity(new Intent(this, InfoActivity.class));
+            case R.id.MENU_ABOUT:
+                startActivity(new Intent(this, AboutActivity.class));
                 break;
         }
         return false;
@@ -503,12 +501,13 @@ public class MapsActivity extends AppCompatActivity
      * Metodo di utilità che permette di posizionare rapidamente sulla mappa una lista di MapItem.
      * Attenzione: l'oggetto gMap deve essere inizializzato, questo metodo va pertanto chiamato preferibilmente dalla
      * callback onMapReady().
-     * @param l la lista di oggetti di tipo I tale che I sia sottotipo di MapItem.
+     *
+     * @param l   la lista di oggetti di tipo I tale che I sia sottotipo di MapItem.
      * @param <I> sottotipo di MapItem.
      * @return ritorna la collection di oggetti Marker aggiunti alla mappa.
      */
     @NonNull
-    protected <I extends MapItem> Collection<Marker> putMarkersFromMapItems(List<I> l) {
+    protected <I extends MapItem> Collection<Marker> putMarkersFromMapItems(List<I> l) throws Exception {
         Collection<Marker> r = new ArrayList<>();
         for (MapItem i : l) {
             MarkerOptions opts = new MarkerOptions().title(i.getTitle()).position(i.getPosition()).snippet(i.getDescription());
@@ -532,7 +531,7 @@ public class MapsActivity extends AppCompatActivity
             List<I> l = parser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
             Log.i(TAG, String.format("parsed %d lines", l.size()));
             return putMarkersFromMapItems(l);
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (Exception e) {
             Log.e(TAG, String.format("exception caught while parsing: %s", e));
             e.printStackTrace();
             return null;
@@ -554,28 +553,25 @@ public class MapsActivity extends AppCompatActivity
         builder.setAlwaysShow(true);
 
         PendingResult<LocationSettingsResult> result = LocationServices.SettingsApi.checkLocationSettings(googleApiClient, builder.build());
-        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-            @Override
-            public void onResult(@NonNull LocationSettingsResult result) {
-                final Status status = result.getStatus();
-                switch (status.getStatusCode()) {
-                    case LocationSettingsStatusCodes.SUCCESS:
-                        Log.i(TAG, "All location settings are satisfied.");
-                        break;
-                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                        Log.i(TAG, "Location settings are not satisfied. Show the user a dialog to upgrade location settings ");
-                        try {
-                            // Show the dialog by calling startResolutionForResult(), and check the result
-                            // in onActivityResult().
-                            status.startResolutionForResult(MapsActivity.this, REQUEST_CHECK_SETTINGS);
-                        } catch (IntentSender.SendIntentException e) {
-                            Log.i(TAG, "PendingIntent unable to execute request.");
-                        }
-                        break;
-                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                        Log.i(TAG, "Location settings are inadequate, and cannot be fixed here. Dialog not created.");
-                        break;
-                }
+        result.setResultCallback(result1 -> {
+            final Status status = result1.getStatus();
+            switch (status.getStatusCode()) {
+                case LocationSettingsStatusCodes.SUCCESS:
+                    Log.i(TAG, "All location settings are satisfied.");
+                    break;
+                case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                    Log.i(TAG, "Location settings are not satisfied. Show the user a dialog to upgrade location settings ");
+                    try {
+                        // Show the dialog by calling startResolutionForResult(), and check the result
+                        // in onActivityResult().
+                        status.startResolutionForResult(MapsActivity.this, REQUEST_CHECK_SETTINGS);
+                    } catch (IntentSender.SendIntentException e) {
+                        Log.i(TAG, "PendingIntent unable to execute request.");
+                    }
+                    break;
+                case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                    Log.i(TAG, "Location settings are inadequate, and cannot be fixed here. Dialog not created.");
+                    break;
             }
         });
     }
@@ -595,24 +591,24 @@ public class MapsActivity extends AppCompatActivity
             for (final CsvRowParser.Row r : rows) {
                 l.add(new MapItem() {
                     @Override
-                    public LatLng getPosition() {
+                    public LatLng getPosition() throws ParserException {
                         String lat = r.get("Latitudine (WGS84)"), lng = r.get("Longitudine (WGS 84)");
                         return new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
                     }
 
                     @Override
-                    public String getTitle() {
+                    public String getTitle() throws ParserException {
                         return r.get("Codice");
                     }
 
                     @Override
-                    public String getDescription() {
+                    public String getDescription() throws ParserException {
                         return r.get("Denominazione");
                     }
                 });
             }
             markers = putMarkersFromMapItems(l);
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

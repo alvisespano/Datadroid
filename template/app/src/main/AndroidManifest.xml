@@ -45,7 +45,7 @@
         </activity>
 
         <activity
-            android:name=".InfoActivity"
+            android:name=".AboutActivity"
             android:parentActivityName=".MapsActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

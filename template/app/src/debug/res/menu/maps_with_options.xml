@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:id="@+id/MENU_SETTINGS"
         android:title="@string/action_impostazioni" />
-    <item android:id="@+id/MENU_INFO"
+    <item android:id="@+id/MENU_ABOUT"
         android:title="@string/action_info" />
 <!--
     <item android:id="@+id/search"

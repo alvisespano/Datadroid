@@ -110,10 +110,6 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> imple
     protected class MyAsyncTask extends AsyncTask<Void, P, List<Data>> {
         private final AbstractAsyncParser<Data, P> enclosing = AbstractAsyncParser.this;
 
-//        private MyAsyncTask(@NonNull AbstractAsyncParser<Data, P> enclosing) {
-//            this.enclosing = enclosing;
-//        }
-
         /**
          * Metodo interno che invoca {@code parse} all'interno di un blocco try..catch.
          * Non è necessario fare override a meno che non si desideri specificare un comportamento diverso.
@@ -132,7 +128,6 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> imple
                 Log.v(tag, String.format("async parser %s finished (%d elements)", name, r.size()));
                 return enclosing.onPostParse(r);
             } catch (IOException e) {
-                Log.e(tag, String.format("exception caught during parser %s: %s", name, e));
                 e.printStackTrace();
                 return null;
             }

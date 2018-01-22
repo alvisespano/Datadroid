@@ -4,6 +4,8 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.io.Serializable;
 
+import it.unive.dais.cevid.datadroid.lib.parser.ParserException;
+
 /**
  * Rappresenta un oggetto visualizzabile sulla mappa, con le informazioni minime per il posizionamento e la creazione di un marker.
  */
@@ -13,17 +15,17 @@ public interface MapItem extends Serializable {
      *
      * @return la posizione in un oggetto di tipo LatLng.
      */
-    LatLng getPosition();
+    LatLng getPosition() throws Exception;
     /**
      * Ritorna il titolo, o il nome, dell'item.
      *
      * @return il nome.
      */
-    String getTitle();
+    String getTitle() throws Exception;
     /**
      * Ritorna la descrizione.
      *
      * @return la descrizione.
      */
-    String getDescription();
+    String getDescription() throws Exception;
 }

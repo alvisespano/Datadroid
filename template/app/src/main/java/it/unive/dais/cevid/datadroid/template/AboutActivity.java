@@ -1,6 +1,5 @@
 package it.unive.dais.cevid.datadroid.template;
 
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,15 +13,25 @@ import android.widget.TextView;
  *
  * @author Alvise Spanò, Università Ca' Foscari
  */
-public class InfoActivity extends AppCompatActivity {
+public class AboutActivity extends AppCompatActivity {
+    /**
+     * Metodo di creazione dell'activity che imposta il layout e la text view con la stringa con i crediti.
+     * @param saveInstanceState
+     */
+    @Override
+    protected void onCreate(Bundle saveInstanceState) {
+        super.onCreate(saveInstanceState);
+        setContentView(R.layout.activity_about);
+        TextView tv_1 = (TextView) findViewById(R.id.textView_1);
+        tv_1.setText(getCredits());
+    }
 
     /**
      * Produce la stringa completa coi crediti.
-     * @param ctx oggetto Context, tipicamente {@code this} se chiamato da un'altra Activity.
      * @return ritorna la stringa completa.
      */
-    public static String credits(Context ctx) {
-        ApplicationInfo ai = ctx.getApplicationInfo();
+    public String getSystemInfo() {
+        ApplicationInfo ai = getApplicationInfo();
         StringBuffer buf = new StringBuffer();
         buf.append("\tVERSION.RELEASE {").append(Build.VERSION.RELEASE).append("}");
         buf.append("\n\tVERSION.INCREMENTAL {").append(Build.VERSION.INCREMENTAL).append("}");
@@ -38,23 +47,16 @@ public class InfoActivity extends AppCompatActivity {
                         "%s v%s [%s]\n" +
                         "(c) %s %s @ %s - %s \n\n" +
                         "--- ANDROID ---\n%s",
-                ctx.getString(ai.labelRes),
+                getString(ai.labelRes),
                 BuildConfig.VERSION_NAME,
                 BuildConfig.BUILD_TYPE,
                 R.string.credits_year, R.string.credits_project, R.string.credits_company, R.string.credits_authors,
                 buf);
     }
 
-    /**
-     * Metodo di creazione dell'activity che imposta il layout e la text view con la stringa con i crediti.
-     * @param saveInstanceState
-     */
-    @Override
-    protected void onCreate(Bundle saveInstanceState) {
-        super.onCreate(saveInstanceState);
-        setContentView(R.layout.activity_info);
-        TextView tv_1 = (TextView) findViewById(R.id.textView_1);
-        tv_1.setText(credits(this));
+
+    private CharSequence getCredits() {
+        return String.format("%s", getString(R.string.credits));
     }
 
 }

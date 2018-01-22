@@ -25,7 +25,7 @@
     <string name="menu_mapStyle_terrain">Terreno</string>
     <string name="menu_mapStyle_hybrid">Ibrido</string>
 
-    <string name="credits_year">2017</string>
+    <string name="credits_year">2016-18</string>
     <string name="credits_project">CEVID</string>
     <string name="credits_company">Università Ca\' Foscari Venezia</string>
     <string name="credits_authors">Alvise Spanò</string>
@@ -37,5 +37,6 @@
     <string name="msg_button_car">Pulsante premuto</string>
     <string name="msg_permissions_not_granted">I permessi appena negati dall\'utente sono necessari per alcune funzionalità dell\'app. Il supporto delle funzionalità sarà ridotto.</string>
     <string name="marker_title">You are HERE</string>
+    <string name="logo_descr">Università Ca\' Foscari, Venezia</string>
 
 </resources>

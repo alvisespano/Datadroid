@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Datadroid Lib</string>
+    <string name="credits">Applicazione realizzata all\'interno del progetto CEVID - Azione 1 in collaborazione con la Direzione Sistemi Informativi della Regione Veneto.\n\n\n\nCoordinatore\nProf. Agostino Cortesì\n\nSupervisore allo Sviluppo\nDott. Alvise Spanò</string>
 </resources>

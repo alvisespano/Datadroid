@@ -65,7 +65,7 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
      */
     @NonNull
     @Override
-    protected Row parseColumns(@NonNull String[] columns) throws RecoverableParseException {
+    protected Row parseColumns(@NonNull String[] columns) throws ParserException {
         return new Row(columns);
     }
 
@@ -88,7 +88,7 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
          *
          * @param values array con i valori da impostare per tutte le colonne.
          */
-        protected Row(String[] values) throws RecoverableParseException {
+        protected Row(String[] values) throws ParserException {
             put(values);
         }
 
@@ -98,7 +98,7 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
          * @param column il nome della colonna.
          * @param value  il valore da impostare.
          */
-        public void put(String column, String value) throws RecoverableParseException {
+        public void put(String column, String value) throws ParserException {
             put(indexOfColumn(column), value);
         }
 
@@ -110,7 +110,7 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
          * @return ritorna il numero della colonna a cui corrisponde il nome dato (dove 0 è la prima); oppure
          * una eccezione {@code IllegalArgumentException} nel caso in cui il nome non esista.
          */
-        protected int indexOfColumn(String column) throws RecoverableParseException {
+        protected int indexOfColumn(String column) throws ParserException {
             column = trimString(column);
             String[] h = getHeader();
             for (int i = 0; i < h.length; i++) {
@@ -119,7 +119,7 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
                     return i;
                 }
             }
-            throw new RecoverableParseException(String.format("cannot find column '%s' in header", column));
+            throw new ParserException(String.format("cannot find column '%s' in header", column));
         }
 
         /**
@@ -153,10 +153,10 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
          *
          * @param values valori da impostare.
          */
-        public void put(String[] values) throws RecoverableParseException {
+        public void put(String[] values) throws ParserException {
             String[] h = getHeader();
             if (values.length != h.length)
-                throw new RecoverableParseException(String.format("CSV has %d columns but header has %d", values.length, h.length));
+                throw new ParserException(String.format("CSV has %d columns but header has %d", values.length, h.length));
             this.values = trimStrings(values);
         }
 
@@ -167,7 +167,7 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
          * @return ritorna il valore (stringa) contenuto alla colonna data.
          */
         @NonNull
-        public String get(String column) throws RecoverableParseException {
+        public String get(String column) throws ParserException {
             return trimString(get(indexOfColumn(column)));
         }
 
