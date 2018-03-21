@@ -5,6 +5,7 @@
 package it.unive.dais.cevid.datadroid.template;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -43,20 +44,27 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import it.unive.dais.cevid.datadroid.lib.parser.AsyncParser;
 import it.unive.dais.cevid.datadroid.lib.parser.CsvRowParser;
-import it.unive.dais.cevid.datadroid.lib.parser.ParserException;
+import it.unive.dais.cevid.datadroid.lib.parser.Parser;
+import it.unive.dais.cevid.datadroid.lib.util.Function;
 import it.unive.dais.cevid.datadroid.lib.util.MapItem;
 
 /**
@@ -468,76 +476,6 @@ public class MapsActivity extends AppCompatActivity
         startActivity(navigation);
     }
 
-    // marker stuff
-    //
-    //
-
-    /**
-     * Callback che viene invocata quando viene cliccato un marker.
-     * Questo metodo viene invocato al click di QUALUNQUE marker nella mappa; pertanto, se è necessario
-     * eseguire comportamenti specifici per un certo marker o gruppo di marker, va modificato questo metodo
-     * con codice che si occupa di discernere tra un marker e l'altro in qualche modo.
-     *
-     * @param marker il marker che è stato cliccato.
-     * @return ritorna true per continuare a chiamare altre callback nella catena di callback per i marker; false altrimenti.
-     */
-    @Override
-    public boolean onMarkerClick(final Marker marker) {
-        marker.showInfoWindow();
-        button_car.setVisibility(View.VISIBLE);
-        button_car.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Snackbar.make(v, R.string.msg_button_car, Snackbar.LENGTH_SHORT);
-                if (currentPosition != null) {
-                    navigate(currentPosition, marker.getPosition());
-                }
-            }
-        });
-        return false;
-    }
-
-    /**
-     * Metodo di utilità che permette di posizionare rapidamente sulla mappa una lista di MapItem.
-     * Attenzione: l'oggetto gMap deve essere inizializzato, questo metodo va pertanto chiamato preferibilmente dalla
-     * callback onMapReady().
-     *
-     * @param l   la lista di oggetti di tipo I tale che I sia sottotipo di MapItem.
-     * @param <I> sottotipo di MapItem.
-     * @return ritorna la collection di oggetti Marker aggiunti alla mappa.
-     */
-    @NonNull
-    protected <I extends MapItem> Collection<Marker> putMarkersFromMapItems(List<I> l) throws Exception {
-        Collection<Marker> r = new ArrayList<>();
-        for (MapItem i : l) {
-            MarkerOptions opts = new MarkerOptions().title(i.getTitle()).position(i.getPosition()).snippet(i.getDescription());
-            r.add(gMap.addMarker(opts));
-        }
-        return r;
-    }
-
-    /**
-     * Metodo proprietario di utilità per popolare la mappa con i dati provenienti da un parser.
-     * Si tratta di un metodo che può essere usato direttamente oppure può fungere da esempio per come
-     * utilizzare i parser con informazioni geolocalizzate.
-     *
-     * @param parser un parser che produca sottotipi di MapItem, con qualunque generic Progress o Input
-     * @param <I>    parametro di tipo che estende MapItem.
-     * @return ritorna una collection di marker se tutto va bene; null altrimenti.
-     */
-    @Nullable
-    protected <I extends MapItem> Collection<Marker> putMarkersFromData(@NonNull AsyncParser<I, ?> parser) {
-        try {
-            List<I> l = parser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
-            Log.i(TAG, String.format("parsed %d lines", l.size()));
-            return putMarkersFromMapItems(l);
-        } catch (Exception e) {
-            Log.e(TAG, String.format("exception caught while parsing: %s", e));
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     /**
      * Controlla lo stato del GPS e dei servizi di localizzazione, comportandosi di conseguenza.
      * Viene usata durante l'inizializzazione ed in altri casi speciali.
@@ -576,42 +514,138 @@ public class MapsActivity extends AppCompatActivity
         });
     }
 
+    // marker stuff
+    //
+    //
 
-    // demo code
-
-    @Nullable
-    private Collection<Marker> markers;
-
-    private void demo() {
-        try {
-            InputStream is = getResources().openRawResource(R.raw.piattaforme);
-            CsvRowParser p = new CsvRowParser(new InputStreamReader(is), true, ";", null);
-            List<CsvRowParser.Row> rows = p.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
-            List<MapItem> l = new ArrayList<>();
-            for (final CsvRowParser.Row r : rows) {
-                l.add(new MapItem() {
-                    @Override
-                    public LatLng getPosition() throws ParserException {
-                        String lat = r.get("Latitudine (WGS84)"), lng = r.get("Longitudine (WGS 84)");
-                        return new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
-                    }
-
-                    @Override
-                    public String getTitle() throws ParserException {
-                        return r.get("Codice");
-                    }
-
-                    @Override
-                    public String getDescription() throws ParserException {
-                        return r.get("Denominazione");
-                    }
-                });
+    /**
+     * Callback che viene invocata quando viene cliccato un marker.
+     * Questo metodo viene invocato al click di QUALUNQUE marker nella mappa; pertanto, se è necessario
+     * eseguire comportamenti specifici per un certo marker o gruppo di marker, va modificato questo metodo
+     * con codice che si occupa di discernere tra un marker e l'altro in qualche modo.
+     *
+     * @param marker il marker che è stato cliccato.
+     * @return ritorna true per continuare a chiamare altre callback nella catena di callback per i marker; false altrimenti.
+     */
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        marker.showInfoWindow();
+        button_car.setVisibility(View.VISIBLE);
+        button_car.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Snackbar.make(v, R.string.msg_button_car, Snackbar.LENGTH_SHORT);
+                if (currentPosition != null) {
+                    navigate(currentPosition, marker.getPosition());
+                }
             }
-            markers = putMarkersFromMapItems(l);
+        });
+        return false;
+    }
+
+    // TODO: mettere i metodi qui sotto in una superclasse AbstractMapActivity oppure in una classe di utility statiche
+
+    /**
+     * Metodo di utilità che permette di posizionare rapidamente sulla mappa una lista di MapItem.
+     * Attenzione: l'oggetto gMap deve essere inizializzato, questo metodo va pertanto chiamato preferibilmente dalla
+     * callback onMapReady().
+     *
+     * @param l   la lista di oggetti di tipo I tale che I sia sottotipo di MapItem.
+     * @param <I> sottotipo di MapItem.
+     * @return ritorna la collection di oggetti Marker aggiunti alla mappa.
+     */
+    @NonNull
+    protected <I extends MapItem> Collection<Marker> putMarkersFromMapItems(List<I> l, float hue) {
+        Collection<Marker> r = new ArrayList<>();
+        int cnt = 0;
+        for (MapItem i : l) {
+            try {
+                // TODO: addare il marker con la runOnUIThread()
+                MarkerOptions opts = new MarkerOptions().title(i.getTitle()).position(i.getPosition()).snippet(i.getDescription()).icon(BitmapDescriptorFactory.defaultMarker(hue));
+                r.add(gMap.addMarker(opts));
+            } catch (Exception e) {
+                Log.e(TAG, String.format("skipping MapItem at position #%d: %s", cnt, e.getMessage()));
+            }
+            cnt++;
+        }
+        Log.i(TAG, String.format("added %d markers", cnt));
+        return r;
+    }
+
+    /**
+     * Metodo proprietario di utilità per popolare la mappa con i dati provenienti da un parser.
+     * Si tratta di un metodo che può essere usato direttamente oppure può fungere da esempio per come
+     * utilizzare i parser con informazioni geolocalizzate.
+     *
+     * @param <I>    parametro di tipo che estende MapItem.
+     * @param parser un parser che produca sottotipi di MapItem, con qualunque generic Progress o Input
+     * @param hue
+     * @return ritorna una collection di marker se tutto va bene; null altrimenti.
+     */
+    @Nullable
+    protected <I extends MapItem> Collection<Marker> putMarkersFromParser(@NonNull AsyncParser<I, ?> parser, float hue) {
+        try {
+            List<I> l = parser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
+            Log.i(TAG, String.format("parsed %d lines", l.size()));
+            return putMarkersFromMapItems(l, hue);
         } catch (Exception e) {
+            Log.e(TAG, String.format("exception caught while parsing: %s", e));
             e.printStackTrace();
+            return null;
         }
     }
 
+    @NonNull
+    protected Collection<Marker> putMarkersFromCsv(InputStream is, Function<CsvRowParser.Row, MapItem> createMapItem, float hue) throws ExecutionException, InterruptedException {
+        CsvRowParser parser = new CsvRowParser(new InputStreamReader(is), true, ";", null);
+        List<CsvRowParser.Row> rows = parser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
+
+        // TODO: cercare riusare la putMarkersFromParser() qui sopra, ad esempio facendo un tipo CsvRowMapItem che trasforma Row in MapItem permettendo di passarle un AsyncParser<CsvRomMapItem, ?>
+        List<MapItem> l = new ArrayList<>();
+        for (CsvRowParser.Row r : rows)
+            l.add(createMapItem.apply(r));
+        return putMarkersFromMapItems(l, hue);
+    }
+
+    @NonNull
+    protected Collection<Marker> putMarkersFromCsv(int resid, Function<CsvRowParser.Row, MapItem> createMapItem, float hue) throws ExecutionException, InterruptedException {
+        return putMarkersFromCsv(getResources().openRawResource(resid), createMapItem, hue);
+    }
+
+    @NonNull
+    protected Collection<Marker> putMarkersFromCsv(URL url, Function<CsvRowParser.Row, MapItem> createMapItem, float hue) throws IOException, ExecutionException, InterruptedException {
+        @SuppressLint("StaticFieldLeak")
+        InputStream is = new AsyncTask<Void, Void, InputStream>() {
+            @Override
+            protected InputStream doInBackground(Void... params) {
+                try {
+                    // TODO: finire di fare il networking in un asynctask
+                    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                    return new BufferedInputStream(urlConnection.getInputStream());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
+        return putMarkersFromCsv(is, createMapItem, hue);
+    }
+
+    private void demo() {
+        try {
+            // put markers from embedded resource CSV
+            putMarkersFromCsv(R.raw.piattaforme,
+                    MapItem.factoryByCsvNames("Latitudine (WGS84)", "Longitudine (WGS 84)", "Denominazione", "Stato"),
+                    BitmapDescriptorFactory.HUE_RED);
+
+            // add markers from online CSV
+            putMarkersFromCsv(new URL("http://dati.unionevallesavio.it/SpodCkanApi/api/3/datastore/dump/7dd16e28-addc-42d1-805f-f94c29adac06.csv"),
+                    MapItem.factoryByCsvNames("Latitudine", "Longitudine", "NOME", "INDIRIZZO"),
+                    BitmapDescriptorFactory.HUE_AZURE);
+
+        } catch (Exception e) {
+            Log.e(TAG, String.format("exception caught: %s", e));
+            e.printStackTrace();
+        }
+    }
 
 }
