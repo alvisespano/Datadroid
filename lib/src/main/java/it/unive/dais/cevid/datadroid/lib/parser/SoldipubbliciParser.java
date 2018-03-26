@@ -93,7 +93,7 @@ public class SoldipubbliciParser extends AbstractAsyncParser<SoldipubbliciParser
             d.importo_2013 = j.getString("importo_2013");
             d.importo_2014 = j.getString("importo_2014");
             d.importo_2015 = j.getString("importo_2015");
-            if (j.getString("importo_2016") != null && j.getString("importo_2016") != "null")
+            if (j.getString("importo_2016") != null && !j.getString("importo_2016").equals("null"))
                 d.importo_2016 = j.getString("importo_2016");
             else
                 d.importo_2016 = "0";

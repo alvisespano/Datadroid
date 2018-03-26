@@ -70,9 +70,9 @@ public class AppaltiParser extends AbstractAsyncParser<AppaltiParser.Data, Progr
         return (Element) e.getElementsByTagName(tagName).item(0);
     }
 
-    protected List<Data> parseNodes(PercentProgressStepper prog, NodeList nodes) {
+    protected List<Data> parseNodes(PercentProgressStepper prog0, NodeList nodes) {
         List<Data> r = new ArrayList<>();
-        prog = prog.getSubProgressStepper(nodes.getLength());
+        PercentProgressStepper prog = prog0.getSubProgressStepper(nodes.getLength());
         for (int i = 0; i < nodes.getLength(); i++) {
             Element parent = (Element) nodes.item(i);
             Data d = new Data();

@@ -10,13 +10,13 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.UiThread;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -48,7 +48,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -60,10 +59,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
-
 import it.unive.dais.cevid.datadroid.lib.parser.AsyncParser;
 import it.unive.dais.cevid.datadroid.lib.parser.CsvRowParser;
-import it.unive.dais.cevid.datadroid.lib.parser.Parser;
+import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressStepper;
 import it.unive.dais.cevid.datadroid.lib.util.Function;
 import it.unive.dais.cevid.datadroid.lib.util.MapItem;
 
@@ -142,24 +140,21 @@ public class MapsActivity extends AppCompatActivity
         mapFragment.getMapAsync(this);
 
         // quando viene premito il pulsante HERE viene eseguito questo codice
-        button_here.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "here button clicked");
-                gpsCheck();
-                updateCurrentPosition();
-                if (hereMarker != null) hereMarker.remove();
-                if (currentPosition != null) {
-                    MarkerOptions opts = new MarkerOptions();
-                    opts.position(currentPosition);
-                    opts.title(getString(R.string.marker_title));
-                    opts.snippet(String.format("lat: %g\nlng: %g", currentPosition.latitude, currentPosition.longitude));
-                    hereMarker = gMap.addMarker(opts);
-                    if (gMap != null)
-                        gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, getResources().getInteger(R.integer.zoomFactor_button_here)));
-                } else
-                    Log.d(TAG, "no current position available");
-            }
+        button_here.setOnClickListener(v -> {
+            Log.d(TAG, "here button clicked");
+            gpsCheck();
+            updateCurrentPosition();
+            if (hereMarker != null) hereMarker.remove();
+            if (currentPosition != null) {
+                MarkerOptions opts = new MarkerOptions();
+                opts.position(currentPosition);
+                opts.title(getString(R.string.marker_title));
+                opts.snippet(String.format("lat: %g\nlng: %g", currentPosition.latitude, currentPosition.longitude));
+                hereMarker = gMap.addMarker(opts);
+                if (gMap != null)
+                    gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, (float) getResources().getInteger(R.integer.zoomFactor_button_here)));
+            } else
+                Log.d(TAG, "no current position available");
         });
     }
 
@@ -341,13 +336,10 @@ public class MapsActivity extends AppCompatActivity
         } else {
             Log.d(TAG, "permission granted");
             fusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(MapsActivity.this, new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location loc) {
-                            if (loc != null) {
-                                currentPosition = new LatLng(loc.getLatitude(), loc.getLongitude());
-                                Log.i(TAG, "current position updated");
-                            }
+                    .addOnSuccessListener(MapsActivity.this, loc -> {
+                        if (loc != null) {
+                            currentPosition = new LatLng(loc.getLatitude(), loc.getLongitude());
+                            Log.i(TAG, "current position updated");
                         }
                     });
         }
@@ -380,7 +372,7 @@ public class MapsActivity extends AppCompatActivity
      * Viene chiamato quando si muove la camera.
      * Attenzione: solamente al momento in cui la camera comincia a muoversi, non durante tutta la durata del movimento.
      *
-     * @param reason
+     * @param reason codice numerico che indica la ragione per cui la camera viene mossa.
      */
     @Override
     public void onCameraMoveStarted(int reason) {
@@ -434,12 +426,9 @@ public class MapsActivity extends AppCompatActivity
         uis.setZoomGesturesEnabled(true);
         uis.setMyLocationButtonEnabled(true);
         gMap.setOnMyLocationButtonClickListener(
-                new GoogleMap.OnMyLocationButtonClickListener() {
-                    @Override
-                    public boolean onMyLocationButtonClick() {
-                        gpsCheck();
-                        return false;
-                    }
+                () -> {
+                    gpsCheck();
+                    return false;
                 });
         uis.setCompassEnabled(true);
         uis.setZoomControlsEnabled(true);
@@ -531,13 +520,10 @@ public class MapsActivity extends AppCompatActivity
     public boolean onMarkerClick(Marker marker) {
         marker.showInfoWindow();
         button_car.setVisibility(View.VISIBLE);
-        button_car.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Snackbar.make(v, R.string.msg_button_car, Snackbar.LENGTH_SHORT);
-                if (currentPosition != null) {
-                    navigate(currentPosition, marker.getPosition());
-                }
+        button_car.setOnClickListener(v -> {
+            Snackbar.make(v, R.string.msg_button_car, Snackbar.LENGTH_SHORT);
+            if (currentPosition != null) {
+                navigate(currentPosition, marker.getPosition());
             }
         });
         return false;
@@ -555,12 +541,12 @@ public class MapsActivity extends AppCompatActivity
      * @return ritorna la collection di oggetti Marker aggiunti alla mappa.
      */
     @NonNull
+    @UiThread
     protected <I extends MapItem> Collection<Marker> putMarkersFromMapItems(List<I> l, float hue) {
         Collection<Marker> r = new ArrayList<>();
         int cnt = 0;
         for (MapItem i : l) {
             try {
-                // TODO: addare il marker con la runOnUIThread()
                 MarkerOptions opts = new MarkerOptions().title(i.getTitle()).position(i.getPosition()).snippet(i.getDescription()).icon(BitmapDescriptorFactory.defaultMarker(hue));
                 r.add(gMap.addMarker(opts));
             } catch (Exception e) {
@@ -572,18 +558,8 @@ public class MapsActivity extends AppCompatActivity
         return r;
     }
 
-    /**
-     * Metodo proprietario di utilità per popolare la mappa con i dati provenienti da un parser.
-     * Si tratta di un metodo che può essere usato direttamente oppure può fungere da esempio per come
-     * utilizzare i parser con informazioni geolocalizzate.
-     *
-     * @param <I>    parametro di tipo che estende MapItem.
-     * @param parser un parser che produca sottotipi di MapItem, con qualunque generic Progress o Input
-     * @param hue
-     * @return ritorna una collection di marker se tutto va bene; null altrimenti.
-     */
     @Nullable
-    protected <I extends MapItem> Collection<Marker> putMarkersFromParser(@NonNull AsyncParser<I, ?> parser, float hue) {
+    protected <I extends MapItem, P extends ProgressStepper> Collection<Marker> putMarkersFromParser(@NonNull AsyncParser<I, P> parser, float hue) {
         try {
             List<I> l = parser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
             Log.i(TAG, String.format("parsed %d lines", l.size()));
@@ -599,8 +575,6 @@ public class MapsActivity extends AppCompatActivity
     protected Collection<Marker> putMarkersFromCsv(InputStream is, Function<CsvRowParser.Row, MapItem> createMapItem, float hue) throws ExecutionException, InterruptedException {
         CsvRowParser parser = new CsvRowParser(new InputStreamReader(is), true, ";", null);
         List<CsvRowParser.Row> rows = parser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
-
-        // TODO: cercare riusare la putMarkersFromParser() qui sopra, ad esempio facendo un tipo CsvRowMapItem che trasforma Row in MapItem permettendo di passarle un AsyncParser<CsvRomMapItem, ?>
         List<MapItem> l = new ArrayList<>();
         for (CsvRowParser.Row r : rows)
             l.add(createMapItem.apply(r));
@@ -613,21 +587,22 @@ public class MapsActivity extends AppCompatActivity
     }
 
     @NonNull
-    protected Collection<Marker> putMarkersFromCsv(URL url, Function<CsvRowParser.Row, MapItem> createMapItem, float hue) throws IOException, ExecutionException, InterruptedException {
-        @SuppressLint("StaticFieldLeak")
-        InputStream is = new AsyncTask<Void, Void, InputStream>() {
+    @SuppressLint("StaticFieldLeak")
+    protected Collection<Marker> putMarkersFromCsv(URL url, Function<CsvRowParser.Row, MapItem> createMapItem, float hue) throws ExecutionException, InterruptedException {
+        return (new AsyncTask<Void, Void, Collection<Marker>>() {
             @Override
-            protected InputStream doInBackground(Void... params) {
+            protected Collection<Marker> doInBackground(Void... params) {
                 try {
-                    // TODO: finire di fare il networking in un asynctask
+                    Log.i(TAG, String.format("downloading %s...", url));
                     HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                    return new BufferedInputStream(urlConnection.getInputStream());
-                } catch (IOException e) {
+                    InputStream is = new BufferedInputStream(urlConnection.getInputStream());
+                    return putMarkersFromCsv(is, createMapItem, hue);
+                } catch (Exception e) {
                     e.printStackTrace();
+                    return null;
                 }
             }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
-        return putMarkersFromCsv(is, createMapItem, hue);
+        }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
     }
 
     private void demo() {
@@ -635,11 +610,11 @@ public class MapsActivity extends AppCompatActivity
             // put markers from embedded resource CSV
             putMarkersFromCsv(R.raw.piattaforme,
                     MapItem.factoryByCsvNames("Latitudine (WGS84)", "Longitudine (WGS 84)", "Denominazione", "Stato"),
-                    BitmapDescriptorFactory.HUE_RED);
+                    BitmapDescriptorFactory.HUE_GREEN);
 
             // add markers from online CSV
-            putMarkersFromCsv(new URL("http://dati.unionevallesavio.it/SpodCkanApi/api/3/datastore/dump/7dd16e28-addc-42d1-805f-f94c29adac06.csv"),
-                    MapItem.factoryByCsvNames("Latitudine", "Longitudine", "NOME", "INDIRIZZO"),
+            putMarkersFromCsv(new URL("http://ckan.ancitel.it/dataset/80431d0c-3433-4745-8d9c-c77a0dcd3325/resource/c381efe6-f73f-4e20-a825-547241eeb457/download/cusersplenevicidocumentsdocs-lavorockancvsxr2pacomuniitaliani24102017.csv"),
+                    MapItem.factoryByCsvNames("Latitudine", "Longitudine", "Comune", "Provincia"),
                     BitmapDescriptorFactory.HUE_AZURE);
 
         } catch (Exception e) {

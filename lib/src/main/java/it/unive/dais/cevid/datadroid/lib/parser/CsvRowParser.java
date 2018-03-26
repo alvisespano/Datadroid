@@ -106,12 +106,12 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
          * Calcola l'indice dato il nome di una colonna dell'header.
          * Permette sostanzialmente di sintetizzare l'accesso via nome tramite un indice.
          *
-         * @param column il nome della colonna.
+         * @param col il nome della colonna.
          * @return ritorna il numero della colonna a cui corrisponde il nome dato (dove 0 è la prima); oppure
          * una eccezione {@code IllegalArgumentException} nel caso in cui il nome non esista.
          */
-        protected int indexOfColumn(String column) throws ParserException {
-            column = trimString(column);
+        protected int indexOfColumn(String col) throws ParserException {
+            String column = trimString(col);
             String[] h = getHeader();
             for (int i = 0; i < h.length; i++) {
                 String s = trimString(h[i]);
