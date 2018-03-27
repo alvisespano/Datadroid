@@ -16,7 +16,9 @@ import java.util.List;
 
 import it.unive.dais.cevid.datadroid.lib.parser.progress.Handle;
 import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressBarManager;
-import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressStepper;
+import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressCounter;
+import it.unive.dais.cevid.datadroid.lib.util.Function;
+import it.unive.dais.cevid.datadroid.lib.util.Prelude;
 
 /**
  * Clase astratta parametrica che rappresenta un parser di dati in senso generale, sottoclasse di AsyncTask.
@@ -29,7 +31,7 @@ import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressStepper;
  * @author Alvise Spanò, Università Ca' Foscari
  */
 @SuppressWarnings("unchecked")
-public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> implements AsyncParser<Data, P> {
+public abstract class AbstractAsyncParser<Data, P extends ProgressCounter> implements AsyncParser<Data, P> {
 
     private final MyAsyncTask asyncTask = new MyAsyncTask();
 
@@ -70,11 +72,21 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> imple
      * @throws IOException lancia questa eccezione quando sorgono problemi di I/O.
      */
     @NonNull
-    protected static InputStreamReader urlToReader(@NonNull URL url) throws IOException {
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.connect();
-        InputStream stream = connection.getInputStream();
-        return new InputStreamReader(stream);
+    protected static AsyncTask<Void, ?, InputStreamReader> urlToReader(@NonNull URL url) {
+        return Prelude.runOnAsyncTask(new Function<Void, InputStreamReader>() {
+            @Override
+            public InputStreamReader apply(Void x) {
+                try {
+                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                    connection.connect();
+                    InputStream stream = connection.getInputStream();
+                    return new InputStreamReader(stream);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+        });
     }
 
     /**
@@ -92,7 +104,7 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> imple
     @Override
     @NonNull
     public String getName() {
-        return getClass().getName();
+        return getClass().getSimpleName();
     }
 
     /**
@@ -109,6 +121,7 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> imple
     @SuppressLint("StaticFieldLeak")
     protected class MyAsyncTask extends AsyncTask<Void, P, List<Data>> {
         private final AbstractAsyncParser<Data, P> enclosing = AbstractAsyncParser.this;
+        private final String NAME = enclosing.getName(), TAG = NAME;
 
         /**
          * Metodo interno che invoca {@code parse} all'interno di un blocco try..catch.
@@ -121,11 +134,10 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> imple
         @Override
         @Nullable
         protected List<Data> doInBackground(Void... params) {
-            final String name = enclosing.getName(), tag = enclosing.getName();
             try {
-                Log.v(tag, String.format("started async parser %s", name));
+                Log.v(TAG, String.format("started async parser %s", NAME));
                 List<Data> r = enclosing.parse();
-                Log.v(tag, String.format("async parser %s finished (%d elements)", name, r.size()));
+                Log.v(TAG, String.format("async parser %s finished (%d elements)", NAME, r.size()));
                 return enclosing.onPostParse(r);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -150,7 +162,7 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> imple
             final P p = ps[0];
             if (handle != null) {
                 handle.apply(pb -> {
-                    pb.setProgress(p.getCurrentProgress());
+                    pb.setProgress(p.getCurrentCounter());
                     return null;
                 });
             }
@@ -176,6 +188,7 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> imple
         private void _publishProgress(@NonNull P... p) {
             this.publishProgress(p);
         }
+
     }
 
     public final void publishProgress(P p) {
@@ -199,5 +212,9 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressStepper> imple
         return r;
     }
 
+    @NonNull
+    public Data onItemParsed(@NonNull Data x) {
+        return x;
+    }
 
 }

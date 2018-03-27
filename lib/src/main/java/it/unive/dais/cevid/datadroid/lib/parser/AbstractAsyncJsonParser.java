@@ -9,7 +9,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressBarManager;
-import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressStepper;
+import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressCounter;
 
 /**
  * Classe astratta che rappresenta un parser JSON generico.
@@ -22,7 +22,7 @@ import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressStepper;
  * @param <P> tipo Progress che viene inoltrato alla superclasse AsyncTask.
  * @author Alvise Spanò, Università Ca' Foscari
  */
-public abstract class AbstractAsyncJsonParser<Item, P extends ProgressStepper> extends AbstractAsyncParser<Item, P> {
+public abstract class AbstractAsyncJsonParser<Item, P extends ProgressCounter> extends AbstractAsyncParser<Item, P> {
 
     @NonNull
     protected final JsonReader reader;
@@ -55,7 +55,7 @@ public abstract class AbstractAsyncJsonParser<Item, P extends ProgressStepper> e
         List<Item> r = new ArrayList<>();
         reader.beginArray();
         while (reader.hasNext()) {
-            r.add(parseItem(reader));
+            r.add(onItemParsed(parseItem(reader)));
         }
         reader.endArray();
         return r;

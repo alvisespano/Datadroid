@@ -16,8 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressBarManager;
+import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressCounter;
 import it.unive.dais.cevid.datadroid.lib.util.Prelude;
-import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressStepper;
 
 /**
  * Classe astratta che rappresenta la superclasse dei parser CSV.
@@ -40,7 +40,7 @@ import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressStepper;
  * @param <Data> tipo di una riga di dati.
  * @author Alvise Spanò, Università Ca' Foscari
  */
-public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<Data, ProgressStepper> {
+public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<Data, ProgressCounter> {
 
     private static final String TAG = "AbstractAsyncCsvParser";
 
@@ -103,19 +103,20 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
     public List<Data> parse() throws IOException {
         if (hasActualHeader()) setHeader(split(reader.readLine()));
         List<Data> r = new ArrayList<>();
-        String line;
-        int linen = 0;
-        for (ProgressStepper prog = new ProgressStepper(); (line = reader.readLine()) != null; prog.step()) {
-            linen = prog.getCurrentProgress();
+        @Nullable String line;
+        ProgressCounter prog = new ProgressCounter();
+        while ((line = reader.readLine()) != null) {
+            int linen = prog.getCurrentCounter();
             try {
-                if (linen == 0 && !hasActualHeader()) setDefaultHeader(line);
+                if (linen == 0 && !hasActualHeader()) setHeader(line);
                 r.add(parseLine(line));
                 publishProgress(prog);
             } catch (ParserException e) {
                 Log.w(TAG, String.format("recoverable parse error at line %d: %s", linen, e.getLocalizedMessage()));
             }
+            prog.stepCounter();
         }
-        Log.v(TAG, String.format("parsed %d/%d lines", r.size(), linen));
+        Log.v(TAG, String.format("parsed %d lines", r.size()));
         return r;
     }
 
@@ -125,7 +126,7 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
      * @param line la stringa da splittare.
      * @return l'array di stringhe splittate.
      */
-    protected String[] split(String line) {
+    protected String[] split(@NonNull String line) {
         return line.split(String.format("%s(?=([^\"]*\"[^\"]*\")*[^\"]*$)", getSeparator()));
     }
 
@@ -135,7 +136,7 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
      *
      * @param line stringa che contiene la linea del CSV da cui estrapolare il numero di colonne per generare l'header.
      */
-    protected void setDefaultHeader(String line) {
+    protected void setHeader(@NonNull String line) {
         String[] hd = split(line);
         for (int j = 0; j < hd.length; ++j) {
             hd[j] = String.valueOf(j);
@@ -152,7 +153,7 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
      */
     @NonNull
     protected Data parseLine(@NonNull String line) throws ParserException {
-        return parseColumns(split(line));
+        return onItemParsed(parseColumns(split(line)));
     }
 
     /**

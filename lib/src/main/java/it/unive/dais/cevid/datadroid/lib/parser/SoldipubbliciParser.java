@@ -12,8 +12,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.unive.dais.cevid.datadroid.lib.parser.progress.PercentProgressCounter;
 import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressBarManager;
-import it.unive.dais.cevid.datadroid.lib.parser.progress.PercentProgressStepper;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -37,7 +37,7 @@ import okhttp3.RequestBody;
  *
  * @author Alvise Spanò, Università Ca' Foscari
  */
-public class SoldipubbliciParser extends AbstractAsyncParser<SoldipubbliciParser.Data, PercentProgressStepper> {
+public class SoldipubbliciParser extends AbstractAsyncParser<SoldipubbliciParser.Data, PercentProgressCounter> {
 
     private static final String TAG = "SoldipubbliciParser";
 
@@ -77,7 +77,7 @@ public class SoldipubbliciParser extends AbstractAsyncParser<SoldipubbliciParser
         List<Data> r = new ArrayList<>();
         JSONObject jo = new JSONObject(data);
         JSONArray ja = jo.getJSONArray("data");
-        PercentProgressStepper prog = new PercentProgressStepper(ja.length());
+        PercentProgressCounter prog = new PercentProgressCounter(ja.length());
         for (int i =0; i< ja.length(); i++){
             JSONObject j = ja.getJSONObject(i);
             Data d = new Data();
@@ -102,7 +102,7 @@ public class SoldipubbliciParser extends AbstractAsyncParser<SoldipubbliciParser
             d.periodo = j.getString("periodo");
 
             r.add(d);
-            prog.step();
+            prog.stepCounter();
             publishProgress(prog);
         }
         return r;

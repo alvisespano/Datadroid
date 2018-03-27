@@ -1,7 +1,3 @@
-/**
- * Questo package contiene le componenti Android riusabili.
- * Si tratta di classi che contengono già funzionalità base e possono essere riusate apportandovi modifiche
- */
 package it.unive.dais.cevid.datadroid.template;
 
 import android.Manifest;
@@ -50,18 +46,17 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+
 import it.unive.dais.cevid.datadroid.lib.parser.AsyncParser;
 import it.unive.dais.cevid.datadroid.lib.parser.CsvRowParser;
-import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressStepper;
+import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressCounter;
 import it.unive.dais.cevid.datadroid.lib.util.Function;
 import it.unive.dais.cevid.datadroid.lib.util.MapItem;
 
@@ -531,6 +526,15 @@ public class MapsActivity extends AppCompatActivity
 
     // TODO: mettere i metodi qui sotto in una superclasse AbstractMapActivity oppure in una classe di utility statiche
 
+    // TODO: aggiungere progress bar
+
+    @UiThread
+    @NonNull
+    protected Marker putMarkerFromMapItem(MapItem i, float hue) throws Exception {
+        MarkerOptions opts = new MarkerOptions().title(i.getTitle()).position(i.getPosition()).snippet(i.getDescription()).icon(BitmapDescriptorFactory.defaultMarker(hue));
+        return gMap.addMarker(opts);
+    }
+
     /**
      * Metodo di utilità che permette di posizionare rapidamente sulla mappa una lista di MapItem.
      * Attenzione: l'oggetto gMap deve essere inizializzato, questo metodo va pertanto chiamato preferibilmente dalla
@@ -547,19 +551,18 @@ public class MapsActivity extends AppCompatActivity
         int cnt = 0;
         for (MapItem i : l) {
             try {
-                MarkerOptions opts = new MarkerOptions().title(i.getTitle()).position(i.getPosition()).snippet(i.getDescription()).icon(BitmapDescriptorFactory.defaultMarker(hue));
-                r.add(gMap.addMarker(opts));
+                r.add(putMarkerFromMapItem(i, hue));
             } catch (Exception e) {
-                Log.e(TAG, String.format("skipping MapItem at position #%d: %s", cnt, e.getMessage()));
+                Log.w(TAG, String.format("skipping MapItem #%d: %s", cnt, e.getMessage()));
             }
-            cnt++;
+            ++cnt;
         }
-        Log.i(TAG, String.format("added %d markers", cnt));
+        Log.v(TAG, String.format("added %d markers", cnt));
         return r;
     }
 
     @Nullable
-    protected <I extends MapItem, P extends ProgressStepper> Collection<Marker> putMarkersFromParser(@NonNull AsyncParser<I, P> parser, float hue) {
+    protected <I extends MapItem, P extends ProgressCounter> Collection<Marker> putMarkersFromParser(@NonNull AsyncParser<I, P> parser, float hue) {
         try {
             List<I> l = parser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
             Log.i(TAG, String.format("parsed %d lines", l.size()));
@@ -572,8 +575,8 @@ public class MapsActivity extends AppCompatActivity
     }
 
     @NonNull
-    protected Collection<Marker> putMarkersFromCsv(InputStream is, Function<CsvRowParser.Row, MapItem> createMapItem, float hue) throws ExecutionException, InterruptedException {
-        CsvRowParser parser = new CsvRowParser(new InputStreamReader(is), true, ";", null);
+    protected Collection<Marker> putMarkersFromCsv(@NonNull CsvRowParser parser, Function<CsvRowParser.Row, MapItem> createMapItem, float hue) throws ExecutionException, InterruptedException {
+//        CsvRowParser parser = new CsvRowParser(new InputStreamReader(is), true, ";", null);
         List<CsvRowParser.Row> rows = parser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
         List<MapItem> l = new ArrayList<>();
         for (CsvRowParser.Row r : rows)

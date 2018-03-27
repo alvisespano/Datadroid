@@ -5,7 +5,9 @@ import android.support.annotation.Nullable;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.Reader;
+import java.net.URL;
 
 import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressBarManager;
 import it.unive.dais.cevid.datadroid.lib.util.UnexpectedException;
@@ -55,6 +57,18 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
      */
     public CsvRowParser(@NonNull File file, boolean hasHeader, String sep, @Nullable ProgressBarManager pbm) throws FileNotFoundException {
         super(file, hasHeader, sep, pbm);
+    }
+
+    /**
+     * Costruttore tramite URL.
+     *
+     * @param url       URL della sorgente.
+     * @param hasHeader flag booleano che indica se il CSV ha un header alla prima riga.
+     * @param sep       separatore tra le colonne del CSV (ad esempio il punto e virgola ";" oppure la virgola ",").
+     * @throws FileNotFoundException lanciata se il file non esiste.
+     */
+    public CsvRowParser(@NonNull URL url, boolean hasHeader, String sep, @Nullable ProgressBarManager pbm) throws IOException {
+        super(url, hasHeader, sep, pbm);
     }
 
     /**

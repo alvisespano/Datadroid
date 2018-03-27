@@ -7,12 +7,12 @@ import android.support.annotation.WorkerThread;
 
 import java.util.List;
 
-import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressStepper;
+import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressCounter;
 
 /**
  * Interfaccia che rappresenta un parser asincrono.
  */
-public interface AsyncParser<Data, P extends ProgressStepper> extends Parser<Data> {
+public interface AsyncParser<Data, P extends ProgressCounter> extends Parser<Data> {
     @NonNull
     AsyncTask<Void, P, List<Data>> getAsyncTask();
 
@@ -27,4 +27,13 @@ public interface AsyncParser<Data, P extends ProgressStepper> extends Parser<Dat
 
     @WorkerThread
     List<Data> onPostParse(@NonNull List<Data> r);
+
+    /**
+     * Invocato per ogni linea o riga o, in generale, elemento di tipo Data.
+     * IMPORTANTE: l'invocazione di questo metodo non è garantita. Ogni sottoclasse è responsabile dell'invocazione.
+     * @param x il dato singolo appena parsato.
+     * @return il nuovo dato singolo, eventualmente riprocessato.
+     */
+    @WorkerThread
+    Data onItemParsed(@NonNull Data x);
 }
