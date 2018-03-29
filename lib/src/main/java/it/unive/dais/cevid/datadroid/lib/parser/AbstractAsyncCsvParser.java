@@ -67,30 +67,6 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
     }
 
     /**
-     * Costruttore tramite file.
-     *
-     * @param file            oggetto di tipo File.
-     * @param hasActualHeader flag booleano che indica se il CSV ha un header alla prima riga.
-     * @param sep             separatore tra le colonne del CSV (ad esempio il punto e virgola ";" oppure la virgola ",").
-     * @throws FileNotFoundException lanciata se il file non esiste.
-     */
-    protected AbstractAsyncCsvParser(@NonNull File file, boolean hasActualHeader, @NonNull String sep, @Nullable ProgressBarManager pbm) throws FileNotFoundException {
-        this(new FileReader(file), hasActualHeader, sep, pbm);
-    }
-
-    /**
-     * Costruttore tramite URL.
-     *
-     * @param url             URL da cui scaricare il CSV.
-     * @param hasActualHeader flag booleano che indica se il CSV ha un header alla prima riga.
-     * @param sep             separatore tra le colonne del CSV (ad esempio il punto e virgola ";" oppure la virgola ",").
-     * @throws IOException lanciata quando la conversione da URL a reader fallisce.
-     */
-    protected AbstractAsyncCsvParser(@NonNull URL url, boolean hasActualHeader, @NonNull String sep, @Nullable ProgressBarManager pbm) throws IOException {
-        this(urlToReader(url), hasActualHeader, sep, pbm);
-    }
-
-    /**
      * Implementa un parser linea-per-linea con progresso.
      * Se ridefinita da una sottoclasse, si deve occupare non solo del parsing ma anche della gestione
      * dell'header, sia in caso sia presente sia in caso non lo sia.

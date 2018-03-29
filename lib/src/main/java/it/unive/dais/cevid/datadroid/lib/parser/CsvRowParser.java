@@ -48,30 +48,6 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
     }
 
     /**
-     * Costruttore tramite file.
-     *
-     * @param file      oggetto di tipo File.
-     * @param hasHeader flag booleano che indica se il CSV ha un header alla prima riga.
-     * @param sep       separatore tra le colonne del CSV (ad esempio il punto e virgola ";" oppure la virgola ",").
-     * @throws FileNotFoundException lanciata se il file non esiste.
-     */
-    public CsvRowParser(@NonNull File file, boolean hasHeader, String sep, @Nullable ProgressBarManager pbm) throws FileNotFoundException {
-        super(file, hasHeader, sep, pbm);
-    }
-
-    /**
-     * Costruttore tramite URL.
-     *
-     * @param url       URL della sorgente.
-     * @param hasHeader flag booleano che indica se il CSV ha un header alla prima riga.
-     * @param sep       separatore tra le colonne del CSV (ad esempio il punto e virgola ";" oppure la virgola ",").
-     * @throws FileNotFoundException lanciata se il file non esiste.
-     */
-    public CsvRowParser(@NonNull URL url, boolean hasHeader, String sep, @Nullable ProgressBarManager pbm) throws IOException {
-        super(url, hasHeader, sep, pbm);
-    }
-
-    /**
      * Parsa una singola linea dato l'array di stringhe con le colonne separate.
      *
      * @param columns array di stringhe in cui ogni elemento contiene il contenuto (sotto forma di stringa) di ogni colonna.

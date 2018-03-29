@@ -45,51 +45,6 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressCounter> imple
     }
 
     /**
-     * Converte una URL in un {@code InputStreamReader}.
-     * Questo metodo statico è utile per implementare, nelle sottoclassi di questa classe, un costruttore aggiuntivo un parametro di
-     * tipo URL come, che può essere convertito in un {@code InputStreamReader} tramite questo metodo statico e passato rapidamente
-     * al costruttore principale, come per esempio:
-     * <blockquote><pre>
-     * {@code
-     * public static class MyDataParser extends AbstractAsyncParser<MapItem, Void, InputStreamReader> {
-     *      protected MyDataParser(InputStreamReader rd) {
-     *          super(rd);
-     *      }
-     * <p>
-     *      protected MyDataParser(URL url) throws IOException {
-     *          super(urlToReader(url));
-     *      }
-     * <p>
-     *      protected List<MapItem> parse(InputStreamReader rd) throws IOException {
-     *          // fai qualcosa usando rd
-     *      }
-     * }
-     * }
-     * </pre></blockquote>
-     *
-     * @param url parametro di tipo URL.
-     * @return risultato di tipo InputStreamReader.
-     * @throws IOException lancia questa eccezione quando sorgono problemi di I/O.
-     */
-    @NonNull
-    protected static AsyncTask<Void, ?, InputStreamReader> urlToReader(@NonNull URL url) {
-        return Prelude.runOnAsyncTask(new Function<Void, InputStreamReader>() {
-            @Override
-            public InputStreamReader apply(Void x) {
-                try {
-                    HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-                    connection.connect();
-                    InputStream stream = connection.getInputStream();
-                    return new InputStreamReader(stream);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-        });
-    }
-
-    /**
      * Metodo di cui è necessario fare override nelle sottoclassi.
      * Deve occuparsi del parsing vero e proprio.
      * //     * @param input parametro di tipo Input.

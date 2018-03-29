@@ -45,9 +45,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
+import java.io.IOException;
+import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,6 +58,7 @@ import it.unive.dais.cevid.datadroid.lib.parser.CsvRowParser;
 import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressCounter;
 import it.unive.dais.cevid.datadroid.lib.util.Function;
 import it.unive.dais.cevid.datadroid.lib.util.MapItem;
+import it.unive.dais.cevid.datadroid.lib.util.Prelude;
 
 /**
  * Questa classe è la componente principale del toolkit: fornisce servizi primari per un'app basata su Google Maps, tra cui localizzazione, pulsanti
@@ -576,7 +576,6 @@ public class MapsActivity extends AppCompatActivity
 
     @NonNull
     protected Collection<Marker> putMarkersFromCsv(@NonNull CsvRowParser parser, Function<CsvRowParser.Row, MapItem> createMapItem, float hue) throws ExecutionException, InterruptedException {
-//        CsvRowParser parser = new CsvRowParser(new InputStreamReader(is), true, ";", null);
         List<CsvRowParser.Row> rows = parser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
         List<MapItem> l = new ArrayList<>();
         for (CsvRowParser.Row r : rows)
@@ -584,9 +583,65 @@ public class MapsActivity extends AppCompatActivity
         return putMarkersFromMapItems(l, hue);
     }
 
+    protected <Row, Progress extends ProgressCounter> AsyncParser<Row, Progress> wrapAsyncParser(@NonNull AsyncParser<Row, Progress> p1, Function<Row, ? extends MapItem> f, float hue) {
+        return new AsyncParser<Row, Progress>() {
+            @NonNull
+            @Override
+            public List<Row> parse() throws IOException {
+                return p1.parse();
+            }
+
+            @NonNull
+            @Override
+            public String getName() {
+                return p1.getName();
+            }
+
+            @NonNull
+            @Override
+            public AsyncTask<Void, Progress, List<Row>> getAsyncTask() {
+                return p1.getAsyncTask();
+            }
+
+            @Override
+            public void onPreExecute() {
+                p1.onPreExecute();
+            }
+
+            @Override
+            public void onPostExecute(@NonNull List<Row> r) {
+                p1.onPostExecute(r);
+            }
+
+            @Override
+            public void onProgressUpdate(@NonNull Progress p) {
+                p1.onProgressUpdate(p);
+            }
+
+            @Override
+            public List<Row> onPostParse(@NonNull List<Row> r) {
+                return p1.onPostParse(r);
+            }
+
+            @Override
+            public Row onItemParsed(@NonNull Row x) {
+                runOnUiThread(() -> {
+                    try {
+                        putMarkerFromMapItem(f.apply(x), hue);
+                    } catch (Exception e) {
+                        Log.e(TAG, String.format("cannot create MapItem for row: %s", x));
+                        e.printStackTrace();
+                    }
+                });
+                return x;
+            }
+        };
+    }
+
     @NonNull
-    protected Collection<Marker> putMarkersFromCsv(int resid, Function<CsvRowParser.Row, MapItem> createMapItem, float hue) throws ExecutionException, InterruptedException {
-        return putMarkersFromCsv(getResources().openRawResource(resid), createMapItem, hue);
+    protected Collection<Marker> putMarkersFromCsv(Reader rd, boolean hasHeader, String sep, Function<CsvRowParser.Row, MapItem> createMapItem, float hue) throws ExecutionException, InterruptedException {
+        CsvRowParser parser = new CsvRowParser(rd, hasHeader, sep, null);
+        return putMarkersFromCsv(parser, createMapItem, hue);
     }
 
     @NonNull
@@ -596,10 +651,8 @@ public class MapsActivity extends AppCompatActivity
             @Override
             protected Collection<Marker> doInBackground(Void... params) {
                 try {
-                    Log.i(TAG, String.format("downloading %s...", url));
-                    HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                    InputStream is = new BufferedInputStream(urlConnection.getInputStream());
-                    return putMarkersFromCsv(is, createMapItem, hue);
+                    Log.v(TAG, String.format("downloading %s...", url));
+                    return putMarkersFromCsv(Prelude.urlToReader(url), createMapItem, hue);
                 } catch (Exception e) {
                     e.printStackTrace();
                     return null;
@@ -611,7 +664,7 @@ public class MapsActivity extends AppCompatActivity
     private void demo() {
         try {
             // put markers from embedded resource CSV
-            putMarkersFromCsv(R.raw.piattaforme,
+            putMarkersFromCsv(getResources().openRawResource(R.raw.piattaforme),
                     MapItem.factoryByCsvNames("Latitudine (WGS84)", "Longitudine (WGS 84)", "Denominazione", "Stato"),
                     BitmapDescriptorFactory.HUE_GREEN);
 

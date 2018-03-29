@@ -37,14 +37,6 @@ public abstract class AbstractAsyncJsonParser<Item, P extends ProgressCounter> e
     }
 
     /**
-     * Costruttore protected via URL.
-     * @param url oggetto URL usato come input.
-     */
-    protected AbstractAsyncJsonParser(@NonNull URL url, @Nullable ProgressBarManager pbm) throws IOException {
-        this(urlToReader(url), pbm);
-    }
-
-    /**
      * Implementazione che parsa il JSON come una lista (o array) di oggetti di tipo Item.
      * @return ritorna una lista di Item.
      * @throws IOException lancia questa eccezione quando ci sono problemi di I/O.

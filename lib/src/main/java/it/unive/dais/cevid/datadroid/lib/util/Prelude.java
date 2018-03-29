@@ -1,15 +1,20 @@
 package it.unive.dais.cevid.datadroid.lib.util;
 
-import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Piccola libreria di utilità di vario genere.
@@ -17,6 +22,12 @@ import java.util.List;
  * @author Alvise Spanò, Università Ca' Foscari
  */
 public final class Prelude {
+
+    private Prelude() {
+    }    // dummy constructor
+
+    // misc stuff
+    //
 
     /**
      * Elimina tutte le occorrenze dei caratteri passati dall'inizio e dalla fine della stringa data.
@@ -28,10 +39,11 @@ public final class Prelude {
      * @return ritorna la nuova stringa.
      */
     public static String trim(String s, char[] cs) {
+        String s1 = s;
         for (char c : cs) {
-            s = s.replaceAll(c + "$", "").replaceAll("^" + c, "");
+            s1 = s1.replaceAll(c + "$", "").replaceAll("^" + c, "");
         }
-        return s;
+        return s1;
     }
 
     /**
@@ -81,74 +93,135 @@ public final class Prelude {
      * @return risultato della proiezione.
      */
     public static double proj(double a0, double b0, double a1, double b1, double x) {
-        x = crop(a0, b0, x);
-        return (x - a0) * (b0 - a0) / (b1 - a1) + a1;
+        double crop = crop(a0, b0, x);
+        return (crop - a0) * (b0 - a0) / (b1 - a1) + a1;
     }
 
-    // async task quick API
+    /**
+     * Converte una URL in un {@code InputStreamReader}.
+     * Questo metodo statico è utile per implementare, nelle sottoclassi di questa classe, un costruttore aggiuntivo un parametro di
+     * tipo URL come, che può essere convertito in un {@code InputStreamReader} tramite questo metodo statico e passato rapidamente
+     * al costruttore principale, come per esempio:
+     * <blockquote><pre>
+     * {@code
+     * public static class MyDataParser extends AbstractAsyncParser<MapItem, Void, InputStreamReader> {
+     *      protected MyDataParser(InputStreamReader rd) {
+     *          super(rd);
+     *      }
+     * <p>
+     *      protected MyDataParser(URL url) throws IOException {
+     *          super(urlToReader(url));
+     *      }
+     * <p>
+     *      protected List<MapItem> parse(InputStreamReader rd) throws IOException {
+     *          // fai qualcosa usando rd
+     *      }
+     * }
+     * }
+     * </pre></blockquote>
+     *
+     * @param url parametro di tipo URL.
+     * @return risultato di tipo InputStreamReader.
+     * @throws IOException lancia questa eccezione quando sorgono problemi di I/O.
+     */
+    @NonNull
+    public static InputStreamReader urlToReader(@NonNull URL url) throws IOException {
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.connect();
+        InputStream stream = connection.getInputStream();
+        return new InputStreamReader(stream);
+    }
+
+
+    // async task quick wrappers
     //
 
-    public static class AsyncTaskResult<T> {
-        private T result = null;
-        private Exception exn = null;
+    public static class AsyncTaskResult<R> {
 
-        public AsyncTaskResult(T x) {
-            result = x;
+        protected final AsyncTask<?, ?, Result<R>> task;
+
+        public AsyncTaskResult(AsyncTask<?, ?, Result<R>> t) {
+            this.task = t;
         }
 
-        public AsyncTaskResult(Exception e) {
-            exn = e;
+        public Result<R> get() throws ExecutionException, InterruptedException {
+            return task.get();
         }
 
-        public boolean hasResult() {
-            return exn != null;
-        }
-
-        @Nullable
-        public T getResult() {
-            return result;
+        public boolean hasResult() throws ExecutionException, InterruptedException {
+            return get().hasResult();
         }
 
         @Nullable
-        public Exception getException() {
-            return exn;
+        public R getResult() throws ExecutionException, InterruptedException {
+            return get().getResult();
         }
-    }
 
+        @Nullable
+        public Exception getException() throws ExecutionException, InterruptedException {
+            return get().getException();
+        }
 
-    public static class AsyncTaskHolder<R> {
-        public AsyncTaskHolder(AsyncTask<?, ?, AsyncTaskResult<R>> t) {
-            super();
+        static class Result<R> {
+
+            @Nullable
+            private R result;
+            @Nullable
+            private Exception exn;
+
+            Result(@Nullable R x) {
+                result = x;
+                exn = null;
+            }
+
+            Result(@NonNull Exception e) {
+                exn = e;
+                result = null;
+            }
+
+            public boolean hasResult() {
+                return exn != null;
+            }
+
+            @Nullable
+            public R getResult() {
+                return result;
+            }
+
+            @NonNull
+            public Exception getException() {
+                if (exn != null) return exn;
+                else throw new RuntimeException("AsyncTask has result and no exception");
+            }
         }
     }
 
     @SuppressWarnings("unchecked")
-    @SuppressLint("StaticFieldLeak")
     @NonNull
     public static <T, R> AsyncTaskResult<R> runOnAsyncTask(@NonNull Function<T, R> f, @Nullable T x) {
-        AsyncTask<T, ?, AsyncTaskResult<R>> t = (new AsyncTask<T, Void, AsyncTaskResult<R>>() {
+        return new AsyncTaskResult<>(new AsyncTask<T, Void, AsyncTaskResult.Result<R>>() {
             @Override
-            protected AsyncTaskResult<R> doInBackground(T... x) {
+            protected AsyncTaskResult.Result<R> doInBackground(T... x) {
                 try {
-                    return new AsyncTaskResult<R>(f.apply(x[0]));
+                    return new AsyncTaskResult.Result<>(f.apply(x[0]));
                 } catch (Exception e) {
-                    return new AsyncTaskResult<R>(e);
+                    return new AsyncTaskResult.Result<>(e);
                 }
             }
-        }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, x);
-        return new AsyncTaskHolder<R>(t);
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, x));
     }
 
-    public static <R> AsyncTask<Void, ?, R> runOnAsyncTask(@NonNull Function<Void, R> f) {
+    public static <R> AsyncTaskResult<R> runOnAsyncTask(@NonNull Function<Void, R> f) {
         return runOnAsyncTask(f, null);
     }
 
-    public static AsyncTask<Void, ?, Void> runOnAsyncTask(Runnable r) {
-        return runOnAsyncTask(x -> {
+    public static void runOnAsyncTask(Runnable r) {
+        runOnAsyncTask(x -> {
             r.run();
             return null;
         });
     }
+
 
     // higher-order functional utilities
     //
@@ -170,26 +243,18 @@ public final class Prelude {
     }
 
     public static <T> void filterByCode(@NonNull List<T> l, final int code, @NonNull final Function<T, Integer> getCode) {
-        filter(l, new Function<T, Boolean>() {
-            @Override
-            public Boolean apply(T x) {
-                return getCode.apply(x) == code;
-            }
-        });
+        filter(l, x -> getCode.apply(x) == code);
     }
 
 
     public static <T> void filterByWords(@NonNull List<T> l, @NonNull final Collection<String> ss, @NonNull final Function<T, String> getText, final boolean isCaseSenstive) {
-        filter(l, new Function<T, Boolean>() {
-            @Override
-            public Boolean apply(T x) {
-                String s0 = getText.apply(x);
-                if (isCaseSenstive) s0 = s0.toLowerCase();
-                for (String s : ss) {
-                    if (s0.contains(isCaseSenstive ? s : s.toLowerCase())) return true;
-                }
-                return false;
+        filter(l, x -> {
+            String s0 = getText.apply(x);
+            if (isCaseSenstive) s0 = s0.toLowerCase();
+            for (String s : ss) {
+                if (s0.contains(isCaseSenstive ? s : s.toLowerCase())) return true;
             }
+            return false;
         });
     }
 
