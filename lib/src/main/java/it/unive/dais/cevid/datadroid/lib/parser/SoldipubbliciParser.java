@@ -90,11 +90,14 @@ public class SoldipubbliciParser extends AbstractAsyncParser<SoldipubbliciParser
             d.descrizione_ente = j.getString("descrizione_ente");
             d.idtable = j.getString("idtable");
             d.imp_uscite_att = j.getString("imp_uscite_att");
-            d.importo_2013 = convertToValue(j.getString("importo_2013"));
-            d.importo_2014 = convertToValue(j.getString("importo_2014"));
-            d.importo_2015 = convertToValue(j.getString("importo_2015"));
-            d.importo_2016 = convertToValue(j.getString("importo_2016"));
-            d.importo_2017 = convertToValue(j.getString("importo_2017"));
+            d.importo_2013 = j.getString("importo_2013");
+            d.importo_2014 = j.getString("importo_2014");
+            d.importo_2015 = j.getString("importo_2015");
+            if (j.getString("importo_2016") != null && j.getString("importo_2016") != "null")
+                d.importo_2016 = j.getString("importo_2016");
+            else
+                d.importo_2016 = "0";
+            d.importo_2017 = j.getString("importo_2017");
             d.ricerca = j.getString("ricerca");
             d.periodo = j.getString("periodo");
 
@@ -103,10 +106,6 @@ public class SoldipubbliciParser extends AbstractAsyncParser<SoldipubbliciParser
             publishProgress(prog);
         }
         return r;
-    }
-
-    private String convertToValue(String s) {
-        return (s != null && !s.equals("null"))? String.valueOf(Double.parseDouble(s) / 100) : "0.0";
     }
 
 
