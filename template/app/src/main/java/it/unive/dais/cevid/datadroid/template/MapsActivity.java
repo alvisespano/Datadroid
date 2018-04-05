@@ -58,6 +58,7 @@ import java.util.concurrent.ExecutionException;
 
 import it.unive.dais.cevid.datadroid.lib.parser.AsyncParser;
 import it.unive.dais.cevid.datadroid.lib.parser.CsvRowParser;
+import it.unive.dais.cevid.datadroid.lib.parser.progress.PercentProgressCounter;
 import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressBarManager;
 import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressCounter;
 import it.unive.dais.cevid.datadroid.lib.util.Function;
@@ -582,80 +583,22 @@ public class MapsActivity extends AppCompatActivity
     }
 
     @NonNull
-    protected Collection<Marker> putMarkersFromCsv(@NonNull CsvRowParser parser, Function<CsvRowParser.Row, MapItem> createMapItem, float hue) throws ExecutionException, InterruptedException {
+    protected <I extends MapItem> Collection<Marker> putMarkersFromCsv(@NonNull CsvRowParser parser, Function<CsvRowParser.Row, I> createMapItem, float hue) throws ExecutionException, InterruptedException {
         List<CsvRowParser.Row> rows = parser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
-        List<MapItem> l = new ArrayList<>();
+        List<I> l = new ArrayList<>();
         for (CsvRowParser.Row r : rows)
             l.add(createMapItem.apply(r));
         return putMarkersFromMapItems(l, hue);
     }
 
-    @Deprecated
-    protected <Row, Progress extends ProgressCounter> AsyncParser<Row, Progress> wrapAsyncParser(@NonNull AsyncParser<Row, Progress> p1, Function<Row, ? extends MapItem> f, float hue) {
-        return new AsyncParser<Row, Progress>() {
-            @NonNull
-            @Override
-            public List<Row> parse() throws IOException {
-                return p1.parse();
-            }
-
-            @NonNull
-            @Override
-            public String getName() {
-                return p1.getName();
-            }
-
-            @NonNull
-            @Override
-            public AsyncTask<Void, Progress, List<Row>> getAsyncTask() {
-                return p1.getAsyncTask();
-            }
-
-            @Override
-            public void onPreExecute() {
-                p1.onPreExecute();
-            }
-
-            @Override
-            public void onPostExecute(@NonNull List<Row> r) {
-                p1.onPostExecute(r);
-            }
-
-            @Override
-            public void onProgressUpdate(@NonNull Progress p) {
-                p1.onProgressUpdate(p);
-            }
-
-            @Override
-            public List<Row> onPostParse(@NonNull List<Row> r) {
-                return p1.onPostParse(r);
-            }
-
-            @Override
-            public Row onItemParsed(@NonNull Row x) {
-                runOnUiThread(() -> {
-                    try {
-                        putMarkerFromMapItem(f.apply(x), hue);
-                    } catch (Exception e) {
-                        Log.e(TAG, String.format("cannot create MapItem for row: %s", x));
-                        e.printStackTrace();
-                    }
-                });
-                return x;
-            }
-        };
-    }
-
     @NonNull
-    @Deprecated
-    protected Collection<Marker> putMarkersFromCsv(Reader rd, boolean hasHeader, String sep, Function<CsvRowParser.Row, MapItem> createMapItem, float hue) throws ExecutionException, InterruptedException {
+    protected <I extends MapItem> Collection<Marker> putMarkersFromCsv(Reader rd, boolean hasHeader, String sep, Function<CsvRowParser.Row, I> createMapItem, float hue) throws ExecutionException, InterruptedException {
         return putMarkersFromCsv(new CsvRowParser(rd, hasHeader, sep, null), createMapItem, hue);
     }
 
     @NonNull
     @SuppressLint("StaticFieldLeak")
-    @Deprecated
-    protected Collection<Marker> putMarkersFromCsv(URL url, boolean hasHeader, String sep, Function<CsvRowParser.Row, MapItem> createMapItem, float hue) throws ExecutionException, InterruptedException {
+    protected <I extends MapItem> Collection<Marker> putMarkersFromCsv(URL url, boolean hasHeader, String sep, Function<CsvRowParser.Row, I> createMapItem, float hue) throws ExecutionException, InterruptedException {
         return (new AsyncTask<Void, Void, Collection<Marker>>() {
             @Override
             protected Collection<Marker> doInBackground(Void... params) {
@@ -670,7 +613,7 @@ public class MapsActivity extends AppCompatActivity
         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
     }
 
-    private void demo1() {
+    private void demo() {
         try {
             // put markers from embedded resource CSV
             putMarkersFromCsv(new InputStreamReader(getResources().openRawResource(R.raw.piattaforme)),
@@ -689,20 +632,5 @@ public class MapsActivity extends AppCompatActivity
             e.printStackTrace();
         }
     }
-
-    private void demo2() {
-        try {
-            CsvRowParser p1 = new CsvRowParser(new InputStreamReader(getResources().openRawResource(R.raw.piattaforme)),true, ";", progressBarManager);
-            CsvRowParser p2 = new CsvRowParser(Prelude.urlToReader(new URL(getString(R.string.demo_csv_url))), true, ";", progressBarManager);
-
-            putMarkersFromParser(p1, MapItem.factoryByCsvColumnNames("Latitudine (WGS84)", "Longitudine (WGS 84)", "Denominazione", "Stato"), BitmapDescriptorFactory.HUE_RED);
-
-        } catch (Exception e) {
-            Log.e(TAG, String.format("exception caught: %s", e));
-            e.printStackTrace();
-        }
-    }
-
-
 
 }

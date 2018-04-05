@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Piccola libreria di utilità di vario genere.
+ * Raccolta di utilità di vario genere.
  *
  * @author Alvise Spanò, Università Ca' Foscari
  */
