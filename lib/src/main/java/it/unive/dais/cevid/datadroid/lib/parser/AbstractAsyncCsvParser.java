@@ -1,17 +1,12 @@
 package it.unive.dais.cevid.datadroid.lib.parser;
 
-
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,8 +36,6 @@ import it.unive.dais.cevid.datadroid.lib.util.Prelude;
  * @author Alvise Spanò, Università Ca' Foscari
  */
 public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<Data, ProgressCounter> {
-
-    private static final String TAG = "AbstractAsyncCsvParser";
 
     protected final boolean hasActualHeader;
     @NonNull
@@ -81,18 +74,18 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
         List<Data> r = new ArrayList<>();
         @Nullable String line;
         ProgressCounter prog = new ProgressCounter();
+        final String TAG = getName();
         while ((line = reader.readLine()) != null) {
             int linen = prog.getCurrentCounter();
             try {
                 if (linen == 0 && !hasActualHeader()) setHeader(line);
-                r.add(parseLine(line));
+                r.add(parserLine(line));
                 publishProgress(prog);
             } catch (ParserException e) {
                 Log.w(TAG, String.format("recoverable parse error at line %d: %s", linen, e.getLocalizedMessage()));
             }
             prog.stepCounter();
         }
-        Log.v(TAG, String.format("parsed %d lines", r.size()));
         return r;
     }
 
@@ -128,7 +121,7 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
      * @return ritorna un singolo oggetto di tipo FiltrableData.
      */
     @NonNull
-    protected Data parseLine(@NonNull String line) throws ParserException {
+    protected Data parserLine(@NonNull String line) throws ParserException {
         return onItemParsed(parseColumns(split(line)));
     }
 
@@ -174,7 +167,7 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
     public void setHeader(@NonNull String[] columns) {
         trimStrings(columns);
         if (header != null && columns.length != header.length)
-            throw new IllegalArgumentException(String.format("former CSV header has %d columnNames while new header has %d", header.length, columns.length));
+            throw new IllegalArgumentException(String.format("CSV header size mismatch: former header has %d columns while new header has %d", header.length, columns.length));
         header = columns;
     }
 

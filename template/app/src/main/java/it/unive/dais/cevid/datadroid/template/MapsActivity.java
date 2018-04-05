@@ -13,6 +13,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
+import android.support.annotation.WorkerThread;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +23,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -46,6 +48,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
@@ -55,6 +58,7 @@ import java.util.concurrent.ExecutionException;
 
 import it.unive.dais.cevid.datadroid.lib.parser.AsyncParser;
 import it.unive.dais.cevid.datadroid.lib.parser.CsvRowParser;
+import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressBarManager;
 import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressCounter;
 import it.unive.dais.cevid.datadroid.lib.util.Function;
 import it.unive.dais.cevid.datadroid.lib.util.MapItem;
@@ -107,6 +111,8 @@ public class MapsActivity extends AppCompatActivity
      */
     @Nullable
     protected Marker hereMarker = null;
+    @Nullable
+    private ProgressBarManager progressBarManager;
 
     /**
      * Questo metodo viene invocato quando viene inizializzata questa activity.
@@ -122,6 +128,8 @@ public class MapsActivity extends AppCompatActivity
 
         // inizializza le preferenze
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+
+        progressBarManager = new ProgressBarManager(this, new ProgressBar[]{(ProgressBar) findViewById(R.id.progress_bar_1), (ProgressBar) findViewById(R.id.progress_bar_2)});
 
         // trova gli oggetti che rappresentano i bottoni e li salva come campi d'istanza
         button_here = (ImageButton) findViewById(R.id.button_here);
@@ -528,8 +536,8 @@ public class MapsActivity extends AppCompatActivity
 
     // TODO: aggiungere progress bar
 
-    @UiThread
     @NonNull
+    @UiThread
     protected Marker putMarkerFromMapItem(MapItem i, float hue) throws Exception {
         MarkerOptions opts = new MarkerOptions().title(i.getTitle()).position(i.getPosition()).snippet(i.getDescription()).icon(BitmapDescriptorFactory.defaultMarker(hue));
         return gMap.addMarker(opts);
@@ -565,10 +573,9 @@ public class MapsActivity extends AppCompatActivity
     protected <I extends MapItem, P extends ProgressCounter> Collection<Marker> putMarkersFromParser(@NonNull AsyncParser<I, P> parser, float hue) {
         try {
             List<I> l = parser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
-            Log.i(TAG, String.format("parsed %d lines", l.size()));
             return putMarkersFromMapItems(l, hue);
         } catch (Exception e) {
-            Log.e(TAG, String.format("exception caught while parsing: %s", e));
+            Log.e(TAG, String.format("exception caught during parser %s: %s", parser.getName(), e));
             e.printStackTrace();
             return null;
         }
@@ -583,6 +590,7 @@ public class MapsActivity extends AppCompatActivity
         return putMarkersFromMapItems(l, hue);
     }
 
+    @Deprecated
     protected <Row, Progress extends ProgressCounter> AsyncParser<Row, Progress> wrapAsyncParser(@NonNull AsyncParser<Row, Progress> p1, Function<Row, ? extends MapItem> f, float hue) {
         return new AsyncParser<Row, Progress>() {
             @NonNull
@@ -639,20 +647,21 @@ public class MapsActivity extends AppCompatActivity
     }
 
     @NonNull
+    @Deprecated
     protected Collection<Marker> putMarkersFromCsv(Reader rd, boolean hasHeader, String sep, Function<CsvRowParser.Row, MapItem> createMapItem, float hue) throws ExecutionException, InterruptedException {
-        CsvRowParser parser = new CsvRowParser(rd, hasHeader, sep, null);
-        return putMarkersFromCsv(parser, createMapItem, hue);
+        return putMarkersFromCsv(new CsvRowParser(rd, hasHeader, sep, null), createMapItem, hue);
     }
 
     @NonNull
     @SuppressLint("StaticFieldLeak")
-    protected Collection<Marker> putMarkersFromCsv(URL url, Function<CsvRowParser.Row, MapItem> createMapItem, float hue) throws ExecutionException, InterruptedException {
+    @Deprecated
+    protected Collection<Marker> putMarkersFromCsv(URL url, boolean hasHeader, String sep, Function<CsvRowParser.Row, MapItem> createMapItem, float hue) throws ExecutionException, InterruptedException {
         return (new AsyncTask<Void, Void, Collection<Marker>>() {
             @Override
             protected Collection<Marker> doInBackground(Void... params) {
                 try {
-                    Log.v(TAG, String.format("downloading %s...", url));
-                    return putMarkersFromCsv(Prelude.urlToReader(url), createMapItem, hue);
+                    Log.v(TAG, String.format("downloading CSV from %s...", url));
+                    return putMarkersFromCsv(Prelude.urlToReader(url), hasHeader, sep, createMapItem, hue);
                 } catch (Exception e) {
                     e.printStackTrace();
                     return null;
@@ -661,16 +670,18 @@ public class MapsActivity extends AppCompatActivity
         }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
     }
 
-    private void demo() {
+    private void demo1() {
         try {
             // put markers from embedded resource CSV
-            putMarkersFromCsv(getResources().openRawResource(R.raw.piattaforme),
-                    MapItem.factoryByCsvNames("Latitudine (WGS84)", "Longitudine (WGS 84)", "Denominazione", "Stato"),
+            putMarkersFromCsv(new InputStreamReader(getResources().openRawResource(R.raw.piattaforme)),
+                    true, ";",
+                    MapItem.factoryByCsvColumnNames("Latitudine (WGS84)", "Longitudine (WGS 84)", "Denominazione", "Stato"),
                     BitmapDescriptorFactory.HUE_GREEN);
 
             // add markers from online CSV
-            putMarkersFromCsv(new URL("http://ckan.ancitel.it/dataset/80431d0c-3433-4745-8d9c-c77a0dcd3325/resource/c381efe6-f73f-4e20-a825-547241eeb457/download/cusersplenevicidocumentsdocs-lavorockancvsxr2pacomuniitaliani24102017.csv"),
-                    MapItem.factoryByCsvNames("Latitudine", "Longitudine", "Comune", "Provincia"),
+            putMarkersFromCsv(new URL(getString(R.string.demo_csv_url)),
+                    true, ";",
+                    MapItem.factoryByCsvColumnNames("Latitudine", "Longitudine", "Comune", "Provincia"),
                     BitmapDescriptorFactory.HUE_AZURE);
 
         } catch (Exception e) {
@@ -678,5 +689,20 @@ public class MapsActivity extends AppCompatActivity
             e.printStackTrace();
         }
     }
+
+    private void demo2() {
+        try {
+            CsvRowParser p1 = new CsvRowParser(new InputStreamReader(getResources().openRawResource(R.raw.piattaforme)),true, ";", progressBarManager);
+            CsvRowParser p2 = new CsvRowParser(Prelude.urlToReader(new URL(getString(R.string.demo_csv_url))), true, ";", progressBarManager);
+
+            putMarkersFromParser(p1, MapItem.factoryByCsvColumnNames("Latitudine (WGS84)", "Longitudine (WGS 84)", "Denominazione", "Stato"), BitmapDescriptorFactory.HUE_RED);
+
+        } catch (Exception e) {
+            Log.e(TAG, String.format("exception caught: %s", e));
+            e.printStackTrace();
+        }
+    }
+
+
 
 }

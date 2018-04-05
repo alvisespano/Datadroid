@@ -33,25 +33,25 @@ public interface MapItem extends Serializable {
      */
     String getDescription() throws Exception;
 
-    static Function<CsvRowParser.Row, MapItem> factoryByCsvNames(String latitudeColumName, String longitudeColumName, String titleColumnName, String descriptionColumnName) {
+    static Function<CsvRowParser.Row, MapItem> factoryByCsvColumnNames(String latitude, String longitude, String title, String description) {
         return new Function<CsvRowParser.Row, MapItem>() {
             @Override
             public MapItem apply(CsvRowParser.Row r) {
                 return new MapItem() {
                     @Override
                     public LatLng getPosition() throws ParserException {
-                        String lat = r.get(latitudeColumName), lng = r.get(longitudeColumName);
+                        String lat = r.get(latitude), lng = r.get(longitude);
                         return new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
                     }
 
                     @Override
                     public String getTitle() throws ParserException {
-                        return r.get(titleColumnName);
+                        return r.get(title);
                     }
 
                     @Override
                     public String getDescription() throws ParserException {
-                        return r.get(descriptionColumnName);
+                        return r.get(description);
                     }
                 };
             }

@@ -38,5 +38,6 @@
     <string name="msg_permissions_not_granted">I permessi appena negati dall\'utente sono necessari per alcune funzionalità dell\'app. Il supporto delle funzionalità sarà ridotto.</string>
     <string name="marker_title">You are HERE</string>
     <string name="logo_descr">Università Ca\' Foscari, Venezia</string>
+    <string name="demo_csv_url">http://ckan.ancitel.it/dataset/80431d0c-3433-4745-8d9c-c77a0dcd3325/resource/c381efe6-f73f-4e20-a825-547241eeb457/download/cusersplenevicidocumentsdocs-lavorockancvsxr2pacomuniitaliani24102017.csv</string>
 
 </resources>

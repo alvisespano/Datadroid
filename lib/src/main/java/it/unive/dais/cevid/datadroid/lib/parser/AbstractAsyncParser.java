@@ -90,9 +90,9 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressCounter> imple
         @Nullable
         protected List<Data> doInBackground(Void... params) {
             try {
-                Log.v(TAG, String.format("started async parser %s", NAME));
+                Log.v(TAG, "async parser started");
                 List<Data> r = enclosing.parse();
-                Log.v(TAG, String.format("async parser %s finished (%d elements)", NAME, r.size()));
+                Log.v(TAG, String.format("async parser finished: %d elements parsed", r.size()));
                 return enclosing.onPostParse(r);
             } catch (IOException e) {
                 e.printStackTrace();

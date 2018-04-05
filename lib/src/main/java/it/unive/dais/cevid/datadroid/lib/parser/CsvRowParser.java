@@ -34,8 +34,6 @@ import it.unive.dais.cevid.datadroid.lib.util.UnexpectedException;
  */
 public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
 
-    private static final String TAG = "CsvRowParser";
-
     /**
      * Costruttore tramite Reader.
      *
@@ -58,7 +56,6 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
     protected Row parseColumns(@NonNull String[] columns) throws ParserException {
         return new Row(columns);
     }
-
 
     /**
      * Classe che rappresenta una singola riga del CSV parsata dal {@code CsvRowParser}.

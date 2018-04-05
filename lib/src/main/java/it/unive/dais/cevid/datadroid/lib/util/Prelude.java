@@ -3,6 +3,7 @@ package it.unive.dais.cevid.datadroid.lib.util;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.WorkerThread;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -125,6 +126,7 @@ public final class Prelude {
      * @throws IOException lancia questa eccezione quando sorgono problemi di I/O.
      */
     @NonNull
+    @WorkerThread
     public static InputStreamReader urlToReader(@NonNull URL url) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.connect();
