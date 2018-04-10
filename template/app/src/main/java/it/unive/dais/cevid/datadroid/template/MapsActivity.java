@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import it.unive.dais.cevid.datadroid.lib.database.DBHelper;
 import it.unive.dais.cevid.datadroid.lib.parser.AsyncParser;
 import it.unive.dais.cevid.datadroid.lib.parser.CsvRowParser;
 import it.unive.dais.cevid.datadroid.lib.parser.ParserException;
@@ -153,6 +154,9 @@ public class MapsActivity extends AppCompatActivity
                     Log.d(TAG, "no current position available");
             }
         });
+
+        DBHelper dbHelper = DBHelper.getSingleton(getApplicationContext());
+        List<String> entities = dbHelper.getEntitie();
     }
 
 

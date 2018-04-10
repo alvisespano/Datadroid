@@ -1,0 +1,5 @@
+CREATE TABLE Ente (codice_ente TEXT PRIMARY KEY ASC NOT NULL, codice_comparto TEXT, denominazione TEXT, latitudine DECIMAL, longitudine DECIMAL, capite INTEGER);
+
+INSERT INTO Ente VALUES  ("000704968000000", "UNI", "Università Ca' Foscari", 45.437576,  12.3289554, 1);
+INSERT INTO Ente VALUES  ("000058546000000", "UNI", "Università di Padova", 45.406766, 11.8774462, 1);
+INSERT INTO Ente VALUES  ("000067046000000", "UNI", "Università di Trento", 46.0694828, 11.1188738, 1);
