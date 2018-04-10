@@ -1,4 +1,4 @@
-﻿Datadroid v1.2
+﻿Datadroid v1.0
 
 Written by Alvise Spanò (C) 2017-18 Università Ca' Foscari, Venezia, Italy
 
