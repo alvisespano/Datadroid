@@ -165,7 +165,7 @@ public class DBHelper extends SQLiteOpenHelper {
         creationCalendar.setTimeInMillis(getCreationTimestamp());
         currentCalendar.setTimeInMillis(System.currentTimeMillis());
 
-        return (creationCalendar.get(Calendar.MONTH) - 1 < currentCalendar.get(Calendar.MONTH))? true : false;
+        return (creationCalendar.get(Calendar.MONTH) < currentCalendar.get(Calendar.MONTH))? true : false;
     }
 
     //Data-insertion stuff
