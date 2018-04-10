@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.text.format.DateFormat;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -17,18 +16,20 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
 import it.unive.dais.cevid.datadroid.lib.R;
-import it.unive.dais.cevid.datadroid.lib.database.item.Entity;
+import it.unive.dais.cevid.datadroid.lib.database.item.Appalto;
+import it.unive.dais.cevid.datadroid.lib.database.item.Bilancio;
 import it.unive.dais.cevid.datadroid.lib.parser.AppaltiParser;
 import it.unive.dais.cevid.datadroid.lib.parser.SoldipubbliciParser;
 
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "datadroid_database.db";
-    private static final int DATABSE_VERSION = 1;
+    private static final int DATABASE_VERSION = 6;
     private static final int ANNO_APPALTI = 2016;
     private static final String TABLE_ENTE = "Ente";
     private static final String TABLE_BILANCIO = "Bilancio";
@@ -38,7 +39,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private Context context;
 
     private DBHelper(Context context) {
-        super(context.getApplicationContext(), DATABASE_NAME, null, DATABSE_VERSION);
+        super(context.getApplicationContext(), DATABASE_NAME, null, DATABASE_VERSION);
         this.context = context.getApplicationContext();
 
         updateDatabase();
@@ -72,7 +73,8 @@ public class DBHelper extends SQLiteOpenHelper {
     private void insertFromFile(SQLiteDatabase db) {
         try {
             insertFromFile(db, R.raw.database_enti_init);
-            insertFromFile(db, R.raw.database_ba_init);
+            insertFromFile(db, R.raw.database_bilancio_init);
+            insertFromFile(db, R.raw.database_appalti_init);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -113,11 +115,6 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private void deleteTable(SQLiteDatabase db, String tableName) {
         db.execSQL("DROP TABLE IF EXISTS " + tableName);
-        try {
-            insertFromFile(db, R.raw.database_enti_init);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private void deleteTables(SQLiteDatabase db) {
@@ -130,10 +127,16 @@ public class DBHelper extends SQLiteOpenHelper {
 
     private void updateDatabase() {
         File dbFile = context.getDatabasePath(DATABASE_NAME);
-
+        SQLiteDatabase db = getWritableDatabase();
         if (dbFile.exists() && isOldDatabase()) {
-            deleteTable(TABLE_BILANCIO);
+            deleteTable(db, TABLE_BILANCIO);
+            try {
+                insertFromFile(db, R.raw.database_bilancio_init);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+        db.close();
     }
 
     private long getCreationTimestamp() {
@@ -162,35 +165,25 @@ public class DBHelper extends SQLiteOpenHelper {
         creationCalendar.setTimeInMillis(getCreationTimestamp());
         currentCalendar.setTimeInMillis(System.currentTimeMillis());
 
-        return (creationCalendar.get(Calendar.MONTH) < currentCalendar.get(Calendar.MONTH))? true : false;
-    }
-
-    private void deleteTable(String tableName) {
-        SQLiteDatabase db = getWritableDatabase();
-        db.execSQL("DROP TABLE IF EXISTS " + tableName);
-        try {
-            insertFromFile(db, R.raw.database_enti_init);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        db.close();
+        return (creationCalendar.get(Calendar.MONTH) - 1 < currentCalendar.get(Calendar.MONTH))? true : false;
     }
 
     //Data-insertion stuff
 
     //Bilancio-insertion stuff
 
-    private void insertBilancio(String codiceEnte, List<SoldipubbliciParser.Data> soldiPubbliciList) {
+    protected void insertBilancio(List<SoldipubbliciParser.Data> soldiPubbliciList) {
         SQLiteDatabase db = getWritableDatabase();
+
         for (SoldipubbliciParser.Data data : soldiPubbliciList) {
-            insertVoceBilancio(db, data, "2015", data.importo_2015);
-            insertVoceBilancio(db, data, "2016", data.importo_2016);
-            insertVoceBilancio(db, data, "2017", data.importo_2017);
+            insertVoceBilancio(db, data, 2015, data.importo_2015);
+            insertVoceBilancio(db, data, 2016, data.importo_2016);
+            insertVoceBilancio(db, data, 2017, data.importo_2017);
         }
         db.close();
     }
 
-    private void insertVoceBilancio (SQLiteDatabase db, SoldipubbliciParser.Data voceBilancio, String anno, String importo) {
+    private void insertVoceBilancio (SQLiteDatabase db, SoldipubbliciParser.Data voceBilancio, int anno, String importo) {
         ContentValues values = new ContentValues();
 
         values.put("codice_siope", voceBilancio.codice_siope);
@@ -199,18 +192,18 @@ public class DBHelper extends SQLiteOpenHelper {
         values.put("descrizione_codice", voceBilancio.descrizione_codice);
         values.put("importo", importo);
 
-        db.insert("Bilancio", null, values);
+        db.insert(TABLE_BILANCIO, null, values);
     }
 
     //Appalti-insertion stuff
 
-    private void insertTenders(String codiceEnte, List<AppaltiParser.Data> tendersList) {
+    protected void insertTenders(String codiceEnte, List<AppaltiParser.Data> tendersList) {
         SQLiteDatabase db = getWritableDatabase();
 
         for (AppaltiParser.Data appalto : tendersList) {
             if (!appalto.aggiudicatario.equals("Dati assenti o mal formattati")) {
                 try {
-                    db.insertOrThrow("Appalti", null, generateNewAppaltoRecord(appalto, codiceEnte));
+                    db.insertOrThrow(TABLE_APPALTI, null, generateNewAppaltoRecord(appalto, codiceEnte));
                 } catch (android.database.sqlite.SQLiteConstraintException e) {
                     updateImportoAppalti(db, appalto);
                 }
@@ -242,7 +235,7 @@ public class DBHelper extends SQLiteOpenHelper {
         cursor.close();
 
         String updateQuery = "UPDATE Appalti SET importo=? WHERE cig=? AND oggetto=? AND codice_fiscale_aggiudicatario=? ;";
-        db.rawQuery(updateQuery, new String[]{new Double(old_importo + appalto.importo).toString(), appalto.cig, appalto.oggetto, appalto.aggiudicatario});
+        db.rawQuery(updateQuery, new String[]{new Double(old_importo + Double.parseDouble(appalto.importo)).toString(), appalto.cig, appalto.oggetto, appalto.aggiudicatario});
 
     }
 
@@ -265,5 +258,52 @@ public class DBHelper extends SQLiteOpenHelper {
         db.close();
 
         return entities;
+    }
+
+    //Get stuff
+
+    public List<Bilancio> getVociBilancio(String codiceEnte, String anno) {
+        SQLiteDatabase db = getReadableDatabase();
+        List<Bilancio> vociBilancio = new LinkedList();
+
+        String query = "SELECT * from Bilancio where codice_ente = ? and importo != 0.0 and anno = ? ORDER BY importo DESC";
+        Cursor cursor = db.rawQuery(query, new String[]{codiceEnte, anno});
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            vociBilancio.add(
+                    new Bilancio(
+                            cursor.getString(0),
+                            cursor.getString(1),
+                            Integer.parseInt(cursor.getString(2)),
+                            cursor.getString(3),
+                            Double.parseDouble(cursor.getString(4))
+                    )
+            );
+        }
+        cursor.close();
+        return vociBilancio;
+    }
+
+    public List<Appalto> getAppalti(String codiceEnte) {
+        SQLiteDatabase db = getReadableDatabase();
+        List<Appalto> appalti = new ArrayList<>();
+
+        String query = "SELECT * from Appalti where codice_ente = ? and importo != 0.0 ORDER BY importo DESC";
+
+        Cursor cursor = db.rawQuery(query, new String[]{codiceEnte});
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            appalti.add(
+                    new Appalto(
+                            cursor.getString(0),
+                            cursor.getString(1),
+                            cursor.getString(2),
+                            cursor.getString(3),
+                            cursor.getString(4),
+                            Double.parseDouble(cursor.getString(5)),
+                            cursor.getString(6)
+                    )
+            );
+        }
+        cursor.close();
+        return appalti;
     }
 }

@@ -1,0 +1,1 @@
+CREATE TABLE Appalti (cig TEXT NOT NULL, oggetto TEXT NOT NULL, scelta_contraente TEXT, codice_fiscale_aggiudicatario TEXT NOT NULL, aggiudicatario TEXT NOT NULL, importo REAL NOT NULL, codice_ente TEXT REFERENCES Ente (codice_ente) ON DELETE CASCADE ON UPDATE CASCADE MATCH SIMPLE NOT NULL, PRIMARY KEY (cig ASC, oggetto ASC, codice_fiscale_aggiudicatario ASC));
