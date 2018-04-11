@@ -1,6 +1,6 @@
 package it.unive.dais.cevid.datadroid.lib.database.item;
 
-public class Appalto {
+public class Tender {
     private String cig;
     private String oggetto;
     private String sceltaContraente;
@@ -9,7 +9,7 @@ public class Appalto {
     private double importo;
     private String codiceEnte;
 
-    public Appalto(String cig, String oggetto, String sceltaContraente, String codice_fiscale_aggiudicatario, String aggiudicatario, double importo, String codiceEnte) {
+    public Tender(String cig, String oggetto, String sceltaContraente, String codice_fiscale_aggiudicatario, String aggiudicatario, double importo, String codiceEnte) {
         this.cig = cig;
         this.oggetto = oggetto;
         this.sceltaContraente = sceltaContraente;

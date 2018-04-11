@@ -1,6 +1,6 @@
 package it.unive.dais.cevid.datadroid.lib.database.item;
 
-public class Bilancio {
+public class Expenditure {
     private String codiceSiope;
     private String codiceEnte;
 
@@ -9,24 +9,13 @@ public class Bilancio {
 
     private String descrizioneCodice;
 
-    public Bilancio(String codiceSiope, String codiceEnte, int anno, String descrizioneCodice, double importo) {
+    public Expenditure(String codiceSiope, String codiceEnte, int anno, String descrizioneCodice, double importo) {
         this.codiceSiope = codiceSiope;
         this.codiceEnte = codiceEnte;
         this.anno = anno;
         this.descrizioneCodice = descrizioneCodice;
         this.importo = importo;
     }
-
-    public Bilancio generateNewBilancio(int anno, double importo) {
-        return new Bilancio(
-                this.codiceSiope,
-                this.codiceEnte,
-                anno,
-                this.descrizioneCodice,
-                importo
-        );
-    }
-
 
     public String getCodiceSiope() {
         return codiceSiope;

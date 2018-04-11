@@ -48,7 +48,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -59,9 +58,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.dais.cevid.datadroid.lib.database.DBHelper;
-import it.unive.dais.cevid.datadroid.lib.database.TendersLinkParser;
-import it.unive.dais.cevid.datadroid.lib.database.item.Appalto;
-import it.unive.dais.cevid.datadroid.lib.database.item.Bilancio;
+import it.unive.dais.cevid.datadroid.lib.database.item.Expenditure;
+import it.unive.dais.cevid.datadroid.lib.database.item.Tender;
 import it.unive.dais.cevid.datadroid.lib.parser.AppaltiParser;
 import it.unive.dais.cevid.datadroid.lib.parser.AsyncParser;
 import it.unive.dais.cevid.datadroid.lib.parser.CsvRowParser;
@@ -169,10 +167,10 @@ public class MapsActivity extends AppCompatActivity
         //testTendersDB(dbHelper);
     }
 
-    /*private void testBilancioDb(DBHelper dbHelper) {
+    private void testBilancioDb(DBHelper dbHelper) {
         SoldipubbliciParser soldipubbliciParser = new SoldipubbliciParser("UNI","000704968000000", null);
         List<SoldipubbliciParser.Data> l;
-        List<Bilancio> vociBilancio;
+        List<Expenditure> vociBilancio;
         try {
             soldipubbliciParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             l = soldipubbliciParser.getAsyncTask().get();
@@ -181,9 +179,9 @@ public class MapsActivity extends AppCompatActivity
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
-    }*/
+    }
 
-    /*private void testTendersDB(DBHelper dbHelper) {
+    private void testTendersDB(DBHelper dbHelper) {
         List<URL> urls = new ArrayList<>();
         try {
             urls.add(new URL("http://www.unive.it/avcp/datiAppalti2016.xml"));
@@ -195,7 +193,7 @@ public class MapsActivity extends AppCompatActivity
         appaltiParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         List<AppaltiParser.Data> l;
-        List<Appalto> appalti;
+        List<Tender> appalti;
 
         try {
             l = appaltiParser.getAsyncTask().get();
@@ -204,7 +202,7 @@ public class MapsActivity extends AppCompatActivity
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
-    }*/
+    }
 
 
     // ciclo di vita della app

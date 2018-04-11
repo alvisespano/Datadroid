@@ -21,17 +21,18 @@ import java.util.List;
 import java.util.Locale;
 
 import it.unive.dais.cevid.datadroid.lib.R;
-import it.unive.dais.cevid.datadroid.lib.database.item.Appalto;
-import it.unive.dais.cevid.datadroid.lib.database.item.Bilancio;
+import it.unive.dais.cevid.datadroid.lib.database.item.Tender;
+import it.unive.dais.cevid.datadroid.lib.database.item.Expenditure;
+import it.unive.dais.cevid.datadroid.lib.database.item.Entity;
 import it.unive.dais.cevid.datadroid.lib.parser.AppaltiParser;
 import it.unive.dais.cevid.datadroid.lib.parser.SoldipubbliciParser;
 
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "datadroid_database.db";
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 9;
     private static final int ANNO_APPALTI = 2016;
-    private static final String TABLE_ENTE = "Ente";
+    private static final String TABLE_ENTI = "Enti";
     private static final String TABLE_BILANCIO = "Bilancio";
     private static final String TABLE_APPALTI = "Appalti";
 
@@ -118,7 +119,7 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     private void deleteTables(SQLiteDatabase db) {
-        deleteTable(db, TABLE_ENTE);
+        deleteTable(db, TABLE_ENTI);
         deleteTable(db, TABLE_BILANCIO);
         deleteTable(db, TABLE_APPALTI);
     }
@@ -170,9 +171,9 @@ public class DBHelper extends SQLiteOpenHelper {
 
     //Data-insertion stuff
 
-    //Bilancio-insertion stuff
+    //Expenditure-insertion stuff
 
-    protected void insertBilancio(List<SoldipubbliciParser.Data> soldiPubbliciList) {
+    public void insertBilancio(List<SoldipubbliciParser.Data> soldiPubbliciList) {
         SQLiteDatabase db = getWritableDatabase();
 
         for (SoldipubbliciParser.Data data : soldiPubbliciList) {
@@ -197,7 +198,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     //Appalti-insertion stuff
 
-    protected void insertTenders(String codiceEnte, List<AppaltiParser.Data> tendersList) {
+    public void insertTenders(String codiceEnte, List<AppaltiParser.Data> tendersList) {
         SQLiteDatabase db = getWritableDatabase();
 
         for (AppaltiParser.Data appalto : tendersList) {
@@ -239,19 +240,25 @@ public class DBHelper extends SQLiteOpenHelper {
 
     }
 
-    public List<String> getEntitie() {
+    public List<Entity> getEntitie() {
         SQLiteDatabase db = getReadableDatabase();
+        List<Entity> entities = new ArrayList<>();
 
-        List<String> entities = new ArrayList<>();
-
-        String query = "SELECT codice_ente FROM Ente";
+        String query = "SELECT codice_ente FROM Enti";
 
         Cursor cursor = db.rawQuery(query, new String[]{});
-
         cursor.moveToFirst();
 
         while (!cursor.isAfterLast()) {
-            entities.add(cursor.getString(0));
+            Entity entity = new Entity(
+                    cursor.getString(0),
+                    cursor.getString(1),
+                    cursor.getString(2),
+                    cursor.getDouble(3),
+                    cursor.getDouble(4)
+                    );
+            entities.add(entity);
+
             cursor.moveToNext();
         }
 
@@ -262,15 +269,15 @@ public class DBHelper extends SQLiteOpenHelper {
 
     //Get stuff
 
-    public List<Bilancio> getVociBilancio(String codiceEnte, String anno) {
+    public List<Expenditure> getVociBilancio(String codiceEnte, String anno) {
         SQLiteDatabase db = getReadableDatabase();
-        List<Bilancio> vociBilancio = new LinkedList();
+        List<Expenditure> expenditureList = new LinkedList();
 
         String query = "SELECT * from Bilancio where codice_ente = ? and importo != 0.0 and anno = ? ORDER BY importo DESC";
         Cursor cursor = db.rawQuery(query, new String[]{codiceEnte, anno});
         for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-            vociBilancio.add(
-                    new Bilancio(
+            expenditureList.add(
+                    new Expenditure(
                             cursor.getString(0),
                             cursor.getString(1),
                             Integer.parseInt(cursor.getString(2)),
@@ -280,19 +287,19 @@ public class DBHelper extends SQLiteOpenHelper {
             );
         }
         cursor.close();
-        return vociBilancio;
+        return expenditureList;
     }
 
-    public List<Appalto> getAppalti(String codiceEnte) {
+    public List<Tender> getAppalti(String codiceEnte) {
         SQLiteDatabase db = getReadableDatabase();
-        List<Appalto> appalti = new ArrayList<>();
+        List<Tender> appalti = new ArrayList<>();
 
         String query = "SELECT * from Appalti where codice_ente = ? and importo != 0.0 ORDER BY importo DESC";
 
         Cursor cursor = db.rawQuery(query, new String[]{codiceEnte});
         for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
             appalti.add(
-                    new Appalto(
+                    new Tender(
                             cursor.getString(0),
                             cursor.getString(1),
                             cursor.getString(2),
