@@ -30,7 +30,7 @@ import it.unive.dais.cevid.datadroid.lib.parser.SoldipubbliciParser;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "datadroid_database.db";
-    private static final int DATABASE_VERSION = 9;
+    private static final int DATABASE_VERSION = 24;
     private static final int ANNO_APPALTI = 2016;
     private static final String TABLE_ENTI = "Enti";
     private static final String TABLE_BILANCIO = "Bilancio";
@@ -131,6 +131,12 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
         if (dbFile.exists() && isOldDatabase()) {
             deleteTable(db, TABLE_BILANCIO);
+            List<Entity> entities = getEntitie();
+
+            for (Entity entity : entities) {
+                updateEntiBA(db, entity.getId(), TABLE_BILANCIO, false);
+            }
+
             try {
                 insertFromFile(db, R.raw.database_bilancio_init);
             } catch (IOException e) {
@@ -152,13 +158,6 @@ public class DBHelper extends SQLiteOpenHelper {
         return lastTime;
     }
 
-    private Calendar getTimestampCal(long timestamp) {
-        Calendar timeStampCal = Calendar.getInstance(Locale.ITALIAN);
-        timeStampCal.setTimeInMillis(timestamp);
-
-        return timeStampCal;
-    }
-
     public boolean isOldDatabase() {
         Calendar creationCalendar = Calendar.getInstance(Locale.ITALIAN);
         Calendar currentCalendar = Calendar.getInstance(Locale.ITALIAN);
@@ -173,8 +172,9 @@ public class DBHelper extends SQLiteOpenHelper {
 
     //Expenditure-insertion stuff
 
-    public void insertBilancio(List<SoldipubbliciParser.Data> soldiPubbliciList) {
+    public void insertBilancio(String codiceEnte, List<SoldipubbliciParser.Data> soldiPubbliciList) {
         SQLiteDatabase db = getWritableDatabase();
+        updateEntiBA(db, codiceEnte, TABLE_BILANCIO, true);
 
         for (SoldipubbliciParser.Data data : soldiPubbliciList) {
             insertVoceBilancio(db, data, 2015, data.importo_2015);
@@ -182,6 +182,19 @@ public class DBHelper extends SQLiteOpenHelper {
             insertVoceBilancio(db, data, 2017, data.importo_2017);
         }
         db.close();
+    }
+
+    private void updateEntiBA(SQLiteDatabase db, String codiceEnte, String field, Boolean insert) {
+        String column = (field.equals(TABLE_BILANCIO))? "bilancio" : "appalti";
+        String updateQuery = "UPDATE Enti SET " + column + " = ? WHERE codice_ente = ?;";
+        if (insert) {
+            db.execSQL(updateQuery, new String[]{"T", codiceEnte});
+            //db.rawQuery(updateQuery, new String[]{"T", codiceEnte});
+        }
+        else {
+            db.execSQL(updateQuery, new String[]{"F", codiceEnte});
+            //db.rawQuery(updateQuery, new String[]{"F", codiceEnte});
+        }
     }
 
     private void insertVoceBilancio (SQLiteDatabase db, SoldipubbliciParser.Data voceBilancio, int anno, String importo) {
@@ -200,6 +213,7 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public void insertTenders(String codiceEnte, List<AppaltiParser.Data> tendersList) {
         SQLiteDatabase db = getWritableDatabase();
+        updateEntiBA(db, codiceEnte, TABLE_APPALTI, true);
 
         for (AppaltiParser.Data appalto : tendersList) {
             if (!appalto.aggiudicatario.equals("Dati assenti o mal formattati")) {
@@ -236,7 +250,7 @@ public class DBHelper extends SQLiteOpenHelper {
         cursor.close();
 
         String updateQuery = "UPDATE Appalti SET importo=? WHERE cig=? AND oggetto=? AND codice_fiscale_aggiudicatario=? ;";
-        db.rawQuery(updateQuery, new String[]{new Double(old_importo + Double.parseDouble(appalto.importo)).toString(), appalto.cig, appalto.oggetto, appalto.aggiudicatario});
+        db.execSQL(updateQuery, new String[]{new Double(old_importo + Double.parseDouble(appalto.importo)).toString(), appalto.cig, appalto.oggetto, appalto.aggiudicatario});
 
     }
 
@@ -244,7 +258,7 @@ public class DBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getReadableDatabase();
         List<Entity> entities = new ArrayList<>();
 
-        String query = "SELECT codice_ente FROM Enti";
+        String query = "SELECT * FROM Enti";
 
         Cursor cursor = db.rawQuery(query, new String[]{});
         cursor.moveToFirst();
@@ -255,7 +269,10 @@ public class DBHelper extends SQLiteOpenHelper {
                     cursor.getString(1),
                     cursor.getString(2),
                     cursor.getDouble(3),
-                    cursor.getDouble(4)
+                    cursor.getDouble(4),
+                    cursor.getInt(5),
+                    cursor.getString(6),
+                    cursor.getString(7)
                     );
             entities.add(entity);
 
@@ -297,7 +314,8 @@ public class DBHelper extends SQLiteOpenHelper {
         String query = "SELECT * from Appalti where codice_ente = ? and importo != 0.0 ORDER BY importo DESC";
 
         Cursor cursor = db.rawQuery(query, new String[]{codiceEnte});
-        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
             appalti.add(
                     new Tender(
                             cursor.getString(0),
@@ -309,8 +327,35 @@ public class DBHelper extends SQLiteOpenHelper {
                             cursor.getString(6)
                     )
             );
+            cursor.moveToNext();
         }
         cursor.close();
         return appalti;
+    }
+
+    public boolean checkBilancioEnte(String codiceEnte) {
+        SQLiteDatabase db = getReadableDatabase();
+        String query = "SELECT bilancio FROM Enti WHERE codice_ente = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{codiceEnte});
+        cursor.moveToFirst();
+
+        boolean check = ((cursor.getString(0)).equals("T"))? true : false;
+
+        cursor.close();
+
+        return check;
+    }
+
+    public boolean checkAppaltiEnte(String codiceEnte) {
+        SQLiteDatabase db = getReadableDatabase();
+        String query = "SELECT appalti FROM Enti WHERE codice_ente = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{codiceEnte});
+        cursor.moveToFirst();
+
+        boolean check = ((cursor.getString(0)).equals("T"))? true : false;
+
+        cursor.close();
+
+        return check;
     }
 }

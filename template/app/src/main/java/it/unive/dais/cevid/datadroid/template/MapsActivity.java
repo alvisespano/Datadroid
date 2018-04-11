@@ -48,6 +48,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -58,6 +59,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.dais.cevid.datadroid.lib.database.DBHelper;
+import it.unive.dais.cevid.datadroid.lib.database.item.Entity;
 import it.unive.dais.cevid.datadroid.lib.database.item.Expenditure;
 import it.unive.dais.cevid.datadroid.lib.database.item.Tender;
 import it.unive.dais.cevid.datadroid.lib.parser.AppaltiParser;
@@ -162,26 +164,25 @@ public class MapsActivity extends AppCompatActivity
             }
         });
 
-        DBHelper dbHelper = DBHelper.getSingleton(getApplicationContext());
-        //testBilancioDb(dbHelper);
-        //testTendersDB(dbHelper);
-    }
-
-    private void testBilancioDb(DBHelper dbHelper) {
-        SoldipubbliciParser soldipubbliciParser = new SoldipubbliciParser("UNI","000704968000000", null);
-        List<SoldipubbliciParser.Data> l;
-        List<Expenditure> vociBilancio;
+        /*DBHelper dbHelper = DBHelper.getSingleton(getApplicationContext());
         try {
-            soldipubbliciParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            l = soldipubbliciParser.getAsyncTask().get();
-            dbHelper.insertBilancio(l);
-            vociBilancio = dbHelper.getVociBilancio("000704968000000", "2016");
-        } catch (InterruptedException | ExecutionException e) {
+            testBilancioDb(dbHelper);
+            testTendersDB(dbHelper);
+        } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
+        List<Entity> entities = dbHelper.getEntitie();*/
     }
 
-    private void testTendersDB(DBHelper dbHelper) {
+    private void testBilancioDb(DBHelper dbHelper) throws ExecutionException, InterruptedException {
+        SoldipubbliciParser soldipubbliciParser = new SoldipubbliciParser("UNI","000704968000000", null);
+        soldipubbliciParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        List<SoldipubbliciParser.Data> l = soldipubbliciParser.getAsyncTask().get();
+        dbHelper.insertBilancio("000704968000000", l);
+        List<Expenditure> vociBilancio = dbHelper.getVociBilancio("000704968000000", "2016");
+    }
+
+    private void testTendersDB(DBHelper dbHelper) throws ExecutionException, InterruptedException {
         List<URL> urls = new ArrayList<>();
         try {
             urls.add(new URL("http://www.unive.it/avcp/datiAppalti2016.xml"));
@@ -191,17 +192,9 @@ public class MapsActivity extends AppCompatActivity
 
         AppaltiParser appaltiParser = new AppaltiParser(urls, null);
         appaltiParser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-        List<AppaltiParser.Data> l;
-        List<Tender> appalti;
-
-        try {
-            l = appaltiParser.getAsyncTask().get();
-            dbHelper.insertTenders("000704968000000", l);
-            appalti = dbHelper.getAppalti("000704968000000");
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
+        List l = appaltiParser.getAsyncTask().get();
+        dbHelper.insertTenders("000704968000000", l);
+        List<Tender> appalti = dbHelper.getAppalti("000704968000000");
     }
 
 
