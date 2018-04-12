@@ -13,7 +13,6 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
-import android.support.annotation.WorkerThread;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -47,7 +46,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
@@ -57,8 +55,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.dais.cevid.datadroid.lib.parser.AsyncParser;
-import it.unive.dais.cevid.datadroid.lib.parser.CsvRowParser;
-import it.unive.dais.cevid.datadroid.lib.parser.progress.PercentProgressCounter;
+import it.unive.dais.cevid.datadroid.lib.parser.CsvParser;
 import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressBarManager;
 import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressCounter;
 import it.unive.dais.cevid.datadroid.lib.util.Function;
@@ -583,24 +580,25 @@ public class MapsActivity extends AppCompatActivity
     }
 
     @NonNull
-    protected <I extends MapItem> Collection<Marker> putMarkersFromCsv(@NonNull CsvRowParser parser, Function<CsvRowParser.Row, I> createMapItem, float hue) throws ExecutionException, InterruptedException {
-        List<CsvRowParser.Row> rows = parser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
+    protected <I extends MapItem> Collection<Marker> putMarkersFromCsv(@NonNull CsvParser parser, Function<CsvParser.Row, I> createMapItem, float hue) throws ExecutionException, InterruptedException {
+        List<CsvParser.Row> rows = parser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
         List<I> l = new ArrayList<>();
-        for (CsvRowParser.Row r : rows)
+        for (CsvParser.Row r : rows)
             l.add(createMapItem.apply(r));
         return putMarkersFromMapItems(l, hue);
     }
 
     @NonNull
-    protected <I extends MapItem> Collection<Marker> putMarkersFromCsv(Reader rd, boolean hasHeader, String sep, Function<CsvRowParser.Row, I> createMapItem, float hue) throws ExecutionException, InterruptedException {
-        return putMarkersFromCsv(new CsvRowParser(rd, hasHeader, sep, null), createMapItem, hue);
+    protected <I extends MapItem> Collection<Marker> putMarkersFromCsv(Reader rd, boolean hasHeader, String sep, Function<CsvParser.Row, I> createMapItem, float hue) throws ExecutionException, InterruptedException {
+        return putMarkersFromCsv(new CsvParser(rd, hasHeader, sep, null), createMapItem, hue);
     }
 
     @NonNull
     @SuppressLint("StaticFieldLeak")
-    protected <I extends MapItem> Collection<Marker> putMarkersFromCsv(URL url, boolean hasHeader, String sep, Function<CsvRowParser.Row, I> createMapItem, float hue) throws ExecutionException, InterruptedException {
+    protected <I extends MapItem> Collection<Marker> putMarkersFromCsv(URL url, boolean hasHeader, String sep, Function<CsvParser.Row, I> createMapItem, float hue) throws ExecutionException, InterruptedException {
         return (new AsyncTask<Void, Void, Collection<Marker>>() {
             @Override
+            @Nullable
             protected Collection<Marker> doInBackground(Void... params) {
                 try {
                     Log.v(TAG, String.format("downloading CSV from %s...", url));

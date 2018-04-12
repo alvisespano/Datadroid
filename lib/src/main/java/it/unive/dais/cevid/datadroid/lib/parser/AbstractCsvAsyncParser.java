@@ -35,7 +35,7 @@ import it.unive.dais.cevid.datadroid.lib.util.Prelude;
  * @param <Data> tipo di una riga di dati.
  * @author Alvise Spanò, Università Ca' Foscari
  */
-public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<Data, ProgressCounter> {
+public abstract class AbstractCsvAsyncParser<Data> extends AbstractAsyncParser<Data, ProgressCounter> {
 
     protected final boolean hasActualHeader;
     @NonNull
@@ -52,7 +52,7 @@ public abstract class AbstractAsyncCsvParser<Data> extends AbstractAsyncParser<D
      * @param hasActualHeader flag booleano che indica se il CSV ha un header alla prima riga.
      * @param sep             separatore tra le colonne del CSV (ad esempio il punto e virgola ";" oppure la virgola ",").
      */
-    protected AbstractAsyncCsvParser(@NonNull Reader rd, boolean hasActualHeader, @NonNull String sep, @Nullable ProgressBarManager pbm) {
+    protected AbstractCsvAsyncParser(@NonNull Reader rd, boolean hasActualHeader, @NonNull String sep, @Nullable ProgressBarManager pbm) {
         super(pbm);
         this.reader = new BufferedReader(rd);
         this.sep = sep;

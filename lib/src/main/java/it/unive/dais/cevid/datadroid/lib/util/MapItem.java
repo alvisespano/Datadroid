@@ -4,7 +4,7 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.io.Serializable;
 
-import it.unive.dais.cevid.datadroid.lib.parser.CsvRowParser;
+import it.unive.dais.cevid.datadroid.lib.parser.CsvParser;
 import it.unive.dais.cevid.datadroid.lib.parser.ParserException;
 
 /**
@@ -33,10 +33,10 @@ public interface MapItem extends Serializable {
      */
     String getDescription() throws Exception;
 
-    static Function<CsvRowParser.Row, MapItem> factoryByCsvColumnNames(String latitude, String longitude, String title, String description) {
-        return new Function<CsvRowParser.Row, MapItem>() {
+    static Function<CsvParser.Row, MapItem> factoryByCsvColumnNames(String latitude, String longitude, String title, String description) {
+        return new Function<CsvParser.Row, MapItem>() {
             @Override
-            public MapItem apply(CsvRowParser.Row r) {
+            public MapItem apply(CsvParser.Row r) {
                 return new MapItem() {
                     @Override
                     public LatLng getPosition() throws ParserException {

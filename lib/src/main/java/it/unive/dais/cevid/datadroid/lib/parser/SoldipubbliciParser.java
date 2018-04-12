@@ -20,7 +20,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 
 /**
- * Sottoclasse di {@code AbstractAsyncCsvParser} che implementa un downloader e parser per il sito soldipubblici.gov.it.
+ * Sottoclasse di {@code AbstractCsvAsyncParser} che implementa un downloader e parser per il sito soldipubblici.gov.it.
  * Questa classe è usabile direttamente e non necessita di essere ereditata.
  * Non richiede il generic FiltrableData perché utilizza una classe innestata apposita per rappresentare il risultato della richiesta in maniera untyped ma generale tramite un dizionario.
  * Un esempio d'uso con un file CSV con header e virgole come separatore:
@@ -28,7 +28,7 @@ import okhttp3.RequestBody;
  * {@code
  * SoldipubbliciParser parser = new SoldipubbliciParser(1, 2);
  * List<SoldipubbliciParser.FiltrableData> rows = parser.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
- * for (CsvRowParser.Row row : rows) {
+ * for (CsvParser.Row row : rows) {
  *     String id = row.get("ID"), nome = row.get("NAME");
  *     // fai qualcosa con id e nome
  * }

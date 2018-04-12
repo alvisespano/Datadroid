@@ -22,7 +22,7 @@ import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressCounter;
  * @param <P> tipo Progress che viene inoltrato alla superclasse AsyncTask.
  * @author Alvise Spanò, Università Ca' Foscari
  */
-public abstract class AbstractAsyncJsonParser<Item, P extends ProgressCounter> extends AbstractAsyncParser<Item, P> {
+public abstract class AbstractJsonAsyncParser<Item, P extends ProgressCounter> extends AbstractAsyncParser<Item, P> {
 
     @NonNull
     protected final JsonReader reader;
@@ -31,7 +31,7 @@ public abstract class AbstractAsyncJsonParser<Item, P extends ProgressCounter> e
      * Costruttore protected via Reader.
      * @param rd oggetto Reader usato come input.
      */
-    protected AbstractAsyncJsonParser(@NonNull Reader rd, @Nullable ProgressBarManager pbm) {
+    protected AbstractJsonAsyncParser(@NonNull Reader rd, @Nullable ProgressBarManager pbm) {
         super(pbm);
         this.reader = new JsonReader(rd);
     }
