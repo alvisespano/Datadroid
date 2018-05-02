@@ -10,8 +10,8 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressBarManager;
-import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressCounter;
+import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
+import it.unive.dais.cevid.datadroid.lib.progress.ProgressCounter;
 import it.unive.dais.cevid.datadroid.lib.util.Prelude;
 
 /**

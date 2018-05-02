@@ -1,18 +1,15 @@
 package it.unive.dais.cevid.datadroid.template;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.annotation.UiThread;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -47,20 +44,11 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 
-import it.unive.dais.cevid.datadroid.lib.parser.AsyncParser;
-import it.unive.dais.cevid.datadroid.lib.parser.CsvParser;
-import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressBarManager;
-import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressCounter;
-import it.unive.dais.cevid.datadroid.lib.util.Function;
-import it.unive.dais.cevid.datadroid.lib.util.MapItem;
-import it.unive.dais.cevid.datadroid.lib.util.Prelude;
+import it.unive.dais.cevid.datadroid.lib.component.MapManager;
+import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
+import it.unive.dais.cevid.datadroid.lib.component.MapItem;
 
 /**
  * Questa classe è la componente principale del toolkit: fornisce servizi primari per un'app basata su Google Maps, tra cui localizzazione, pulsanti
@@ -83,7 +71,7 @@ public class MapsActivity extends AppCompatActivity
     protected static final int REQUEST_CHECK_SETTINGS = 500;
     protected static final int PERMISSIONS_REQUEST_ACCESS_BOTH_LOCATION = 501;
     // alcune costanti
-    private static final String TAG = "MapsActivity";
+    private static final String TAG = "MapManager";
     /**
      * Questo oggetto è la mappa di Google Maps. Viene inizializzato asincronamente dal metodo {@code onMapsReady}.
      */
@@ -466,10 +454,6 @@ public class MapsActivity extends AppCompatActivity
         startActivity(navigation);
     }
 
-    /**
-     * Controlla lo stato del GPS e dei servizi di localizzazione, comportandosi di conseguenza.
-     * Viene usata durante l'inizializzazione ed in altri casi speciali.
-     */
     protected void gpsCheck() {
         GoogleApiClient googleApiClient = new GoogleApiClient.Builder(MapsActivity.this).addApi(LocationServices.API).build();
         googleApiClient.connect();
@@ -504,10 +488,6 @@ public class MapsActivity extends AppCompatActivity
         });
     }
 
-    // marker stuff
-    //
-    //
-
     /**
      * Callback che viene invocata quando viene cliccato un marker.
      * Questo metodo viene invocato al click di QUALUNQUE marker nella mappa; pertanto, se è necessario
@@ -530,99 +510,31 @@ public class MapsActivity extends AppCompatActivity
         return false;
     }
 
-    // TODO: mettere i metodi qui sotto in una superclasse AbstractMapActivity oppure in una classe di utility statiche
 
-    // TODO: aggiungere progress bar
 
-    @NonNull
-    @UiThread
-    protected Marker putMarkerFromMapItem(MapItem i, float hue) throws Exception {
-        MarkerOptions opts = new MarkerOptions().title(i.getTitle()).position(i.getPosition()).snippet(i.getDescription()).icon(BitmapDescriptorFactory.defaultMarker(hue));
-        return gMap.addMarker(opts);
-    }
-
-    /**
-     * Metodo di utilità che permette di posizionare rapidamente sulla mappa una lista di MapItem.
-     * Attenzione: l'oggetto gMap deve essere inizializzato, questo metodo va pertanto chiamato preferibilmente dalla
-     * callback onMapReady().
-     *
-     * @param l   la lista di oggetti di tipo I tale che I sia sottotipo di MapItem.
-     * @param <I> sottotipo di MapItem.
-     * @return ritorna la collection di oggetti Marker aggiunti alla mappa.
-     */
-    @NonNull
-    @UiThread
-    protected <I extends MapItem> Collection<Marker> putMarkersFromMapItems(List<I> l, float hue) {
-        Collection<Marker> r = new ArrayList<>();
-        int cnt = 0;
-        for (MapItem i : l) {
-            try {
-                r.add(putMarkerFromMapItem(i, hue));
-            } catch (Exception e) {
-                Log.w(TAG, String.format("skipping MapItem #%d: %s", cnt, e.getMessage()));
-            }
-            ++cnt;
-        }
-        Log.v(TAG, String.format("added %d markers", cnt));
-        return r;
-    }
-
-    @Nullable
-    protected <I extends MapItem, P extends ProgressCounter> Collection<Marker> putMarkersFromParser(@NonNull AsyncParser<I, P> parser, float hue) {
-        try {
-            List<I> l = parser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
-            return putMarkersFromMapItems(l, hue);
-        } catch (Exception e) {
-            Log.e(TAG, String.format("exception caught during parser %s: %s", parser.getName(), e));
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    @NonNull
-    protected <I extends MapItem> Collection<Marker> putMarkersFromCsv(@NonNull CsvParser parser, Function<CsvParser.Row, I> createMapItem, float hue) throws ExecutionException, InterruptedException {
-        List<CsvParser.Row> rows = parser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
-        List<I> l = new ArrayList<>();
-        for (CsvParser.Row r : rows)
-            l.add(createMapItem.apply(r));
-        return putMarkersFromMapItems(l, hue);
-    }
-
-    @NonNull
-    protected <I extends MapItem> Collection<Marker> putMarkersFromCsv(Reader rd, boolean hasHeader, String sep, Function<CsvParser.Row, I> createMapItem, float hue) throws ExecutionException, InterruptedException {
-        return putMarkersFromCsv(new CsvParser(rd, hasHeader, sep, null), createMapItem, hue);
-    }
-
-    @NonNull
-    @SuppressLint("StaticFieldLeak")
-    protected <I extends MapItem> Collection<Marker> putMarkersFromCsv(URL url, boolean hasHeader, String sep, Function<CsvParser.Row, I> createMapItem, float hue) throws ExecutionException, InterruptedException {
-        return (new AsyncTask<Void, Void, Collection<Marker>>() {
-            @Override
-            @Nullable
-            protected Collection<Marker> doInBackground(Void... params) {
-                try {
-                    Log.v(TAG, String.format("downloading CSV from %s...", url));
-                    return putMarkersFromCsv(Prelude.urlToReader(url), hasHeader, sep, createMapItem, hue);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-        }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
-    }
+    // demo application code
+    //
+    //
 
     private void demo() {
         try {
+            MapManager mm = new MapManager() {
+                @NonNull
+                @Override
+                protected GoogleMap getGoogleMap() {
+                    return gMap;
+                }
+            };
             // put markers from embedded resource CSV
-            putMarkersFromCsv(new InputStreamReader(getResources().openRawResource(R.raw.piattaforme)),
+            mm.putMarkersFromCsv(new InputStreamReader(getResources().openRawResource(R.raw.piattaforme)),
                     true, ";",
-                    MapItem.factoryByCsvColumnNames("Latitudine (WGS84)", "Longitudine (WGS 84)", "Denominazione", "Stato"),
+                    MapItem.byCsvColumnNames("Latitudine (WGS84)", "Longitudine (WGS 84)", "Denominazione", "Stato"),
                     BitmapDescriptorFactory.HUE_GREEN);
 
             // add markers from online CSV
-            putMarkersFromCsv(new URL(getString(R.string.demo_csv_url)),
+            mm.putMarkersFromCsv(new URL(getString(R.string.demo_csv_url)),
                     true, ";",
-                    MapItem.factoryByCsvColumnNames("Latitudine", "Longitudine", "Comune", "Provincia"),
+                    MapItem.byCsvColumnNames("Latitudine", "Longitudine", "Comune", "Provincia"),
                     BitmapDescriptorFactory.HUE_AZURE);
 
         } catch (Exception e) {

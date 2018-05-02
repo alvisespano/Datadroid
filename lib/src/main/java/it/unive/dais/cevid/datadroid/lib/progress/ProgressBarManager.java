@@ -1,4 +1,4 @@
-package it.unive.dais.cevid.datadroid.lib.parser.progress;
+package it.unive.dais.cevid.datadroid.lib.progress;
 
 import android.app.Activity;
 import android.support.annotation.NonNull;

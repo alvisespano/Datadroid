@@ -5,7 +5,7 @@ import android.support.annotation.Nullable;
 
 import java.io.Reader;
 
-import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressBarManager;
+import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
 import it.unive.dais.cevid.datadroid.lib.util.UnexpectedException;
 
 /**

@@ -5,11 +5,10 @@ import android.support.annotation.Nullable;
 import android.util.JsonReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressBarManager;
-import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressCounter;
+import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
+import it.unive.dais.cevid.datadroid.lib.progress.ProgressCounter;
 
 /**
  * Classe astratta che rappresenta un parser JSON generico.

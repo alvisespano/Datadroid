@@ -20,9 +20,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressBarManager;
-import it.unive.dais.cevid.datadroid.lib.parser.progress.PercentProgressCounter;
-import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressCounter;
+import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
+import it.unive.dais.cevid.datadroid.lib.progress.PercentProgressCounter;
+import it.unive.dais.cevid.datadroid.lib.progress.ProgressCounter;
 
 
 public class AppaltiParser extends AbstractAsyncParser<AppaltiParser.Data, ProgressCounter> {

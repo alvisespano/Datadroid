@@ -7,7 +7,7 @@ import android.support.annotation.WorkerThread;
 
 import java.util.List;
 
-import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressCounter;
+import it.unive.dais.cevid.datadroid.lib.progress.ProgressCounter;
 
 /**
  * Interfaccia che rappresenta un parser asincrono.

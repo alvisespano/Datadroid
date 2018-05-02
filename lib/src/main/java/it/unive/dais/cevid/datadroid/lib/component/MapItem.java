@@ -1,4 +1,4 @@
-package it.unive.dais.cevid.datadroid.lib.util;
+package it.unive.dais.cevid.datadroid.lib.component;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -6,6 +6,7 @@ import java.io.Serializable;
 
 import it.unive.dais.cevid.datadroid.lib.parser.CsvParser;
 import it.unive.dais.cevid.datadroid.lib.parser.ParserException;
+import it.unive.dais.cevid.datadroid.lib.util.Function;
 
 /**
  * Rappresenta un oggetto visualizzabile sulla mappa, con le informazioni minime per il posizionamento e la creazione di un marker.
@@ -33,7 +34,7 @@ public interface MapItem extends Serializable {
      */
     String getDescription() throws Exception;
 
-    static Function<CsvParser.Row, MapItem> factoryByCsvColumnNames(String latitude, String longitude, String title, String description) {
+    static Function<CsvParser.Row, MapItem> byCsvColumnNames(String latitude, String longitude, String title, String description) {
         return new Function<CsvParser.Row, MapItem>() {
             @Override
             public MapItem apply(CsvParser.Row r) {

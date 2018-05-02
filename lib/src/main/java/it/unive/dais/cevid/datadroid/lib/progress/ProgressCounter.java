@@ -1,4 +1,4 @@
-package it.unive.dais.cevid.datadroid.lib.parser.progress;
+package it.unive.dais.cevid.datadroid.lib.progress;
 
 /**
  * Created by spano on 03/01/2018.

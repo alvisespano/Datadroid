@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import it.unive.dais.cevid.datadroid.lib.util.Function;
+
 public class DataManipulation {
 
     // higher-order functional utilities
