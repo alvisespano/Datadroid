@@ -529,13 +529,13 @@ public class MapsActivity extends AppCompatActivity
             mm.putMarkersFromCsv(new InputStreamReader(getResources().openRawResource(R.raw.piattaforme)),
                     true, ";",
                     MapItem.byCsvColumnNames("Latitudine (WGS84)", "Longitudine (WGS 84)", "Denominazione", "Stato"),
-                    BitmapDescriptorFactory.HUE_GREEN);
+                    BitmapDescriptorFactory.HUE_GREEN, null);
 
             // add markers from online CSV
             mm.putMarkersFromCsv(new URL(getString(R.string.demo_csv_url)),
                     true, ";",
                     MapItem.byCsvColumnNames("Latitudine", "Longitudine", "Comune", "Provincia"),
-                    BitmapDescriptorFactory.HUE_AZURE);
+                    BitmapDescriptorFactory.HUE_AZURE, null);
 
         } catch (Exception e) {
             Log.e(TAG, String.format("exception caught: %s", e));
