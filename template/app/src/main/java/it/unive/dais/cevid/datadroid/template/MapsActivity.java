@@ -43,12 +43,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.concurrent.ExecutionException;
 
-import it.unive.dais.cevid.datadroid.lib.component.MapManager;
+import it.unive.dais.cevid.datadroid.lib.util.AsyncTaskResult;
+import it.unive.dais.cevid.datadroid.lib.util.MapManager;
 import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
-import it.unive.dais.cevid.datadroid.lib.component.MapItem;
+import it.unive.dais.cevid.datadroid.lib.util.MapItem;
 
 /**
  * Questa classe è la componente principale del toolkit: fornisce servizi primari per un'app basata su Google Maps, tra cui localizzazione, pulsanti
@@ -75,6 +79,7 @@ public class MapsActivity extends AppCompatActivity
     /**
      * Questo oggetto è la mappa di Google Maps. Viene inizializzato asincronamente dal metodo {@code onMapsReady}.
      */
+    @Nullable
     protected GoogleMap gMap;
     /**
      * Pulsanti in sovraimpressione gestiti da questa app. Da non confondere con i pulsanti che GoogleMaps mette in sovraimpressione e che non
@@ -97,7 +102,7 @@ public class MapsActivity extends AppCompatActivity
      */
     @Nullable
     protected Marker hereMarker = null;
-    @Nullable
+
     private ProgressBarManager progressBarManager;
 
     /**
@@ -139,9 +144,10 @@ public class MapsActivity extends AppCompatActivity
                 opts.position(currentPosition);
                 opts.title(getString(R.string.marker_title));
                 opts.snippet(String.format("lat: %g\nlng: %g", currentPosition.latitude, currentPosition.longitude));
-                hereMarker = gMap.addMarker(opts);
-                if (gMap != null)
+                if (gMap != null) {
+                    hereMarker = gMap.addMarker(opts);
                     gMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentPosition, (float) getResources().getInteger(R.integer.zoomFactor_button_here)));
+                } else Log.e(TAG, "gMap == null in button_here click listener");
             } else
                 Log.d(TAG, "no current position available");
         });
@@ -181,7 +187,9 @@ public class MapsActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        gMap.clear();
+        if (gMap != null) {
+            gMap.clear();
+        }
     }
 
     /**
@@ -200,7 +208,7 @@ public class MapsActivity extends AppCompatActivity
                         // inserire codice qui
                         break;
                     case Activity.RESULT_CANCELED:
-                        // o qui
+                        // oppure qui
                         break;
                     default:
                         break;
@@ -399,6 +407,7 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         gMap = googleMap;
+        assert gMap != null;
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MapsActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSIONS_REQUEST_ACCESS_BOTH_LOCATION);
@@ -511,36 +520,43 @@ public class MapsActivity extends AppCompatActivity
     }
 
 
-
     // demo application code
     //
     //
 
     private void demo() {
-        try {
-            MapManager mm = new MapManager() {
-                @NonNull
-                @Override
-                protected GoogleMap getGoogleMap() {
-                    return gMap;
-                }
-            };
-            // put markers from embedded resource CSV
-            mm.putMarkersFromCsv(new InputStreamReader(getResources().openRawResource(R.raw.piattaforme)),
-                    true, ";",
-                    MapItem.byCsvColumnNames("Latitudine (WGS84)", "Longitudine (WGS 84)", "Denominazione", "Stato"),
-                    BitmapDescriptorFactory.HUE_GREEN, null);
+        MapManager mm = new MapManager() {
+            @NonNull
+            @Override
+            protected GoogleMap getGoogleMap() {
+                assert gMap != null;
+                return gMap;
+            }
+        };
 
-            // add markers from online CSV
-            mm.putMarkersFromCsv(new URL(getString(R.string.demo_csv_url)),
-                    true, ";",
-                    MapItem.byCsvColumnNames("Latitudine", "Longitudine", "Comune", "Provincia"),
-                    BitmapDescriptorFactory.HUE_AZURE, null);
+        // put markers from embedded resource CSV
+        AsyncTaskResult.run(() -> {
+            try {
+                mm.putMarkersFromCsv(new InputStreamReader(getResources().openRawResource(R.raw.piattaforme)),
+                        true, ";",
+                        MapItem.byCsvColumnNames("Latitudine (WGS84)", "Longitudine (WGS 84)", "Denominazione", "Stato"),
+                        BitmapDescriptorFactory.HUE_GREEN, progressBarManager);
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
 
-        } catch (Exception e) {
-            Log.e(TAG, String.format("exception caught: %s", e));
-            e.printStackTrace();
-        }
+        // add markers from online CSV
+        AsyncTaskResult.run(() -> {
+            try {
+                mm.putMarkersFromCsv(new URL(getString(R.string.demo_csv_url)),
+                        true, ";",
+                        MapItem.byCsvColumnNames("Latitudine", "Longitudine", "Comune", "Provincia"),
+                        BitmapDescriptorFactory.HUE_AZURE, progressBarManager);
+            } catch (ExecutionException | InterruptedException | IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
 }

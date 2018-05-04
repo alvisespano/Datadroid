@@ -10,6 +10,7 @@ import java.io.IOException;
  * @param <R> il tipo di ritorno della funzione.
  * @author Alvise Spanò, Università Ca' Foscari
  */
+@FunctionalInterface
 public interface Function<T, R>{
     /**
      * Unico metodo dell'interfaccia.

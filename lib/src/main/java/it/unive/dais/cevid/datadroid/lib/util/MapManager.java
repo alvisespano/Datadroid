@@ -1,6 +1,5 @@
-package it.unive.dais.cevid.datadroid.lib.component;
+package it.unive.dais.cevid.datadroid.lib.util;
 
-import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -12,6 +11,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 import java.util.ArrayList;
@@ -23,7 +23,9 @@ import it.unive.dais.cevid.datadroid.lib.parser.AsyncParser;
 import it.unive.dais.cevid.datadroid.lib.parser.CsvParser;
 import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
 import it.unive.dais.cevid.datadroid.lib.progress.ProgressCounter;
+import it.unive.dais.cevid.datadroid.lib.util.AsyncTaskResult;
 import it.unive.dais.cevid.datadroid.lib.util.Function;
+import it.unive.dais.cevid.datadroid.lib.util.MapItem;
 import it.unive.dais.cevid.datadroid.lib.util.Prelude;
 
 public abstract class MapManager {
@@ -31,7 +33,6 @@ public abstract class MapManager {
     private static final String TAG = "MapManager";
 
     @NonNull
-    @UiThread
     protected abstract GoogleMap getGoogleMap();
 
     @NonNull
@@ -41,15 +42,6 @@ public abstract class MapManager {
         return getGoogleMap().addMarker(opts);
     }
 
-    /**
-     * Metodo di utilità che permette di posizionare rapidamente sulla mappa una lista di MapItem.
-     * Attenzione: l'oggetto gMap deve essere inizializzato, questo metodo va pertanto chiamato preferibilmente dalla
-     * callback onMapReady().
-     *
-     * @param l   la lista di oggetti di tipo I tale che I sia sottotipo di MapItem.
-     * @param <I> sottotipo di MapItem.
-     * @return ritorna la collection di oggetti Marker aggiunti alla mappa.
-     */
     @NonNull
     @UiThread
     protected <I extends MapItem> Collection<Marker> putMarkersFromMapItems(@NonNull List<I> l, float hue) {
@@ -68,15 +60,9 @@ public abstract class MapManager {
     }
 
     @Nullable
-    protected <I extends MapItem, P extends ProgressCounter> Collection<Marker> putMarkersFromParser(@NonNull AsyncParser<I, P> parser, float hue) {
-        try {
-            List<I> l = parser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
-            return putMarkersFromMapItems(l, hue);
-        } catch (Exception e) {
-            Log.e(TAG, String.format("exception caught during parser %s: %s", parser.getName(), e));
-            e.printStackTrace();
-            return null;
-        }
+    protected <I extends MapItem, P extends ProgressCounter> Collection<Marker> putMarkersFromAsyncParser(@NonNull AsyncParser<I, P> parser, float hue) throws ExecutionException, InterruptedException {
+        List<I> l = parser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
+        return putMarkersFromMapItems(l, hue);
     }
 
     @NonNull
@@ -89,26 +75,14 @@ public abstract class MapManager {
     }
 
     @NonNull
-    public <I extends MapItem> Collection<Marker> putMarkersFromCsv(@NonNull Reader rd, boolean hasHeader, @NonNull String sep, @NonNull Function<CsvParser.Row, I> createMapItem, float hue, @NonNull ProgressBarManager pbm) throws ExecutionException, InterruptedException {
+    public <I extends MapItem> Collection<Marker> putMarkersFromCsv(@NonNull Reader rd, boolean hasHeader, @NonNull String sep, @NonNull Function<CsvParser.Row, I> createMapItem, float hue, @Nullable ProgressBarManager pbm) throws ExecutionException, InterruptedException {
         return putMarkersFromCsv(new CsvParser(rd, hasHeader, sep, pbm), createMapItem, hue);
     }
 
     @NonNull
-    @SuppressLint("StaticFieldLeak")
-    public <I extends MapItem> Collection<Marker> putMarkersFromCsv(@NonNull URL url, boolean hasHeader, @NonNull String sep, @NonNull Function<CsvParser.Row, I> createMapItem, float hue, @NonNull ProgressBarManager pbm) throws ExecutionException, InterruptedException {
-        return (new AsyncTask<Void, Void, Collection<Marker>>() {
-            @Override
-            @Nullable
-            protected Collection<Marker> doInBackground(Void... params) {
-                try {
-                    Log.v(TAG, String.format("downloading CSV from %s...", url));
-                    return putMarkersFromCsv(Prelude.urlToReader(url), hasHeader, sep, createMapItem, hue, pbm);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-        }).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
+    public <I extends MapItem> Collection<Marker> putMarkersFromCsv(@NonNull URL url, boolean hasHeader, @NonNull String sep, @NonNull Function<CsvParser.Row, I> createMapItem, float hue, @Nullable ProgressBarManager pbm) throws IOException, ExecutionException, InterruptedException {
+        Log.v(TAG, String.format("downloading CSV from %s...", url));
+        return putMarkersFromCsv(Prelude.urlToReader(url), hasHeader, sep, createMapItem, hue, pbm);
     }
 
 }
