@@ -33,6 +33,7 @@ public abstract class MapManager {
     private static final String TAG = "MapManager";
 
     @NonNull
+    @UiThread
     protected abstract GoogleMap getGoogleMap();
 
     @NonNull

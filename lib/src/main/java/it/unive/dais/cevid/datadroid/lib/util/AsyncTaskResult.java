@@ -3,10 +3,13 @@ package it.unive.dais.cevid.datadroid.lib.util;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.util.concurrent.ExecutionException;
 
 public class AsyncTaskResult<R> {
+
+    private static final String TAG = "AsyncTaskResult";
 
     protected final AsyncTask<?, ?, Result<R>> task;
 
@@ -73,9 +76,13 @@ public class AsyncTaskResult<R> {
     public static <T, R> AsyncTaskResult<R> run(@NonNull Function<T, R> f, @Nullable T x) {
         return new AsyncTaskResult<>(new AsyncTask<T, Void, AsyncTaskResult.Result<R>>() {
             @Override
-            protected AsyncTaskResult.Result<R> doInBackground(T... x) {
+            protected AsyncTaskResult.Result<R> doInBackground(T... xs) {
                 try {
-                    return new AsyncTaskResult.Result<>(f.apply(x[0]));
+                    final T x = xs[0];
+                    Log.v(TAG, String.format("computing function application: %s(%s)", f, x));
+                    final R r = f.apply(x);
+                    Log.v(TAG, String.format("computation finished: %s(%s)", f, x));
+                    return new AsyncTaskResult.Result<>(r);
                 } catch (Exception e) {
                     return new AsyncTaskResult.Result<>(e);
                 }
