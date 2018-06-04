@@ -40,7 +40,9 @@ public abstract class MapManager {
     @UiThread
     protected Marker putMarkerFromMapItem(@NonNull MapItem i, float hue) throws Exception {
         MarkerOptions opts = new MarkerOptions().title(i.getTitle()).position(i.getPosition()).snippet(i.getDescription()).icon(BitmapDescriptorFactory.defaultMarker(hue));
-        return getGoogleMap().addMarker(opts);
+        Marker m = getGoogleMap().addMarker(opts);
+        m.setTag(i);
+        return m;
     }
 
     @NonNull
