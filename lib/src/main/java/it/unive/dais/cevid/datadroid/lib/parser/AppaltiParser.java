@@ -20,12 +20,12 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressBarManager;
-import it.unive.dais.cevid.datadroid.lib.parser.progress.PercentProgressStepper;
-import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressStepper;
+import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
+import it.unive.dais.cevid.datadroid.lib.progress.PercentProgressCounter;
+import it.unive.dais.cevid.datadroid.lib.progress.ProgressCounter;
 
 
-public class AppaltiParser extends AbstractAsyncParser<AppaltiParser.Data, ProgressStepper> {
+public class AppaltiParser extends AbstractAsyncParser<AppaltiParser.Data, ProgressCounter> {
     private static final String TAG = "AppaltiParser";
     protected static final String DATI_ASSENTI_O_MAL_FORMATTATI = "Dati assenti o mal formattati";
     protected List<URL> urls;
@@ -39,7 +39,7 @@ public class AppaltiParser extends AbstractAsyncParser<AppaltiParser.Data, Progr
     @Override
     public List<Data> parse() throws IOException {
         List<Data> datalist = new ArrayList<>();
-        PercentProgressStepper prog = new PercentProgressStepper(urls.size());
+        PercentProgressCounter prog = new PercentProgressCounter(urls.size());
         for (URL url : urls) {
             try {
                 URLConnection conn = url.openConnection();
@@ -51,7 +51,7 @@ public class AppaltiParser extends AbstractAsyncParser<AppaltiParser.Data, Progr
             } catch (ParserConfigurationException | SAXException e) {
                 throw new IOException(e);
             }
-            prog.step();
+            prog.stepCounter();
         }
         return datalist;
     }
@@ -70,9 +70,9 @@ public class AppaltiParser extends AbstractAsyncParser<AppaltiParser.Data, Progr
         return (Element) e.getElementsByTagName(tagName).item(0);
     }
 
-    protected List<Data> parseNodes(PercentProgressStepper prog, NodeList nodes) {
+    protected List<Data> parseNodes(PercentProgressCounter prog0, NodeList nodes) {
         List<Data> r = new ArrayList<>();
-        prog = prog.getSubProgressStepper(nodes.getLength());
+        PercentProgressCounter prog = prog0.subsection(nodes.getLength());
         for (int i = 0; i < nodes.getLength(); i++) {
             Element parent = (Element) nodes.item(i);
             Data d = new Data();
@@ -118,8 +118,8 @@ public class AppaltiParser extends AbstractAsyncParser<AppaltiParser.Data, Progr
             //controllo cig
             d.cig = getTextByTag(parent, "cig", "0");
 
-            r.add(d);
-            prog.step();
+            r.add(onItemParsed(d));
+            prog.stepCounter();
             publishProgress(prog);
         }
         return r;

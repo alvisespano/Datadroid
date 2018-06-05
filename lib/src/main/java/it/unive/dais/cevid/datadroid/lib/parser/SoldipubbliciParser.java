@@ -12,15 +12,15 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressBarManager;
-import it.unive.dais.cevid.datadroid.lib.parser.progress.PercentProgressStepper;
+import it.unive.dais.cevid.datadroid.lib.progress.PercentProgressCounter;
+import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
 /**
- * Sottoclasse di {@code AbstractAsyncCsvParser} che implementa un downloader e parser per il sito soldipubblici.gov.it.
+ * Sottoclasse di {@code AbstractCsvAsyncParser} che implementa un downloader e parser per il sito soldipubblici.gov.it.
  * Questa classe è usabile direttamente e non necessita di essere ereditata.
  * Non richiede il generic FiltrableData perché utilizza una classe innestata apposita per rappresentare il risultato della richiesta in maniera untyped ma generale tramite un dizionario.
  * Un esempio d'uso con un file CSV con header e virgole come separatore:
@@ -28,7 +28,7 @@ import okhttp3.RequestBody;
  * {@code
  * SoldipubbliciParser parser = new SoldipubbliciParser(1, 2);
  * List<SoldipubbliciParser.FiltrableData> rows = parser.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
- * for (CsvRowParser.Row row : rows) {
+ * for (CsvParser.Row row : rows) {
  *     String id = row.get("ID"), nome = row.get("NAME");
  *     // fai qualcosa con id e nome
  * }
@@ -37,7 +37,7 @@ import okhttp3.RequestBody;
  *
  * @author Alvise Spanò, Università Ca' Foscari
  */
-public class SoldipubbliciParser extends AbstractAsyncParser<SoldipubbliciParser.Data, PercentProgressStepper> {
+public class SoldipubbliciParser extends AbstractAsyncParser<SoldipubbliciParser.Data, PercentProgressCounter> {
 
     private static final String TAG = "SoldipubbliciParser";
 
@@ -77,7 +77,7 @@ public class SoldipubbliciParser extends AbstractAsyncParser<SoldipubbliciParser
         List<Data> r = new ArrayList<>();
         JSONObject jo = new JSONObject(data);
         JSONArray ja = jo.getJSONArray("data");
-        PercentProgressStepper prog = new PercentProgressStepper(ja.length());
+        PercentProgressCounter prog = new PercentProgressCounter(ja.length());
         for (int i =0; i< ja.length(); i++){
             JSONObject j = ja.getJSONObject(i);
             Data d = new Data();
@@ -90,16 +90,24 @@ public class SoldipubbliciParser extends AbstractAsyncParser<SoldipubbliciParser
             d.descrizione_ente = j.getString("descrizione_ente");
             d.idtable = j.getString("idtable");
             d.imp_uscite_att = j.getString("imp_uscite_att");
-            d.importo_2013 = convertToValue(j.getString("importo_2013"));
-            d.importo_2014 = convertToValue(j.getString("importo_2014"));
-            d.importo_2015 = convertToValue(j.getString("importo_2015"));
-            d.importo_2016 = convertToValue(j.getString("importo_2016"));
-            d.importo_2017 = convertToValue(j.getString("importo_2017"));
+//            d.importo_2013 = convertToValue(j.getString("importo_2013"));
+//            d.importo_2014 = convertToValue(j.getString("importo_2014"));
+//            d.importo_2015 = convertToValue(j.getString("importo_2015"));
+//            d.importo_2016 = convertToValue(j.getString("importo_2016"));
+//            d.importo_2017 = convertToValue(j.getString("importo_2017"));
+            d.importo_2013 = j.getString("importo_2013");
+            d.importo_2014 = j.getString("importo_2014");
+            d.importo_2015 = j.getString("importo_2015");
+            if (j.getString("importo_2016") != null && !j.getString("importo_2016").equals("null"))
+                d.importo_2016 = j.getString("importo_2016");
+            else
+                d.importo_2016 = "0";
+            d.importo_2017 = j.getString("importo_2017");
             d.ricerca = j.getString("ricerca");
             d.periodo = j.getString("periodo");
 
             r.add(d);
-            prog.step();
+            prog.stepCounter();
             publishProgress(prog);
         }
         return r;

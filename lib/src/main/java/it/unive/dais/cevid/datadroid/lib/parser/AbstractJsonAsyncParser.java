@@ -5,11 +5,10 @@ import android.support.annotation.Nullable;
 import android.util.JsonReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressBarManager;
-import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressStepper;
+import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
+import it.unive.dais.cevid.datadroid.lib.progress.ProgressCounter;
 
 /**
  * Classe astratta che rappresenta un parser JSON generico.
@@ -22,7 +21,7 @@ import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressStepper;
  * @param <P> tipo Progress che viene inoltrato alla superclasse AsyncTask.
  * @author Alvise Spanò, Università Ca' Foscari
  */
-public abstract class AbstractAsyncJsonParser<Item, P extends ProgressStepper> extends AbstractAsyncParser<Item, P> {
+public abstract class AbstractJsonAsyncParser<Item, P extends ProgressCounter> extends AbstractAsyncParser<Item, P> {
 
     @NonNull
     protected final JsonReader reader;
@@ -31,17 +30,9 @@ public abstract class AbstractAsyncJsonParser<Item, P extends ProgressStepper> e
      * Costruttore protected via Reader.
      * @param rd oggetto Reader usato come input.
      */
-    protected AbstractAsyncJsonParser(@NonNull Reader rd, @Nullable ProgressBarManager pbm) {
+    protected AbstractJsonAsyncParser(@NonNull Reader rd, @Nullable ProgressBarManager pbm) {
         super(pbm);
         this.reader = new JsonReader(rd);
-    }
-
-    /**
-     * Costruttore protected via URL.
-     * @param url oggetto URL usato come input.
-     */
-    protected AbstractAsyncJsonParser(@NonNull URL url, @Nullable ProgressBarManager pbm) throws IOException {
-        this(urlToReader(url), pbm);
     }
 
     /**
@@ -55,7 +46,7 @@ public abstract class AbstractAsyncJsonParser<Item, P extends ProgressStepper> e
         List<Item> r = new ArrayList<>();
         reader.beginArray();
         while (reader.hasNext()) {
-            r.add(parseItem(reader));
+            r.add(onItemParsed(parseItem(reader)));
         }
         reader.endArray();
         return r;

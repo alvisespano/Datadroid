@@ -1,6 +1,8 @@
 package it.unive.dais.cevid.datadroid.lib.util;
 
 
+import java.io.IOException;
+
 /**
  * Interfaccia che rappresenta una funzione unaria il cui dominio (tipo di input) è T ed il cui codominio (tipo di ritorno) è R.
  * Questa interfaccia è compatibile con l'interfaccia java.lang.Function di Java 8, tuttavia funziona anche con versioni più vecchie di Java.
@@ -8,6 +10,7 @@ package it.unive.dais.cevid.datadroid.lib.util;
  * @param <R> il tipo di ritorno della funzione.
  * @author Alvise Spanò, Università Ca' Foscari
  */
+@FunctionalInterface
 public interface Function<T, R>{
     /**
      * Unico metodo dell'interfaccia.

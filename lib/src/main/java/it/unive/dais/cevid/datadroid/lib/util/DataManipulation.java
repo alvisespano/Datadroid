@@ -7,7 +7,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import it.unive.dais.cevid.datadroid.lib.util.Function;
+
 public class DataManipulation {
+
+    // higher-order functional utilities
+    //
 
     public static <T> void filter(@NonNull List<T> l, @NonNull Function<T, Boolean> f) {
         Collection<T> c = new ArrayList<>();
@@ -25,32 +30,25 @@ public class DataManipulation {
         return r;
     }
 
-    public static <T> void filterByCode(@NonNull List<T> l, final int code, @NonNull final Function<T, Integer> getCode) {
-        filter(l, new Function<T, Boolean>() {
-            @Override
-            public Boolean apply(T x) {
-                return getCode.apply(x) == code;
-            }
-        });
+    public static <T> void filterByCode(@NonNull List<T> l, int code, @NonNull Function<T, Integer> getCode) {
+        filter(l, x -> getCode.apply(x) == code);
     }
 
 
-    public static <T> void filterByWords(@NonNull List<T> l, @NonNull final Collection<String> ss, @NonNull final Function<T, String> getText, final boolean isCaseSenstive) {
-        filter(l, new Function<T, Boolean>() {
-            @Override
-            public Boolean apply(T x) {
-                String s0 = getText.apply(x);
-                if (isCaseSenstive) s0 = s0.toLowerCase();
-                for (String s : ss) {
-                    if (s0.contains(isCaseSenstive ? s : s.toLowerCase())) return true;
-                }
-                return false;
+    public static <T> void filterByWords(@NonNull List<T> l, @NonNull Collection<String> ss, @NonNull Function<T, String> getText, boolean isCaseSenstive) {
+        filter(l, x -> {
+            String s0 = getText.apply(x);
+            if (isCaseSenstive) s0 = s0.toLowerCase();
+            for (String s : ss) {
+                if (s0.contains(isCaseSenstive ? s : s.toLowerCase())) return true;
             }
+            return false;
         });
     }
 
     public static <T> void filterByWords(@NonNull List<T> l, @NonNull String[] ss, @NonNull Function<T, String> getText, boolean isCaseSensitive) {
         filterByWords(l, Arrays.asList(ss), getText, isCaseSensitive);
     }
+
 
 }

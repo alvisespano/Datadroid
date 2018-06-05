@@ -18,7 +18,21 @@
         android:gravity="start"
         >
 
+        <ProgressBar
+            android:id="@+id/progress_bar_1"
+            style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:indeterminate="false" />
 
+        <ProgressBar
+            android:id="@+id/progress_bar_2"
+            style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:indeterminate="false" />
 
 
         <ImageButton

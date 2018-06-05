@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * Interfaccia che rappresenta un parser di dati qualsiasi.
- * @param <Dataa>
+ * @param <Data>
  */
 public interface Parser<Data> {
     @NonNull List<Data> parse() throws IOException;

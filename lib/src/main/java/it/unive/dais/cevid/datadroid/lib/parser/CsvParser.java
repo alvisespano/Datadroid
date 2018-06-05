@@ -3,15 +3,13 @@ package it.unive.dais.cevid.datadroid.lib.parser;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.Reader;
 
-import it.unive.dais.cevid.datadroid.lib.parser.progress.ProgressBarManager;
+import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
 import it.unive.dais.cevid.datadroid.lib.util.UnexpectedException;
 
 /**
- * Sottoclasse di {@code AbstractAsyncCsvParser} che implementa un parser riga-per-riga di CSV.
+ * Sottoclasse di {@code AbstractCsvAsyncParser} che implementa un parser riga-per-riga di CSV.
  * Questa classe è usabile direttamente e non necessita di essere ereditata.
  * Non utilizza il generic FiltrableData e non richiede la definizione di una classe per rappresentare le colonne
  * di una riga di CSV; viene invece utilizzata la classe {@code Row} che rappresenta tale informazione
@@ -19,9 +17,9 @@ import it.unive.dais.cevid.datadroid.lib.util.UnexpectedException;
  * Un esempio d'uso con un file CSV con header e virgole come separatore:
  * <blockquote><pre>
  * {@code
- * CsvRowParser parser = new CsvRowParser(new FileReader("nome_file.csv"), true, ",");
- * List<CsvRowParser.Row> rows = parser.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
- * for (CsvRowParser.Row row : rows) {
+ * CsvParser parser = new CsvParser(new FileReader("nome_file.csv"), true, ",");
+ * List<CsvParser.Row> rows = parser.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
+ * for (CsvParser.Row row : rows) {
  *     String id = row.get("ID"), nome = row.get("NAME");
  *     // fai qualcosa con id e nome
  * }
@@ -30,9 +28,7 @@ import it.unive.dais.cevid.datadroid.lib.util.UnexpectedException;
  *
  * @author Alvise Spanò, Università Ca' Foscari
  */
-public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
-
-    private static final String TAG = "CsvRowParser";
+public class CsvParser extends AbstractCsvAsyncParser<CsvParser.Row> {
 
     /**
      * Costruttore tramite Reader.
@@ -41,20 +37,8 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
      * @param hasHeader flag booleano che indica se il CSV ha un header alla prima riga.
      * @param sep       separatore tra le colonne del CSV (ad esempio il punto e virgola ";" oppure la virgola ",").
      */
-    public CsvRowParser(@NonNull Reader rd, boolean hasHeader, String sep, @Nullable ProgressBarManager pbm) {
+    public CsvParser(@NonNull Reader rd, boolean hasHeader, String sep, @Nullable ProgressBarManager pbm) {
         super(rd, hasHeader, sep, pbm);
-    }
-
-    /**
-     * Costruttore tramite file.
-     *
-     * @param file      oggetto di tipo File.
-     * @param hasHeader flag booleano che indica se il CSV ha un header alla prima riga.
-     * @param sep       separatore tra le colonne del CSV (ad esempio il punto e virgola ";" oppure la virgola ",").
-     * @throws FileNotFoundException lanciata se il file non esiste.
-     */
-    public CsvRowParser(@NonNull File file, boolean hasHeader, String sep, @Nullable ProgressBarManager pbm) throws FileNotFoundException {
-        super(file, hasHeader, sep, pbm);
     }
 
     /**
@@ -69,9 +53,8 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
         return new Row(columns);
     }
 
-
     /**
-     * Classe che rappresenta una singola riga del CSV parsata dal {@code CsvRowParser}.
+     * Classe che rappresenta una singola riga del CSV parsata dal {@code CsvParser}.
      * Si tratta di una rappresentazione senza tipi e generale, basata su un dizionario le cui chiavi sono i nomi delle colonne
      * trovati nell'header ed i valori sono ovviamente i valori delle colonne.
      * Un oggetto di tipo Row rappresenta una sola riga del CSV ed è consultabile come se fosse una mappa, ovvero
@@ -106,12 +89,12 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
          * Calcola l'indice dato il nome di una colonna dell'header.
          * Permette sostanzialmente di sintetizzare l'accesso via nome tramite un indice.
          *
-         * @param column il nome della colonna.
+         * @param col il nome della colonna.
          * @return ritorna il numero della colonna a cui corrisponde il nome dato (dove 0 è la prima); oppure
          * una eccezione {@code IllegalArgumentException} nel caso in cui il nome non esista.
          */
-        protected int indexOfColumn(String column) throws ParserException {
-            column = trimString(column);
+        protected int indexOfColumn(String col) throws ParserException {
+            String column = trimString(col);
             String[] h = getHeader();
             for (int i = 0; i < h.length; i++) {
                 String s = trimString(h[i]);
@@ -132,7 +115,7 @@ public class CsvRowParser extends AbstractAsyncCsvParser<CsvRowParser.Row> {
          */
         @NonNull
         private String[] getHeader() {
-            String[] h = CsvRowParser.this.getHeader();
+            String[] h = CsvParser.this.getHeader();
             if (h == null) throw new UnexpectedException("no header parsed yet");
             return h;
         }
