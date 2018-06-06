@@ -34,11 +34,11 @@ public abstract class MapManager {
 
     @NonNull
     @UiThread
-    protected abstract GoogleMap getGoogleMap();
+    public abstract GoogleMap getGoogleMap();
 
     @NonNull
     @UiThread
-    protected Marker putMarkerFromMapItem(@NonNull MapItem i, float hue) throws Exception {
+    public Marker putMarkerFromMapItem(@NonNull MapItem i, float hue) throws Exception {
         MarkerOptions opts = new MarkerOptions().title(i.getTitle()).position(i.getPosition()).snippet(i.getDescription()).icon(BitmapDescriptorFactory.defaultMarker(hue));
         Marker m = getGoogleMap().addMarker(opts);
         m.setTag(i);
@@ -47,7 +47,7 @@ public abstract class MapManager {
 
     @NonNull
     @UiThread
-    protected <I extends MapItem> Collection<Marker> putMarkersFromMapItems(@NonNull List<I> l, float hue) {
+    public <I extends MapItem> Collection<Marker> putMarkersFromMapItems(@NonNull List<I> l, float hue) {
         Collection<Marker> r = new ArrayList<>();
         int cnt = 0;
         for (MapItem i : l) {
@@ -62,24 +62,19 @@ public abstract class MapManager {
         return r;
     }
 
-    @Nullable
-    protected <I extends MapItem, P extends ProgressCounter> Collection<Marker> putMarkersFromAsyncParser(@NonNull AsyncParser<I, P> parser, float hue) throws ExecutionException, InterruptedException {
-        List<I> l = parser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
-        return putMarkersFromMapItems(l, hue);
-    }
-
     @NonNull
-    protected <I extends MapItem> Collection<Marker> putMarkersFromCsv(@NonNull CsvParser parser, @NonNull Function<CsvParser.Row, I> createMapItem, float hue) throws ExecutionException, InterruptedException {
-        List<CsvParser.Row> rows = parser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
+    @UiThread
+    public <I extends MapItem> Collection<Marker> putMarkersFromCsv(@NonNull List<CsvParser.Row> rows, @NonNull Function<CsvParser.Row, I> createMapItem, float hue) {
         List<I> l = new ArrayList<>();
         for (CsvParser.Row r : rows)
             l.add(createMapItem.apply(r));
         return putMarkersFromMapItems(l, hue);
     }
 
+    // TODO: questa api ad alto livello non è comoda come potrebbe sembrare, perché non parallelizza il parsing
     @NonNull
     public <I extends MapItem> Collection<Marker> putMarkersFromCsv(@NonNull Reader rd, boolean hasHeader, @NonNull String sep, @NonNull Function<CsvParser.Row, I> createMapItem, float hue, @Nullable ProgressBarManager pbm) throws ExecutionException, InterruptedException {
-        return putMarkersFromCsv(new CsvParser(rd, hasHeader, sep, pbm), createMapItem, hue);
+        return putMarkersFromCsv(new CsvParser(rd, hasHeader, sep, pbm).getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get(), createMapItem, hue);
     }
 
     @NonNull

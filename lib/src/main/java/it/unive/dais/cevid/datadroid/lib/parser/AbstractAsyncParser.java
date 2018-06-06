@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.UiThread;
+import android.support.annotation.WorkerThread;
 import android.util.Log;
 import android.widget.ProgressBar;
 
@@ -87,7 +89,7 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressCounter> imple
                 Log.v(TAG, "async parser started");
                 List<Data> r = enclosing.parse();
                 Log.v(TAG, String.format("async parser finished: %d elements parsed", r.size()));
-                return enclosing.onPostParse(r);
+                return r;
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
@@ -145,6 +147,7 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressCounter> imple
     }
 
     @Override
+    @UiThread
     public void onPreExecute() {
     }
 
@@ -153,16 +156,26 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressCounter> imple
     }
 
     @Override
+    @UiThread
     public void onPostExecute(@NonNull List<Data> r) {
     }
 
     @NonNull
-    public List<Data> onPostParse(@NonNull List<Data> r) {
+    @WorkerThread
+    public List<Data> onAllItemsParsed(@NonNull List<Data> r, P prog) {
         return r;
     }
 
+    /**
+     * Called by the worker thread performing the background task.
+     * Default semantics is the identity function.
+     * @param x the input data row to be processed.
+     * @param prog the current progress.
+     * @return the processed data row.
+     */
     @NonNull
-    public Data onItemParsed(@NonNull Data x) {
+    @WorkerThread
+    public Data onItemParsed(@NonNull Data x, P prog) {
         return x;
     }
 

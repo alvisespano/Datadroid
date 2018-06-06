@@ -44,13 +44,22 @@ public abstract class AbstractJsonAsyncParser<Item, P extends ProgressCounter> e
     @NonNull
     public List<Item> parse() throws IOException {
         List<Item> r = new ArrayList<>();
+        P prog = createProgressCounter();
         reader.beginArray();
         while (reader.hasNext()) {
-            r.add(onItemParsed(parseItem(reader)));
+            r.add(onItemParsed(parseItem(reader), prog));
+            prog.stepCounter();
         }
         reader.endArray();
-        return r;
+        return onAllItemsParsed(r, prog);
     }
+
+    /**
+     * ProgressCounter factory.
+     * @return the object of type P.
+     */
+    @NonNull
+    protected abstract P createProgressCounter();
 
     /**
      * Metodo astratto che deve implementare il parser di un singolo oggetto JSON.

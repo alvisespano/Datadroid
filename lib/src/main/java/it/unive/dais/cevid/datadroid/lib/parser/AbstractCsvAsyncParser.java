@@ -79,14 +79,14 @@ public abstract class AbstractCsvAsyncParser<Data> extends AbstractAsyncParser<D
             int linen = prog.getCurrentCounter();
             try {
                 if (linen == 0 && !hasActualHeader()) setHeader(line);
-                r.add(parserLine(line));
+                r.add(onItemParsed(parseLine(line), prog));
                 publishProgress(prog);
             } catch (ParserException e) {
-                Log.w(TAG, String.format("recoverable parse error at line %d: %s", linen, e.getLocalizedMessage()));
+                Log.w(TAG, String.format("recoverable parse error at line %d: \"%s\"\n%s", linen + 1, line, e));
             }
             prog.stepCounter();
         }
-        return r;
+        return onAllItemsParsed(r, prog);
     }
 
     /**
@@ -121,8 +121,8 @@ public abstract class AbstractCsvAsyncParser<Data> extends AbstractAsyncParser<D
      * @return ritorna un singolo oggetto di tipo FiltrableData.
      */
     @NonNull
-    protected Data parserLine(@NonNull String line) throws ParserException {
-        return onItemParsed(parseColumns(split(line)));
+    protected Data parseLine(@NonNull String line) throws ParserException {
+        return parseColumns(split(line));
     }
 
     /**

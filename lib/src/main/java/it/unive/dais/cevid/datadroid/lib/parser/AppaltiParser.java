@@ -118,7 +118,7 @@ public class AppaltiParser extends AbstractAsyncParser<AppaltiParser.Data, Progr
             //controllo cig
             d.cig = getTextByTag(parent, "cig", "0");
 
-            r.add(onItemParsed(d));
+            r.add(onItemParsed(d, prog));
             prog.stepCounter();
             publishProgress(prog);
         }

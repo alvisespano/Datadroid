@@ -26,14 +26,15 @@ public interface AsyncParser<Data, P extends ProgressCounter> extends Parser<Dat
     void onProgressUpdate(@NonNull P p);
 
     @WorkerThread
-    List<Data> onPostParse(@NonNull List<Data> r);
+    List<Data> onAllItemsParsed(@NonNull List<Data> r, P prog);
 
     /**
      * Invocato per ogni linea o riga o, in generale, elemento di tipo Data.
      * IMPORTANTE: l'invocazione di questo metodo non è garantita. Ogni sottoclasse è responsabile dell'invocazione.
      * @param x il dato singolo appena parsato.
+     * @param prog
      * @return il nuovo dato singolo, eventualmente riprocessato.
      */
     @WorkerThread
-    Data onItemParsed(@NonNull Data x);
+    Data onItemParsed(@NonNull Data x, P prog);
 }
