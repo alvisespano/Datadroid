@@ -5,19 +5,20 @@ package it.unive.dais.cevid.datadroid.lib.progress;
  */
 
 public class ProgressCounter {
-    private final int increment;
-    protected int cnt = 0;
+    protected final int step;
+    protected int cnt;
 
-    public ProgressCounter(int increment) {
-        this.increment = increment;
+    public ProgressCounter(int start, int step) {
+        this.cnt = start;
+        this.step = step;
     }
 
     public ProgressCounter() {
-        this(1);
+        this(0, 1);
     }
 
     public void stepCounter() {
-        cnt += increment;
+        cnt += step;
     }
 
     public int getCurrentCounter() {

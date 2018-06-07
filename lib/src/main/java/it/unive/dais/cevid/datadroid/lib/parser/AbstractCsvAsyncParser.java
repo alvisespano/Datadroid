@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
@@ -70,21 +71,22 @@ public abstract class AbstractCsvAsyncParser<Data> extends AbstractAsyncParser<D
     @Override
     @NonNull
     public List<Data> parse() throws IOException {
-        if (hasActualHeader()) setHeader(split(reader.readLine()));
         List<Data> r = new ArrayList<>();
-        @Nullable String line;
         ProgressCounter prog = new ProgressCounter();
-        final String TAG = getName();
-        while ((line = reader.readLine()) != null) {
+        for (@Nullable String line; (line = reader.readLine()) != null; prog.stepCounter()) {
             int linen = prog.getCurrentCounter();
             try {
-                if (linen == 0 && !hasActualHeader()) setHeader(line);
-                r.add(onItemParsed(parseLine(line), prog));
+                if (linen == 0) {
+                    if (!hasActualHeader()) setDefaultHeader(line);
+                    else setHeader(line);
+                }
+                else {
+                    r.add(onItemParsed(parseLine(line), prog));
+                }
                 publishProgress(prog);
             } catch (ParserException e) {
-                Log.w(TAG, String.format("recoverable parse error at line %d: \"%s\"\n%s", linen + 1, line, e));
+                Log.w(getName(), String.format("recoverable parse error at line %d: \"%s\"\n%s", linen + 1, line, e));
             }
-            prog.stepCounter();
         }
         return onAllItemsParsed(r, prog);
     }
@@ -99,13 +101,17 @@ public abstract class AbstractCsvAsyncParser<Data> extends AbstractAsyncParser<D
         return line.split(String.format("%s(?=([^\"]*\"[^\"]*\")*[^\"]*$)", getSeparator()));
     }
 
+    protected synchronized void setHeader(String line) {
+        setHeader(split(line));
+    }
+
     /**
      * Imposta l'header di default quando non ce n'è uno nel CSV.
      * Dall'implementazione della {@code parse} viene chiamato una volta sola dopo aver parsato la prima linea.
      *
      * @param line stringa che contiene la linea del CSV da cui estrapolare il numero di colonne per generare l'header.
      */
-    protected void setHeader(@NonNull String line) {
+    protected void setDefaultHeader(@NonNull String line) {
         String[] hd = split(line);
         for (int j = 0; j < hd.length; ++j) {
             hd[j] = String.valueOf(j);
@@ -153,7 +159,7 @@ public abstract class AbstractCsvAsyncParser<Data> extends AbstractAsyncParser<D
      * @return ritorna l'header. Se {@code null} significa che non è ancora stato parsato o impostato.
      */
     @Nullable
-    public String[] getHeader() {
+    public synchronized String[] getHeader() {
         return header;
     }
 
@@ -167,8 +173,9 @@ public abstract class AbstractCsvAsyncParser<Data> extends AbstractAsyncParser<D
     public void setHeader(@NonNull String[] columns) {
         trimStrings(columns);
         if (header != null && columns.length != header.length)
-            throw new IllegalArgumentException(String.format("CSV header size mismatch: former header has %d columns while new header has %d", header.length, columns.length));
+            throw new IllegalArgumentException(String.format("CSV header length mismatch: former header has %d columns while new header has %d", header.length, columns.length));
         header = columns;
+        Log.d(getName(), String.format("CSV header of length %d set to: %s", header.length, Arrays.toString(header)));
     }
 
     /**
@@ -189,7 +196,7 @@ public abstract class AbstractCsvAsyncParser<Data> extends AbstractAsyncParser<D
      *
      * @param ss l'array di stringhe.
      */
-    protected String[] trimStrings(String[] ss) {
+    protected static String[] trimStrings(String[] ss) {
         String[] r = new String[ss.length];
         for (int i = 0; i < ss.length; ++i) {
             r[i] = trimString(ss[i]);

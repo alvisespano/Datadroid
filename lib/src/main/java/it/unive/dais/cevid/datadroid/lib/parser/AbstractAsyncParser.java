@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
+import android.view.View;
 import android.widget.ProgressBar;
 
 import java.io.IOException;

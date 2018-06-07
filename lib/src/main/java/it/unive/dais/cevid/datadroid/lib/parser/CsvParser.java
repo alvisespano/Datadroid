@@ -4,9 +4,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.io.Reader;
+import java.io.Serializable;
 
 import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
-import it.unive.dais.cevid.datadroid.lib.util.UnexpectedException;
 
 /**
  * Sottoclasse di {@code AbstractCsvAsyncParser} che implementa un parser riga-per-riga di CSV.
@@ -50,7 +50,9 @@ public class CsvParser extends AbstractCsvAsyncParser<CsvParser.Row> {
     @NonNull
     @Override
     protected Row parseColumns(@NonNull String[] columns) throws ParserException {
-        return new Row(columns);
+        String[] h = getHeader();
+        assert h != null;
+        return new Row(columns, h);
     }
 
     /**
@@ -62,8 +64,10 @@ public class CsvParser extends AbstractCsvAsyncParser<CsvParser.Row> {
      * Per i CSV senza header, le chiavi del dizionario sono i numeri delle colonne, sotto forma di stringhe, a partire
      * dal numero 0.
      */
-    public class Row {
+    public static class Row implements Serializable {
 
+        @NonNull
+        private final String[] header;
         private String[] values;
 
         /**
@@ -71,7 +75,8 @@ public class CsvParser extends AbstractCsvAsyncParser<CsvParser.Row> {
          *
          * @param values array con i valori da impostare per tutte le colonne.
          */
-        protected Row(String[] values) throws ParserException {
+        protected Row(@NonNull String[] values, @NonNull String[] header) throws ParserException {
+            this.header = header;
             put(values);
         }
 
@@ -81,6 +86,7 @@ public class CsvParser extends AbstractCsvAsyncParser<CsvParser.Row> {
          * @param column il nome della colonna.
          * @param value  il valore da impostare.
          */
+        @SuppressWarnings("unused")
         public void put(String column, String value) throws ParserException {
             put(indexOfColumn(column), value);
         }
@@ -115,9 +121,7 @@ public class CsvParser extends AbstractCsvAsyncParser<CsvParser.Row> {
          */
         @NonNull
         private String[] getHeader() {
-            String[] h = CsvParser.this.getHeader();
-            if (h == null) throw new UnexpectedException("no header parsed yet");
-            return h;
+            return header;
         }
 
         /**
@@ -139,8 +143,8 @@ public class CsvParser extends AbstractCsvAsyncParser<CsvParser.Row> {
         public void put(String[] values) throws ParserException {
             String[] h = getHeader();
             if (values.length != h.length)
-                throw new ParserException(String.format("CSV has %d columns but header has %d", values.length, h.length));
-            this.values = trimStrings(values);
+                throw new ParserException(String.format("CSV row length mismatch: row has %d columns but header has %d", values.length, h.length));
+            this.values = AbstractCsvAsyncParser.trimStrings(values);
         }
 
         /**

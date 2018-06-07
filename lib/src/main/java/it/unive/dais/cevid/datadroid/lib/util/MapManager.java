@@ -47,8 +47,8 @@ public abstract class MapManager {
 
     @NonNull
     @UiThread
-    public <I extends MapItem> Collection<Marker> putMarkersFromMapItems(@NonNull List<I> l, float hue) {
-        Collection<Marker> r = new ArrayList<>();
+    public <I extends MapItem> List<Marker> putMarkersFromMapItems(@NonNull List<I> l, float hue) {
+        List<Marker> r = new ArrayList<>();
         int cnt = 0;
         for (MapItem i : l) {
             try {
@@ -64,7 +64,7 @@ public abstract class MapManager {
 
     @NonNull
     @UiThread
-    public <I extends MapItem> Collection<Marker> putMarkersFromCsv(@NonNull List<CsvParser.Row> rows, @NonNull Function<CsvParser.Row, I> createMapItem, float hue) {
+    public <I extends MapItem> List<Marker> putMarkersFromCsv(@NonNull List<CsvParser.Row> rows, @NonNull Function<CsvParser.Row, I> createMapItem, float hue) {
         List<I> l = new ArrayList<>();
         for (CsvParser.Row r : rows)
             l.add(createMapItem.apply(r));
@@ -73,12 +73,12 @@ public abstract class MapManager {
 
     // TODO: questa api ad alto livello non è comoda come potrebbe sembrare, perché non parallelizza il parsing
     @NonNull
-    public <I extends MapItem> Collection<Marker> putMarkersFromCsv(@NonNull Reader rd, boolean hasHeader, @NonNull String sep, @NonNull Function<CsvParser.Row, I> createMapItem, float hue, @Nullable ProgressBarManager pbm) throws ExecutionException, InterruptedException {
+    public <I extends MapItem> List<Marker> putMarkersFromCsv(@NonNull Reader rd, boolean hasHeader, @NonNull String sep, @NonNull Function<CsvParser.Row, I> createMapItem, float hue, @Nullable ProgressBarManager pbm) throws ExecutionException, InterruptedException {
         return putMarkersFromCsv(new CsvParser(rd, hasHeader, sep, pbm).getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get(), createMapItem, hue);
     }
 
     @NonNull
-    public <I extends MapItem> Collection<Marker> putMarkersFromCsv(@NonNull URL url, boolean hasHeader, @NonNull String sep, @NonNull Function<CsvParser.Row, I> createMapItem, float hue, @Nullable ProgressBarManager pbm) throws IOException, ExecutionException, InterruptedException {
+    public <I extends MapItem> List<Marker> putMarkersFromCsv(@NonNull URL url, boolean hasHeader, @NonNull String sep, @NonNull Function<CsvParser.Row, I> createMapItem, float hue, @Nullable ProgressBarManager pbm) throws IOException, ExecutionException, InterruptedException {
         Log.v(TAG, String.format("downloading CSV from %s...", url));
         return putMarkersFromCsv(Prelude.urlToReader(url), hasHeader, sep, createMapItem, hue, pbm);
     }

@@ -1,5 +1,6 @@
 package it.unive.dais.cevid.datadroid.lib.progress;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -15,18 +16,20 @@ import it.unive.dais.cevid.datadroid.lib.util.Function;
 /**
  * Created by spano on 05/01/2018.
  */
+@SuppressWarnings("unused")
 public class ProgressBarManager {
 
     protected static class Descr {
         private static int cnt = 1;
+        private int owner = 0;
         @NonNull
         public final ProgressBar progressBar;
-        private int owner = 0;
 
         public Descr(@NonNull ProgressBar progressBar) {
             this.progressBar = progressBar;
         }
 
+        @SuppressLint("DefaultLocale")
         @Override
         public String toString() {
             return String.format("[bar:%s owner:%d]", System.identityHashCode(progressBar), getOwner());
@@ -116,7 +119,7 @@ public class ProgressBarManager {
         synchronized (q) {
             for (Descr d : q) {
                 if (d.isOwner(owner)) {
-                    Log.d(TAG, String.format("found descr %s already owned by %d", d, owner));
+//                    Log.d(TAG, String.format("found descr %s already owned by %d", d, owner));
                     return d;
                 }
             }
@@ -138,12 +141,12 @@ public class ProgressBarManager {
     }
 
     protected void onLastRelease(@NonNull ProgressBar progressBar) {
-        Log.d(TAG, "parser progressbar: GONE");
+        Log.d(TAG, "progressbar: GONE");
         ctx.runOnUiThread(() -> progressBar.setVisibility(View.GONE));
     }
 
     protected void onFirstAcquire(@NonNull ProgressBar progressBar) {
-        Log.d(TAG, "parser progressbar: VISIBLE");
+        Log.d(TAG, "progressbar: VISIBLE");
         ctx.runOnUiThread(() -> progressBar.setVisibility(View.VISIBLE));
     }
 

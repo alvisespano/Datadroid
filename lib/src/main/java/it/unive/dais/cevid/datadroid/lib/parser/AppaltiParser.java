@@ -122,7 +122,7 @@ public class AppaltiParser extends AbstractAsyncParser<AppaltiParser.Data, Progr
             prog.stepCounter();
             publishProgress(prog);
         }
-        return r;
+        return onAllItemsParsed(r, prog);
     }
 
     public static class Data implements Serializable{
