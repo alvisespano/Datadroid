@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 
 import java.io.Reader;
 import java.io.Serializable;
+import java.util.Arrays;
 
 import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
 
@@ -188,6 +189,10 @@ public class CsvParser extends AbstractCsvAsyncParser<CsvParser.Row> {
             return values;
         }
 
+        @Override
+        public String toString() {
+            return String.format("CSVParser.Row[%s]", Arrays.toString(values));
+        }
 
     }
 }
