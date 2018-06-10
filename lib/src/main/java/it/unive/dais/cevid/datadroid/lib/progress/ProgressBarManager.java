@@ -142,7 +142,7 @@ public class ProgressBarManager {
 
     protected void onLastRelease(@NonNull ProgressBar progressBar) {
         Log.d(TAG, "progressbar: GONE");
-        ctx.runOnUiThread(() -> progressBar.setVisibility(View.GONE));
+        ctx.runOnUiThread(() -> progressBar.setVisibility(View.GONE)); // TODO: delay this callback by 1 sec
     }
 
     protected void onFirstAcquire(@NonNull ProgressBar progressBar) {
