@@ -114,7 +114,6 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressCounter> imple
             final int n = (int) (p.getPercent() * 100.);  // evaluate current percent BEFORE the callback
             if (handle != null) {
                 handle.apply(pb -> {
-                    Log.d(TAG, String.format("progress set: %d", n));
                     pb.setProgress(n);
                     return null;
                 });
