@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.support.annotation.WorkerThread;
 import android.util.Log;
-import android.view.View;
 import android.widget.ProgressBar;
 
 import java.io.IOException;
@@ -112,9 +111,11 @@ public abstract class AbstractAsyncParser<Data, P extends ProgressCounter> imple
         @Override
         protected final void onProgressUpdate(@NonNull P... ps) {
             final P p = ps[0];
+            final int n = (int) (p.getPercent() * 100.);  // evaluate current percent BEFORE the callback
             if (handle != null) {
                 handle.apply(pb -> {
-                    pb.setProgress(p.getCurrentCounter());
+                    Log.d(TAG, String.format("progress set: %d", n));
+                    pb.setProgress(n);
                     return null;
                 });
             }

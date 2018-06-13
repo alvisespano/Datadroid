@@ -48,7 +48,7 @@ public abstract class AbstractJsonAsyncParser<Item, P extends ProgressCounter> e
         reader.beginArray();
         while (reader.hasNext()) {
             r.add(onItemParsed(parseItem(reader), prog));
-            prog.stepCounter();
+            prog.step();
         }
         reader.endArray();
         return onAllItemsParsed(r, prog);

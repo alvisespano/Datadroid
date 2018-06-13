@@ -64,7 +64,7 @@ public class AsyncTaskResult<R> {
         @NonNull
         public Exception getException() {
             if (exn != null) return exn;
-            else throw new RuntimeException("AsyncTask has result and no exception");
+            else throw new UnexpectedException("AsyncTask has result and no exception");
         }
     }
 

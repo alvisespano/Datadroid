@@ -9,9 +9,13 @@ package it.unive.dais.cevid.datadroid.lib.util;
 public class UnexpectedException extends RuntimeException {
     /**
      * Costruttore per stringa.
-     * @param msg la stringa col messaggio contenuto nell'eccezione.
+     * @param s la stringa col messaggio contenuto nell'eccezione.
      */
-    public UnexpectedException(String msg) {
-        super(msg);
+    public UnexpectedException(String s) {
+        super(s);
+    }
+
+    public UnexpectedException(String s, Throwable cause) {
+        super(s, cause);
     }
 }

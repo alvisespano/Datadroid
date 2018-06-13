@@ -21,7 +21,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
-import it.unive.dais.cevid.datadroid.lib.progress.PercentProgressCounter;
 import it.unive.dais.cevid.datadroid.lib.progress.ProgressCounter;
 
 
@@ -39,7 +38,7 @@ public class AppaltiParser extends AbstractAsyncParser<AppaltiParser.Data, Progr
     @Override
     public List<Data> parse() throws IOException {
         List<Data> datalist = new ArrayList<>();
-        PercentProgressCounter prog = new PercentProgressCounter(urls.size());
+        ProgressCounter prog = new ProgressCounter(urls.size());
         for (URL url : urls) {
             try {
                 URLConnection conn = url.openConnection();
@@ -51,7 +50,7 @@ public class AppaltiParser extends AbstractAsyncParser<AppaltiParser.Data, Progr
             } catch (ParserConfigurationException | SAXException e) {
                 throw new IOException(e);
             }
-            prog.stepCounter();
+            prog.step();
         }
         return datalist;
     }
@@ -70,9 +69,9 @@ public class AppaltiParser extends AbstractAsyncParser<AppaltiParser.Data, Progr
         return (Element) e.getElementsByTagName(tagName).item(0);
     }
 
-    protected List<Data> parseNodes(PercentProgressCounter prog0, NodeList nodes) {
+    protected List<Data> parseNodes(ProgressCounter prog0, NodeList nodes) {
         List<Data> r = new ArrayList<>();
-        PercentProgressCounter prog = prog0.subsection(nodes.getLength());
+        ProgressCounter prog = prog0.subsection(nodes.getLength());
         for (int i = 0; i < nodes.getLength(); i++) {
             Element parent = (Element) nodes.item(i);
             Data d = new Data();
@@ -119,7 +118,7 @@ public class AppaltiParser extends AbstractAsyncParser<AppaltiParser.Data, Progr
             d.cig = getTextByTag(parent, "cig", "0");
 
             r.add(onItemParsed(d, prog));
-            prog.stepCounter();
+            prog.step();
             publishProgress(prog);
         }
         return onAllItemsParsed(r, prog);

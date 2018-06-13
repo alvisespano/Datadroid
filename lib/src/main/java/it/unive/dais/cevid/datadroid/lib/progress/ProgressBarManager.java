@@ -2,6 +2,7 @@ package it.unive.dais.cevid.datadroid.lib.progress;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
@@ -144,7 +145,8 @@ public class ProgressBarManager {
 
     protected void onLastRelease(@NonNull ProgressBar progressBar) {
         Log.d(TAG, "progressbar: GONE");
-        ctx.runOnUiThread(() -> progressBar.setVisibility(View.GONE)); // TODO: delay this callback by 1 sec
+//        new Handler().postDelayed(() -> progressBar.setVisibility(View.GONE), 500);   // TODO: serve il delay oppure no?
+        ctx.runOnUiThread(() -> progressBar.setVisibility(View.GONE));
     }
 
     protected void onFirstAcquire(@NonNull ProgressBar progressBar) {

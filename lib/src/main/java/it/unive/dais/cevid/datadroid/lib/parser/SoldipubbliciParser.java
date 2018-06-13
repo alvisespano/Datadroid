@@ -11,9 +11,10 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-import it.unive.dais.cevid.datadroid.lib.progress.PercentProgressCounter;
 import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
+import it.unive.dais.cevid.datadroid.lib.progress.ProgressCounter;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -37,7 +38,7 @@ import okhttp3.RequestBody;
  *
  * @author Alvise Spanò, Università Ca' Foscari
  */
-public class SoldipubbliciParser extends AbstractAsyncParser<SoldipubbliciParser.Data, PercentProgressCounter> {
+public class SoldipubbliciParser extends AbstractAsyncParser<SoldipubbliciParser.Data, ProgressCounter> {
 
     private static final String TAG = "SoldipubbliciParser";
 
@@ -67,7 +68,7 @@ public class SoldipubbliciParser extends AbstractAsyncParser<SoldipubbliciParser
                 .build();
 
         try {
-            return parseJSON(new OkHttpClient().newCall(request).execute().body().string());
+            return parseJSON(Objects.requireNonNull(new OkHttpClient().newCall(request).execute().body()).string());
         } catch (JSONException e) {
             throw new IOException(e);
         }
@@ -77,7 +78,7 @@ public class SoldipubbliciParser extends AbstractAsyncParser<SoldipubbliciParser
         List<Data> r = new ArrayList<>();
         JSONObject jo = new JSONObject(data);
         JSONArray ja = jo.getJSONArray("data");
-        PercentProgressCounter prog = new PercentProgressCounter(ja.length());
+        ProgressCounter prog = new ProgressCounter(ja.length());
         for (int i =0; i< ja.length(); i++){
             JSONObject j = ja.getJSONObject(i);
             Data d = new Data();
@@ -99,7 +100,7 @@ public class SoldipubbliciParser extends AbstractAsyncParser<SoldipubbliciParser
             d.periodo = j.getString("periodo");
 
             r.add(d);
-            prog.stepCounter();
+            prog.step();
             publishProgress(prog);
         }
         return r;

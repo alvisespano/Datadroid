@@ -1,7 +1,9 @@
 package it.unive.dais.cevid.datadroid.lib.parser;
 
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -10,9 +12,10 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
 import it.unive.dais.cevid.datadroid.lib.progress.ProgressCounter;
+import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
 import it.unive.dais.cevid.datadroid.lib.util.Prelude;
 
 /**
@@ -72,23 +75,35 @@ public abstract class AbstractCsvAsyncParser<Data> extends AbstractAsyncParser<D
     @NonNull
     public List<Data> parse() throws IOException {
         List<Data> r = new ArrayList<>();
-        ProgressCounter prog = new ProgressCounter();
-        for (@Nullable String line; (line = reader.readLine()) != null; prog.stepCounter()) {
+        List<String> lines = readLines();
+        Log.d(getName(), String.format("parsing %d CSV lines...", lines.size()));
+        ProgressCounter prog = new ProgressCounter(lines.size());
+        for (String line : lines) {
             int linen = prog.getCurrentCounter();
             try {
                 if (linen == 0) {
                     if (!hasActualHeader()) setDefaultHeader(line);
                     else setHeader(line);
-                }
-                else {
+                } else {
                     r.add(onItemParsed(parseLine(line), prog));
                 }
+                prog.step();
                 publishProgress(prog);
             } catch (ParserException e) {
                 Log.w(getName(), String.format("recoverable parse error at line %d: \"%s\"\n%s", linen + 1, line, e));
             }
         }
         return onAllItemsParsed(r, prog);
+    }
+
+    @NonNull
+    protected List<String> readLines() throws IOException {
+        List<String> r = new ArrayList<>();
+        String line;
+        while ((line = reader.readLine()) != null) {
+            r.add(line);
+        }
+        return r;
     }
 
     /**
