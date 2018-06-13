@@ -145,8 +145,7 @@ public class ProgressBarManager {
 
     protected void onLastRelease(@NonNull ProgressBar progressBar) {
         Log.d(TAG, "progressbar: GONE");
-//        new Handler().postDelayed(() -> progressBar.setVisibility(View.GONE), 500);   // TODO: serve il delay oppure no?
-        ctx.runOnUiThread(() -> progressBar.setVisibility(View.GONE));
+        new Handler().postDelayed(() -> progressBar.setVisibility(View.GONE), 400);
     }
 
     protected void onFirstAcquire(@NonNull ProgressBar progressBar) {
