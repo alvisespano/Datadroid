@@ -528,7 +528,7 @@ public class MapsActivity extends AppCompatActivity
         MapManager mm = new MapManager() {
             @NonNull
             @Override
-            protected GoogleMap getGoogleMap() {
+            public GoogleMap getGoogleMap() {
                 assert gMap != null;
                 return gMap;
             }
@@ -540,7 +540,8 @@ public class MapsActivity extends AppCompatActivity
                 mm.putMarkersFromCsv(new InputStreamReader(getResources().openRawResource(R.raw.piattaforme)),
                         true, ";",
                         MapItem.byCsvColumnNames("Latitudine (WGS84)", "Longitudine (WGS 84)", "Denominazione", "Stato"),
-                        BitmapDescriptorFactory.HUE_GREEN, progressBarManager);
+                        (opts) -> opts.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)),
+                        progressBarManager);
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
             }
@@ -552,7 +553,8 @@ public class MapsActivity extends AppCompatActivity
                 mm.putMarkersFromCsv(new URL(getString(R.string.demo_csv_url)),
                         true, ";",
                         MapItem.byCsvColumnNames("Latitudine", "Longitudine", "Comune", "Provincia"),
-                        BitmapDescriptorFactory.HUE_AZURE, progressBarManager);
+                        (opts) -> opts.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)),
+                        progressBarManager);
             } catch (ExecutionException | InterruptedException | IOException e) {
                 e.printStackTrace();
             }
