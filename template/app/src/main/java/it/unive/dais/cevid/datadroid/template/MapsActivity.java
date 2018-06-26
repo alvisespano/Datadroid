@@ -250,8 +250,8 @@ public class MapsActivity extends AppCompatActivity
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.maps_with_options, menu);
+       /* MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.maps_with_options, menu);*/
         return true;
     }
 
@@ -264,14 +264,14 @@ public class MapsActivity extends AppCompatActivity
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
+        /*switch (item.getItemId()) {
             case R.id.MENU_SETTINGS:
                 startActivity(new Intent(this, SettingsActivity.class));
                 break;
             case R.id.MENU_ABOUT:
                 startActivity(new Intent(this, AboutActivity.class));
                 break;
-        }
+        }*/
         return false;
     }
 
@@ -536,16 +536,20 @@ public class MapsActivity extends AppCompatActivity
 
         // put markers from embedded resource CSV
         AsyncTaskResult.run(() -> {
-            try {
-                mm.putMarkersFromCsv(new InputStreamReader(getResources().openRawResource(R.raw.piattaforme)),
-                        true, ";",
-                        MapItem.byCsvColumnNames("Latitudine (WGS84)", "Longitudine (WGS 84)", "Denominazione", "Stato"),
-                        (opts) -> opts.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)),
-                        progressBarManager);
-            } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
+                    //RUNONUITHREAD (evitare eccezione not in UI Thread)
+                    runOnUiThread(() -> {
+                        try {
+                            mm.putMarkersFromCsv(new InputStreamReader(getResources().openRawResource(R.raw.piattaforme)),
+                                    true, ";",
+                                    MapItem.byCsvColumnNames("Latitudine (WGS84)", "Longitudine (WGS 84)", "Denominazione", "Stato"),
+                                    (opts) -> opts.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)),
+                                    progressBarManager);
+                        } catch (ExecutionException | InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                    });
+                });
 
         // add markers from online CSV
         AsyncTaskResult.run(() -> {
@@ -553,7 +557,7 @@ public class MapsActivity extends AppCompatActivity
                 mm.putMarkersFromCsv(new URL(getString(R.string.demo_csv_url)),
                         true, ";",
                         MapItem.byCsvColumnNames("Latitudine", "Longitudine", "Comune", "Provincia"),
-                        (opts) -> opts.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)),
+                        (opts) -> opts.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)),
                         progressBarManager);
             } catch (ExecutionException | InterruptedException | IOException e) {
                 e.printStackTrace();
