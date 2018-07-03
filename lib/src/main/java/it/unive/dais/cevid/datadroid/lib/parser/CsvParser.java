@@ -50,10 +50,10 @@ public class CsvParser extends AbstractCsvAsyncParser<CsvParser.Row> {
      */
     @NonNull
     @Override
-    protected Row parseColumns(@NonNull String[] columns) throws ParserException {
+    protected Row parseColumns(int line, @NonNull String[] columns) throws ParserException {
         String[] h = getHeader();
         assert h != null;
-        return new Row(columns, h);
+        return new Row(line, columns, h);
     }
 
     /**
@@ -70,14 +70,16 @@ public class CsvParser extends AbstractCsvAsyncParser<CsvParser.Row> {
         @NonNull
         private final String[] header;
         private String[] values;
+        private final int linen;
 
         /**
          * Costruttore tramite array di valori delle colonne.
          *
          * @param values array con i valori da impostare per tutte le colonne.
          */
-        protected Row(@NonNull String[] values, @NonNull String[] header) throws ParserException {
+        protected Row(int linen, @NonNull String[] values, @NonNull String[] header) throws ParserException {
             this.header = header;
+            this.linen = linen;
             put(values);
         }
 
@@ -111,6 +113,8 @@ public class CsvParser extends AbstractCsvAsyncParser<CsvParser.Row> {
             }
             throw new ParserException(String.format("cannot find column '%s' in header", column));
         }
+
+        public int getLine() { return linen; }
 
         /**
          * Ritorna l'header a cui questa Row è associata, similmente al metodo {@code CsvParser.getHeader}, ma

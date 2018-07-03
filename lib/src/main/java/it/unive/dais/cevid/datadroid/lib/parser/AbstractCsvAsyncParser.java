@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -76,22 +77,31 @@ public abstract class AbstractCsvAsyncParser<Data> extends AbstractAsyncParser<D
     public List<Data> parse() throws IOException {
         List<Data> r = new ArrayList<>();
         List<String> lines = readLines();
-        Log.d(getName(), String.format("parsing %d CSV lines...", lines.size()));
+        final String tag = getName();
+
+        Log.d(tag, String.format("parsing %d CSV lines (%s header)...", lines.size(), hasActualHeader() ? "including" : "excluding"));
         ProgressCounter prog = new ProgressCounter(lines.size());
-        for (String line : lines) {
-            int linen = prog.getCurrentCounter();
-            try {
-                if (linen == 0) {
-                    if (!hasActualHeader()) setDefaultHeader(line);
-                    else setHeader(line);
-                } else {
-                    r.add(onItemParsed(parseLine(line), prog));
+        Iterator<String> it = lines.iterator();
+
+        final String line0 = it.next();
+        prog.step();
+        if (hasActualHeader()) setHeader(line0);
+        else setDefaultHeader(line0);
+
+        while (it.hasNext()) {
+            final String line = it.next();
+            final int cnt = prog.getCurrentCounter(), linen = cnt + 1;
+            if (line.trim().isEmpty())
+                Log.v(tag, String.format("skipping empty line %d", linen));
+            else {
+                try {
+                    r.add(onItemParsed(parseLine(linen, line), prog));
+                } catch (ParserException e) {
+                    Log.w(tag, String.format("recoverable parse error at line %d: %s\n%s", linen, line, e));
                 }
-                prog.step();
-                publishProgress(prog);
-            } catch (ParserException e) {
-                Log.w(getName(), String.format("recoverable parse error at line %d: \"%s\"\n%s", linen + 1, line, e));
             }
+            prog.step();
+            publishProgress(prog);
         }
         return onAllItemsParsed(r, prog);
     }
@@ -142,8 +152,8 @@ public abstract class AbstractCsvAsyncParser<Data> extends AbstractAsyncParser<D
      * @return ritorna un singolo oggetto di tipo FiltrableData.
      */
     @NonNull
-    protected Data parseLine(@NonNull String line) throws ParserException {
-        return parseColumns(split(line));
+    protected Data parseLine(int linen, @NonNull String line) throws ParserException {
+        return parseColumns(linen, split(line));
     }
 
     /**
@@ -153,7 +163,7 @@ public abstract class AbstractCsvAsyncParser<Data> extends AbstractAsyncParser<D
      * @return ritorna un singolo oggetto di tipo FiltrableData.
      */
     @NonNull
-    protected abstract Data parseColumns(@NonNull String[] columns) throws ParserException;
+    protected abstract Data parseColumns(int line, @NonNull String[] columns) throws ParserException;
 
     /**
      * Getter del separatore.
@@ -226,7 +236,7 @@ public abstract class AbstractCsvAsyncParser<Data> extends AbstractAsyncParser<D
      * @param s la stringa.
      */
     protected static String trimString(String s) {
-        return Prelude.trim(s, new char[]{' ', '"', '\''});
+        return Prelude.trim(s, new char[]{' ', '"', '\'', '\n', '\t', '\r'});
     }
 }
 

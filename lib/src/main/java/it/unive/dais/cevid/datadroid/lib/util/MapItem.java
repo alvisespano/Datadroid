@@ -1,5 +1,7 @@
 package it.unive.dais.cevid.datadroid.lib.util;
 
+import android.support.annotation.NonNull;
+
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.Serializable;
@@ -16,6 +18,7 @@ public interface MapItem extends Serializable {
      *
      * @return la posizione in un oggetto di tipo LatLng.
      */
+    @NonNull
     LatLng getPosition() throws Exception;
 
     /**
@@ -23,6 +26,7 @@ public interface MapItem extends Serializable {
      *
      * @return il nome.
      */
+    @NonNull
     String getTitle() throws Exception;
 
     /**
@@ -30,21 +34,25 @@ public interface MapItem extends Serializable {
      *
      * @return la descrizione.
      */
+    @NonNull
     String getDescription() throws Exception;
 
     static Function<CsvParser.Row, MapItem> byCsvColumnNames(String latitude, String longitude, String title, String description) {
         return row -> new MapItem() {
+            @NonNull
             @Override
             public LatLng getPosition() throws ParserException {
                 String lat = row.get(latitude), lng = row.get(longitude);
                 return new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
             }
 
+            @NonNull
             @Override
             public String getTitle() throws ParserException {
                 return row.get(title);
             }
 
+            @NonNull
             @Override
             public String getDescription() throws ParserException {
                 return row.get(description);
