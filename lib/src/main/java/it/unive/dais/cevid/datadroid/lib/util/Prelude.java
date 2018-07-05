@@ -19,8 +19,7 @@ import java.util.Comparator;
  */
 public final class Prelude {
 
-    private Prelude() {
-    }    // dummy constructor
+    private Prelude() {}    // dummy constructor
 
     // misc stuff
     //
