@@ -1,18 +1,24 @@
 package it.unive.dais.cevid.datadroid.lib.database;
 
 import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
 import com.google.android.gms.maps.model.LatLng;
 
 import it.unive.dais.cevid.datadroid.lib.util.MapItem;
 
-@android.arch.persistence.room.Entity
+
 /*
 TODO: Entity estende MapItem?
 
  */
+@Entity(tableName = "mapentities")
 public class MapEntity implements MapItem {
+    @PrimaryKey
+    @NonNull
+    private String id;
     @ColumnInfo(name = "lat")
     private double lat;
     @ColumnInfo(name = "lon")
@@ -22,21 +28,31 @@ public class MapEntity implements MapItem {
     @ColumnInfo(name = "description")
     private String description;
 
+
+    public MapEntity(String title, String description, double lat, double lon, String id){
+        this.lat = lat;
+        this.lon = lon;
+        this.description = description;
+        this.title = title;
+        this.id = id;
+    }
+    public MapEntity(){}
+
     @NonNull
     @Override
-    public LatLng getPosition() throws Exception {
+    public LatLng getPosition(){
         return new LatLng(lat, lon);
     }
 
     @NonNull
     @Override
-    public String getTitle() throws Exception {
+    public String getTitle() {
         return title;
     }
 
     @NonNull
     @Override
-    public String getDescription() throws Exception {
+    public String getDescription(){
         return description;
     }
 
@@ -54,5 +70,19 @@ public class MapEntity implements MapItem {
 
     public void setLat(double lat) {
         this.lat = lat;
+    }
+    public String getId() {
+        return id;
+    }
+
+    public double getLat() {
+        return lat;
+    }
+
+    public double getLon() {
+        return lon;
+    }
+    public void setId(String id) {
+        this.id = id;
     }
 }

@@ -2,6 +2,7 @@ package it.unive.dais.cevid.datadroid.template;
 
 import android.Manifest;
 import android.app.Activity;
+import android.arch.persistence.room.Room;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -47,8 +48,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
+import it.unive.dais.cevid.datadroid.lib.database.AppDatabase;
+import it.unive.dais.cevid.datadroid.lib.database.MapEntity;
 import it.unive.dais.cevid.datadroid.lib.util.AsyncTaskResult;
 import it.unive.dais.cevid.datadroid.lib.util.MapManager;
 import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
@@ -533,11 +539,13 @@ public class MapsActivity extends AppCompatActivity
                 return gMap;
             }
         };
-
+        /*
+                ----------------------------------------- TESTING ------------------------------------
+         */
         // put markers from embedded resource CSV
-        AsyncTaskResult.run(() -> {
+        /*AsyncTaskResult.run(() -> {
                     //RUNONUITHREAD (evitare eccezione not in UI Thread)
-                    runOnUiThread(() -> {
+                    //runOnUiThread(() -> {
                         try {
                             mm.putMarkersFromCsv(new InputStreamReader(getResources().openRawResource(R.raw.piattaforme)),
                                     true, ";",
@@ -549,10 +557,33 @@ public class MapsActivity extends AppCompatActivity
                         }
 
                     });
-                });
+                //});*/
+        AppDatabase db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "database-test").build();
+        /*AsyncTaskResult.run(() -> {
+            db.entityDao().insertEntities(new MapEntity("titolo", "marker di prova", 3.23, 4.53, "01"));
+            db.entityDao().insertEntities(new MapEntity("titolo1", "marker 2", 4.23, 10.54,"ciaoo"));
+
+        });*/
+        Executor executor = Executors.newSingleThreadExecutor();
+
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+
+                MapEntity[] myEntities = db.entityDao().getAll();
+                Log.d(TAG, "Size nr = " + myEntities.length);
+
+                    runOnUiThread( ()-> {
+                try {
+                    mm.putMarkerFromMapItem(myEntities[0],(opts) -> opts.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }});
+            }
+        });
 
         // add markers from online CSV
-        AsyncTaskResult.run(() -> {
+       /* AsyncTaskResult.run(() -> {
             try {
                 mm.putMarkersFromCsv(new URL(getString(R.string.demo_csv_url)),
                         true, ";",
@@ -562,7 +593,10 @@ public class MapsActivity extends AppCompatActivity
             } catch (ExecutionException | InterruptedException | IOException e) {
                 e.printStackTrace();
             }
-        });
+        });*/
+               /*
+                ----------------------------------------- END TESTING ------------------------------------
+         */
     }
 
 }
