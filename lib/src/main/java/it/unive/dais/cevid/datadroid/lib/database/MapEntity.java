@@ -16,7 +16,7 @@ TODO: Entity estende MapItem?
  */
 @Entity(tableName = "mapentities")
 public class MapEntity implements MapItem {
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     @NonNull
     private String id;
     @ColumnInfo(name = "lat")
@@ -29,12 +29,11 @@ public class MapEntity implements MapItem {
     private String description;
 
 
-    public MapEntity(String title, String description, double lat, double lon, String id){
+    public MapEntity(String title, String description, double lat, double lon){
         this.lat = lat;
         this.lon = lon;
         this.description = description;
         this.title = title;
-        this.id = id;
     }
     public MapEntity(){}
 

@@ -54,6 +54,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
 import it.unive.dais.cevid.datadroid.lib.database.AppDatabase;
+import it.unive.dais.cevid.datadroid.lib.database.DatabaseBuilder;
 import it.unive.dais.cevid.datadroid.lib.database.MapEntity;
 import it.unive.dais.cevid.datadroid.lib.util.AsyncTaskResult;
 import it.unive.dais.cevid.datadroid.lib.util.MapManager;
@@ -558,7 +559,9 @@ public class MapsActivity extends AppCompatActivity
 
                     });
                 //});*/
-        AppDatabase db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "database-test").build();
+
+        AppDatabase db = DatabaseBuilder.build(getApplicationContext(), "database-test");
+
         /*AsyncTaskResult.run(() -> {
             db.entityDao().insertEntities(new MapEntity("titolo", "marker di prova", 3.23, 4.53, "01"));
             db.entityDao().insertEntities(new MapEntity("titolo1", "marker 2", 4.23, 10.54,"ciaoo"));
@@ -569,7 +572,9 @@ public class MapsActivity extends AppCompatActivity
         executor.execute(new Runnable() {
             @Override
             public void run() {
+                /* todo: insert mapentities from File if DB is empty..
 
+                 */
                 MapEntity[] myEntities = db.entityDao().getAll();
                 Log.d(TAG, "Size nr = " + myEntities.length);
 
