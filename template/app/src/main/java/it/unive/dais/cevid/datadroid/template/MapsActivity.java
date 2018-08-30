@@ -2,7 +2,6 @@ package it.unive.dais.cevid.datadroid.template;
 
 import android.Manifest;
 import android.app.Activity;
-import android.arch.persistence.room.Room;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -16,7 +15,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageButton;
@@ -44,22 +42,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import it.unive.dais.cevid.datadroid.lib.database.AppDatabase;
-import it.unive.dais.cevid.datadroid.lib.database.DatabaseBuilder;
-import it.unive.dais.cevid.datadroid.lib.database.MapEntity;
-import it.unive.dais.cevid.datadroid.lib.util.AsyncTaskResult;
 import it.unive.dais.cevid.datadroid.lib.util.MapManager;
 import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
-import it.unive.dais.cevid.datadroid.lib.util.MapItem;
 
 /**
  * Questa classe è la componente principale del toolkit: fornisce servizi primari per un'app basata su Google Maps, tra cui localizzazione, pulsanti
@@ -560,7 +547,6 @@ public class MapsActivity extends AppCompatActivity
                     });
                 //});*/
 
-        AppDatabase db = DatabaseBuilder.build(getApplicationContext(), "database-test");
 
         /*AsyncTaskResult.run(() -> {
             db.entityDao().insertEntities(new MapEntity("titolo", "marker di prova", 3.23, 4.53, "01"));
@@ -569,23 +555,7 @@ public class MapsActivity extends AppCompatActivity
         });*/
         Executor executor = Executors.newSingleThreadExecutor();
 
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                /* todo: insert mapentities from File if DB is empty..
 
-                 */
-                MapEntity[] myEntities = db.entityDao().getAll();
-                Log.d(TAG, "Size nr = " + myEntities.length);
-
-                    runOnUiThread( ()-> {
-                try {
-                    mm.putMarkerFromMapItem(myEntities[0],(opts) -> opts.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }});
-            }
-        });
 
         // add markers from online CSV
        /* AsyncTaskResult.run(() -> {
