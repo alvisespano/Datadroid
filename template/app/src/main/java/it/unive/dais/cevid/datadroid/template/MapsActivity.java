@@ -42,9 +42,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.lang.reflect.ParameterizedType;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import it.unive.dais.cevid.datadroid.lib.database.DataDao;
+import it.unive.dais.cevid.datadroid.lib.database.MapEntity;
 import it.unive.dais.cevid.datadroid.lib.util.MapManager;
 import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
 
@@ -553,9 +557,7 @@ public class MapsActivity extends AppCompatActivity
             db.entityDao().insertEntities(new MapEntity("titolo1", "marker 2", 4.23, 10.54,"ciaoo"));
 
         });*/
-        Executor executor = Executors.newSingleThreadExecutor();
-
-
+        //Executor executor = Executors.newSingleThreadExecutor();
 
         // add markers from online CSV
        /* AsyncTaskResult.run(() -> {
