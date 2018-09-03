@@ -2,6 +2,9 @@ package it.unive.dais.cevid.datadroid.template;
 
 import android.Manifest;
 import android.app.Activity;
+import android.arch.persistence.db.SupportSQLiteDatabase;
+import android.arch.persistence.room.Room;
+import android.arch.persistence.room.RoomDatabase;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -43,12 +46,18 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import it.unive.dais.cevid.datadroid.lib.database.AppDatabase;
+import it.unive.dais.cevid.datadroid.lib.database.AppDatabase_Impl;
+import it.unive.dais.cevid.datadroid.lib.database.DBManager;
 import it.unive.dais.cevid.datadroid.lib.database.DataDao;
 import it.unive.dais.cevid.datadroid.lib.database.MapEntity;
+import it.unive.dais.cevid.datadroid.lib.util.AsyncTaskResult;
+import it.unive.dais.cevid.datadroid.lib.util.MapItem;
 import it.unive.dais.cevid.datadroid.lib.util.MapManager;
 import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
 
@@ -69,7 +78,7 @@ public class MapsActivity extends AppCompatActivity
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         GoogleMap.OnMapClickListener, GoogleMap.OnMapLongClickListener, GoogleMap.OnCameraMoveStartedListener, GoogleMap.OnMarkerClickListener {
-
+        AppDatabase db;
     protected static final int REQUEST_CHECK_SETTINGS = 500;
     protected static final int PERMISSIONS_REQUEST_ACCESS_BOTH_LOCATION = 501;
     // alcune costanti
@@ -534,6 +543,49 @@ public class MapsActivity extends AppCompatActivity
         /*
                 ----------------------------------------- TESTING ------------------------------------
          */
+        DBManager db = new DBManager();
+        db.buildDatabase(this, "testing");
+        AsyncTaskResult.run(() ->{
+            try {
+                Log.i("MapsActivity", "getting db...");
+                List<MapEntity> list = db.getDatabase(this).getDataDao().findAll();
+                Log.i("MapsActivity", "size: "+list.size());
+                runOnUiThread(() -> {
+                    Toast.makeText(this, "Number of entities: " + list.size(), Toast.LENGTH_LONG).show();
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+
+        /*db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "test-db")
+                .addCallback(new RoomDatabase.Callback() {
+                    @Override
+                    public void onCreate(@NonNull SupportSQLiteDatabase sqLiteDb) {
+                        super.onCreate(sqLiteDb);
+                        AsyncTaskResult.run(() -> {
+                            getApplicationContext().db.getDataDao().insert(new MapEntity("test03", "descrizione", 3.23, 4.23));
+                            db.getDataDao().insert(new MapEntity("test04", "descrizione", 10.23, 10.23));
+                        });
+                    }
+                })
+                .build();*/
+        /*to do in a async task
+        AsyncTaskResult.run(() -> {
+            db.getDataDao().insert(new MapEntity("test01", "descrizione", 3.23, 4.23));
+            db.getDataDao().insert(new MapEntity("test02", "descrizione", 10.23, 10.23));
+            List<MapEntity> list = db.getDataDao().findAll();
+
+            runOnUiThread(() -> {
+                try {
+                    Toast.makeText(this, "Number of entities: "+list.size(), Toast.LENGTH_LONG).show();
+                    for(MapItem i: list)
+                        mm.putMarkerFromMapItem(i, (opts) -> opts);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        });*/
         // put markers from embedded resource CSV
         /*AsyncTaskResult.run(() -> {
                     //RUNONUITHREAD (evitare eccezione not in UI Thread)
