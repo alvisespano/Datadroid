@@ -9,4 +9,5 @@ import java.util.Map;
 public abstract class BaseDataDao extends DataDao<MapEntity> {
     @Query("SELECT * FROM MapEntity")
     public abstract List<MapEntity> findAll();
+
 }

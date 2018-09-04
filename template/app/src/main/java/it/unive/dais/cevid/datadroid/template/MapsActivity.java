@@ -46,6 +46,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -544,19 +545,22 @@ public class MapsActivity extends AppCompatActivity
                 ----------------------------------------- TESTING ------------------------------------
          */
         DBManager db = new DBManager();
-        db.buildDatabase(this, "testing");
-        AsyncTaskResult.run(() ->{
+        //db.buildDatabase(this, "testS");
+        //db.insert(new MapEntity("titolo", "descrizione", 23.4, 23.4));
+        ArrayList<MapEntity> ms = db.getAll();
+        Log.i("DB", "getAllResult: "+ms.size());
+        /*AsyncTaskResult.run(() ->{
             try {
-                Log.i("MapsActivity", "getting db...");
-                List<MapEntity> list = db.getDatabase(this).getDataDao().findAll();
-                Log.i("MapsActivity", "size: "+list.size());
+                D
+                //List<MapEntity> list = db.getDatabase(this).getDataDao().findAll();
+                //Log.i("MapsActivity", "size: "+list.size());
                 runOnUiThread(() -> {
-                    Toast.makeText(this, "Number of entities: " + list.size(), Toast.LENGTH_LONG).show();
+                    //Toast.makeText(this, "Number of entities: " + list.size(), Toast.LENGTH_LONG).show();
                 });
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        });
+        });*/
 
         /*db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "test-db")
                 .addCallback(new RoomDatabase.Callback() {
