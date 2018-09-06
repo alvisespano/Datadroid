@@ -546,9 +546,9 @@ public class MapsActivity extends AppCompatActivity
         /*
                 ----------------------------------------- TESTING ------------------------------------
          */
-        DBManager db = DBManager.instance().builder(this, "testo")
-                //.withParser(new CsvParser(new InputStreamReader(getResources().openRawResource(R.raw.opere_inc)), true, ";", progressBarManager), "natura_opera", "cup", "lat", "lon")
-                .withParser(new CsvParser(new InputStreamReader(getResources().openRawResource(R.raw.piattaforme)), true, ";", progressBarManager), "Denominazione", "Codice", "Latitudine (WGS84)", "Longitudine (WGS 84)")
+        DBManager db = DBManager.instance().builder(this, "database")
+                .withParser(new CsvParser(new InputStreamReader(getResources().openRawResource(R.raw.opere_inc)), true, ";", progressBarManager), "natura_opera", "cup", "lat", "lon")
+                //.withParser(new CsvParser(new InputStreamReader(getResources().openRawResource(R.raw.piattaforme)), true, ";", progressBarManager), "Denominazione", "Codice", "Latitudine (WGS84)", "Longitudine (WGS 84)")
                 .withGMap(mm,(opts) -> opts.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
                 .build();
          /*

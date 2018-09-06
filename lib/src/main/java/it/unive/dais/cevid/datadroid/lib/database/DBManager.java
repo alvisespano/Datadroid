@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import it.unive.dais.cevid.datadroid.lib.database.event.QueryEvent;
+import it.unive.dais.cevid.datadroid.lib.parser.AsyncParser;
 import it.unive.dais.cevid.datadroid.lib.parser.CsvParser;
 import it.unive.dais.cevid.datadroid.lib.parser.ParserException;
 import it.unive.dais.cevid.datadroid.lib.util.AsyncTaskResult;
@@ -27,7 +28,6 @@ public class DBManager {
     private DBIOScheduler scheduler = new DBIOScheduler(this);
     private static DBManager db;
     private boolean firstTime = false;
-    private final Boolean lock = Boolean.TRUE;
     private boolean opened = false;
 
     public static DBManager instance(){
@@ -89,7 +89,7 @@ public class DBManager {
     public static class DBBuilder{
         private final String name;
         private Context context = null;
-        private CsvParser parser = null;
+        private AsyncParser<?, ?> parser = null;
         private String colTitle;
         private String colLon;
         private String colLat;
@@ -114,7 +114,7 @@ public class DBManager {
             this.mm = mm;
             return this;
         }
-        public DBBuilder withParser(CsvParser parser, String colTitle, String colDescr, String colLat, String colLon){
+        public DBBuilder withParser(AsyncParser<?, ?> parser, String colTitle, String colDescr, String colLat, String colLon){
             this.parser = parser;
             this.colTitle = colTitle;
             this.colDescr = colDescr;
@@ -142,7 +142,7 @@ public class DBManager {
      * @param colLon
      * @return
      */
-    private DBManager buildDatabase(Context context, String name, MapManager mm, Function<MarkerOptions, MarkerOptions> optf, CsvParser parser, String colTitle, String colDescr, String colLat, String colLon) {
+    private DBManager buildDatabase(Context context, String name, MapManager mm, Function<MarkerOptions, MarkerOptions> optf, AsyncParser<?, ?> parser, String colTitle, String colDescr, String colLat, String colLon) {
 
             scheduler.start();
             database = Room.databaseBuilder(context, AppDatabase.class, name)
