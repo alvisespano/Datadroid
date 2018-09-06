@@ -24,16 +24,6 @@ public abstract class DataDao<T extends MapEntity> {
     @Delete
     /*Delete data from the table T*/
      public abstract void delete(T data);
-     /*open the database
-    @Query("SELECT * from mapentity where 1 = 0")
-    public abstract void open();
-    //@RawQuery
-    //protected abstract List<T> doFindAll(SupportSQLiteQuery query);
-    /**
-     * @return String
-     * * return the name of the table.
-     *   For convention, table name = class name of Generics T
-     */
 
 
 

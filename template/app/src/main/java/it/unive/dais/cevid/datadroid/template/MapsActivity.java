@@ -551,7 +551,6 @@ public class MapsActivity extends AppCompatActivity
                 .withParser(new CsvParser(new InputStreamReader(getResources().openRawResource(R.raw.piattaforme)), true, ";", progressBarManager), "Denominazione", "Codice", "Latitudine (WGS84)", "Longitudine (WGS 84)")
                 .withGMap(mm,(opts) -> opts.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
                 .build();
-        //db.insert(new MapEntity("prova", "prova", 33.47, 23.47), mm, (opts) -> opts.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
          /*
                 -------------------------------------- END TESTING ------------------------------------
          */

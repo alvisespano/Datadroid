@@ -96,14 +96,19 @@ public class DBManager {
         private Function<MarkerOptions, MarkerOptions> optf;
         private String colDescr;
         private MapManager mm;
-        private boolean loadedFromCSV = false;
-        private boolean alreadyOnMap = false;
 
         private DBBuilder(Context context, String name) {
             this.context = context;
             this.name = name;
         }
 
+        /**
+         * Questo metodo permette di caricare, in fase di apertura/creazione del database, i marker
+         * memorizzati nel database all'interno della mappa.
+         * @param mm
+         * @param optf
+         * @return
+         */
         public DBBuilder withGMap(MapManager mm, @NonNull Function<MarkerOptions, MarkerOptions> optf){
             this.optf = optf;
             this.mm = mm;
@@ -123,11 +128,30 @@ public class DBManager {
 
     }
 
+    /**
+     * buildDatabase: inizializza il database con i parametri richiesti.
+     * Inoltre avvia lo scheduler, che lavora in un Thread separato e gestisce le interazioni con il Database.
+     * @param context
+     * @param name
+     * @param mm
+     * @param optf
+     * @param parser
+     * @param colTitle
+     * @param colDescr
+     * @param colLat
+     * @param colLon
+     * @return
+     */
     private DBManager buildDatabase(Context context, String name, MapManager mm, Function<MarkerOptions, MarkerOptions> optf, CsvParser parser, String colTitle, String colDescr, String colLat, String colLon) {
 
             scheduler.start();
             database = Room.databaseBuilder(context, AppDatabase.class, name)
                     .addCallback(new RoomDatabase.Callback() {
+                        /**
+                         * Questo metodo viene chiamato solo quando il database viene creato (quando vengono create le tabelle).
+                         *
+                         * @param db
+                         */
                         @Override
                         public void onCreate(@NonNull SupportSQLiteDatabase db) {
                             super.onCreate(db);
@@ -135,6 +159,13 @@ public class DBManager {
                             Log.i("DB", "Created...");
                         }
 
+                        /**
+                         * Questo metodo viene chiamato all'apertura del database: viene controllato se
+                         * il database è stato appena creato, e se lo è vengono inseriti i Marker nella mappa (se espresso dal programmatore).
+                         * Se non è stato creato, viene effettuata una query che ritorna tutti i Marker memorizzati nel database e gli inserisce nella mappa,
+                         * se il programmatore lo ha deciso.
+                         * @param db
+                         */
                         @Override
                         public void onOpen(@NonNull SupportSQLiteDatabase db) {
                                 super.onOpen(db);
@@ -156,7 +187,6 @@ public class DBManager {
                                                 //Log.i("DB", "SIZE: "+getAll().size());
                                                 //Log.i("DB", "Row inserted!");
                                             }
-                                            //initialize(m, DBIOScheduler.Priority.HIGH);
                                         } catch (InterruptedException | ExecutionException | ParserException e) {
                                             e.printStackTrace();
                                         }
