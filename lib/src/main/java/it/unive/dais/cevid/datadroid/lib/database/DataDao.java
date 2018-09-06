@@ -11,6 +11,7 @@ import android.arch.persistence.room.RawQuery;
 
 import java.lang.reflect.ParameterizedType;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Dao
@@ -18,11 +19,8 @@ public abstract class DataDao<T extends MapEntity> {
     @Insert
     /*Insert a Element data of type T on the table T*/
      public abstract void insert(T data);
-
-    @Insert
-    /*Insert all the elements of type T of the array data on the table T*/
-     public abstract void insert(T[] data);
-
+     @Insert
+     public abstract void insertAll(T[] data);
     @Delete
     /*Delete data from the table T*/
      public abstract void delete(T data);

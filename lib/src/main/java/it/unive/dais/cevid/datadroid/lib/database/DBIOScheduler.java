@@ -10,7 +10,6 @@ import it.unive.dais.cevid.datadroid.lib.database.event.IOEvent;
 
 class DBIOScheduler extends Thread {
     private List<Pair<IOEvent, Object[]>> queue = new ArrayList<>();
-    private List<Pair<IOEvent, Object[]>> secondaryQueue = new ArrayList<>();
     private DBManager db;
     private final String TAG = "DBIOScheduler";
 
@@ -36,6 +35,8 @@ class DBIOScheduler extends Thread {
         }
         else
             insert(e, params);
+
+
     }
     private void process() {
         if (queue != null) {

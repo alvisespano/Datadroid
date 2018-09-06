@@ -547,14 +547,11 @@ public class MapsActivity extends AppCompatActivity
                 ----------------------------------------- TESTING ------------------------------------
          */
         DBManager db = DBManager.instance().builder(this, "testo")
-                .withParser(new CsvParser(new InputStreamReader(getResources().openRawResource(R.raw.opere_inc)), true, ";", progressBarManager), "natura_opera", "cup", "lat", "lon")
-                .withGMap(mm,(opts) -> opts.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)))
+                //.withParser(new CsvParser(new InputStreamReader(getResources().openRawResource(R.raw.opere_inc)), true, ";", progressBarManager), "natura_opera", "cup", "lat", "lon")
+                .withParser(new CsvParser(new InputStreamReader(getResources().openRawResource(R.raw.piattaforme)), true, ";", progressBarManager), "Denominazione", "Codice", "Latitudine (WGS84)", "Longitudine (WGS 84)")
+                .withGMap(mm,(opts) -> opts.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
                 .build();
-        List<MapEntity> ms = db.getAll();
-        db.insert(new MapEntity("prova", "prova", 33.47, 23.47), mm, (opts) -> opts.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
-        Log.i("DB", "getAllResult: "+ms.size());
-        ms = db.getAll();
-        Log.i("DB", "second getAll: "+ms.size());
+        //db.insert(new MapEntity("prova", "prova", 33.47, 23.47), mm, (opts) -> opts.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
          /*
                 -------------------------------------- END TESTING ------------------------------------
          */
