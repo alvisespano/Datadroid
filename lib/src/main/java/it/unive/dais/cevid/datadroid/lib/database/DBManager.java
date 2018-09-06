@@ -4,61 +4,52 @@ import android.arch.persistence.db.SupportSQLiteDatabase;
 import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import it.unive.dais.cevid.datadroid.lib.database.event.QueryEvent;
 import it.unive.dais.cevid.datadroid.lib.parser.CsvParser;
+import it.unive.dais.cevid.datadroid.lib.parser.ParserException;
 import it.unive.dais.cevid.datadroid.lib.util.AsyncTaskResult;
+import it.unive.dais.cevid.datadroid.lib.util.Function;
+import it.unive.dais.cevid.datadroid.lib.util.MapManager;
 
 public class DBManager {
     private AppDatabase database;
     private DBIOScheduler scheduler = new DBIOScheduler(this);
     private final Boolean lock = Boolean.TRUE;
-    private AppDatabase buildDatabase(Context context, String name){
-        scheduler.start();
-        database = Room.databaseBuilder(context, AppDatabase.class, name)
-                .addCallback(new RoomDatabase.Callback() {
-                    @Override
-                    public void onCreate(@NonNull SupportSQLiteDatabase db) {
-                        super.onCreate(db);
-                        insert(new MapEntity("titolo", "descrizione", 23.4, 23.4), DBIOScheduler.Priority.HIGH);
-                        Log.i("DB", "Created...");
-                    }
-
-                    @Override
-                    public void onOpen(@NonNull SupportSQLiteDatabase db) {
-                        super.onOpen(db);
-                        Log.i("DB", "Opened...");
-                        /*to do: insert on Map.*/
-                        AsyncTaskResult.run(()-> {
-                            ArrayList<MapEntity> ms = getAll();
-                            for(MapEntity m : ms){
-                                Log.i("DB", "Inserting on GMaps!");
-                            }
-                        });
-
-                    }
-                }).allowMainThreadQueries().build();
-        database.beginTransaction();
-        database.endTransaction();
-        return database;
+    private boolean initialized = false;
+    private static DBManager db;
+    private boolean firstTime = false;
+    public static DBManager instance(){
+        if(db == null)
+            db = new DBManager();
+        return db;
     }
 
-    public void open(){
-        scheduler.insert(new QueryEvent("open", database.getDataDao(), MapEntity.class));
-    }
+    private DBManager(){}
+
 
     public void insert(MapEntity m){
         scheduler.insert(new QueryEvent("insert", database.getDataDao(), MapEntity.class), m);
     }
-
-    private void insert(MapEntity m, DBIOScheduler.Priority priority){
+    public void insert(MapEntity m, MapManager mm, @NonNull Function<MarkerOptions, MarkerOptions> optf){
+        try {
+            mm.putMarkerFromMapItem(m, optf);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        insert(m);
+    }
+    private void initialize(MapEntity m, DBIOScheduler.Priority priority){
         scheduler.insert(new QueryEvent("insert", database.getDataDao(), MapEntity.class), priority, m);
     }
 
@@ -66,7 +57,7 @@ public class DBManager {
         scheduler.insert(new QueryEvent("insert", database.getDataDao(), MapEntity.class), (Object[]) ms);
     }
 
-    public ArrayList<MapEntity> getAll(){
+    public List<MapEntity> getAll(){
         QueryEvent query = new QueryEvent("findAll", database.getDataDao());
         scheduler.insert(query);
         synchronized (query){
@@ -77,39 +68,104 @@ public class DBManager {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                Log.i("DBManager", "Query processed!");
+                //Log.i("DBManager", "Query processed!");
             }
-            return (ArrayList<MapEntity>) query.getResult();
+            return (List<MapEntity>) query.getResult();
         }
     }
 
+    //dummy transaction -> do a fake transaction
+    private void dummyTransaction(){
+        database.beginTransaction();
+        database.endTransaction();
+    }
     public DBBuilder builder(Context context, String name){
         return new DBBuilder(context, name);
     }
-    public class DBBuilder{
+    public static class DBBuilder{
         private final String name;
-        private GoogleMap gmap = null;
         private Context context = null;
         private CsvParser parser = null;
+        private String colTitle;
+        private String colLon;
+        private String colLat;
+        private Function<MarkerOptions, MarkerOptions> optf;
+        private String colDescr;
+        private MapManager mm;
 
         public DBBuilder(Context context, String name) {
             this.context = context;
             this.name = name;
         }
 
-        public DBBuilder withGMap(GoogleMap gmap){
-            this.gmap = gmap;
+        public DBBuilder withGMap(MapManager mm, @NonNull Function<MarkerOptions, MarkerOptions> optf){
+            this.optf = optf;
+            this.mm = mm;
             return this;
         }
-        public DBBuilder withParser(CsvParser parser){
+        public DBBuilder withParser(CsvParser parser, String colTitle, String colDescr, String colLat, String colLon){
             this.parser = parser;
+            this.colTitle = colTitle;
+            this.colDescr = colDescr;
+            this.colLat = colLat;
+            this.colLon = colLon;
             return this;
         }
         public DBManager build(){
-            //TO DO
-
-            return null;
+            return new DBManager().buildDatabase(context, name, mm, optf, parser, colTitle, colDescr, colLat, colLon);
         }
 
     }
+
+    private DBManager buildDatabase(Context context, String name, MapManager mm, Function<MarkerOptions, MarkerOptions> optf, CsvParser parser, String colTitle, String colDescr, String colLat, String colLon) {
+
+        scheduler.start();
+        database = Room.databaseBuilder(context, AppDatabase.class, name)
+
+                .addCallback(new RoomDatabase.Callback() {
+                    @Override
+                    public void onCreate(@NonNull SupportSQLiteDatabase db) {
+                        super.onCreate(db);
+                        firstTime = true;
+                        Log.i("DB", "Created...");
+                    }
+
+                    @Override
+                    public void onOpen(@NonNull SupportSQLiteDatabase db) {
+                        super.onOpen(db);
+                        Log.i("DB", "Opened...");
+                        if(firstTime && parser != null){
+                            firstTime = false;
+                            try {
+                                List<CsvParser.Row> rows = parser.getAsyncTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR).get();
+                                Log.i("DB", "Rows size: " + rows.size());
+                                for (CsvParser.Row r : rows) {
+                                    MapEntity m = new MapEntity(r.get(colTitle), r.get(colDescr), r.get(colLat), r.get(colLon));
+
+                                    //Toast.makeText(this, "Number of entities: " + list.size(), Toast.LENGTH_LONG).show();
+                                    //Log.i("DB", r.get(colTitle) + ", " + r.get(colDescr) + ", " + r.get(colLat) + ", " + r.get(colLon));
+                                    initialize(m, DBIOScheduler.Priority.HIGH);
+                                    //Log.i("DB", "Row inserted!");
+                                }
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            } catch (ExecutionException e) {
+                                e.printStackTrace();
+                            } catch (ParserException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        initialized = true;
+
+                    }
+                }).allowMainThreadQueries().build();
+
+        dummyTransaction();
+        if(mm != null && optf != null) {
+            List<MapEntity> ms = getAll();
+            mm.putMarkersFromMapItems(ms, optf);
+        }
+        return this;
+        }
 }
+

@@ -45,6 +45,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.InputStreamReader;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +58,7 @@ import it.unive.dais.cevid.datadroid.lib.database.AppDatabase_Impl;
 import it.unive.dais.cevid.datadroid.lib.database.DBManager;
 import it.unive.dais.cevid.datadroid.lib.database.DataDao;
 import it.unive.dais.cevid.datadroid.lib.database.MapEntity;
+import it.unive.dais.cevid.datadroid.lib.parser.CsvParser;
 import it.unive.dais.cevid.datadroid.lib.util.AsyncTaskResult;
 import it.unive.dais.cevid.datadroid.lib.util.MapItem;
 import it.unive.dais.cevid.datadroid.lib.util.MapManager;
@@ -544,91 +546,17 @@ public class MapsActivity extends AppCompatActivity
         /*
                 ----------------------------------------- TESTING ------------------------------------
          */
-        DBManager db = new DBManager();
-        //db.buildDatabase(this, "testS");
-        //db.insert(new MapEntity("titolo", "descrizione", 23.4, 23.4));
-        ArrayList<MapEntity> ms = db.getAll();
+        DBManager db = DBManager.instance().builder(this, "testo")
+                .withParser(new CsvParser(new InputStreamReader(getResources().openRawResource(R.raw.opere_inc)), true, ";", progressBarManager), "natura_opera", "cup", "lat", "lon")
+                .withGMap(mm,(opts) -> opts.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)))
+                .build();
+        List<MapEntity> ms = db.getAll();
+        db.insert(new MapEntity("prova", "prova", 33.47, 23.47), mm, (opts) -> opts.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
         Log.i("DB", "getAllResult: "+ms.size());
-        /*AsyncTaskResult.run(() ->{
-            try {
-                D
-                //List<MapEntity> list = db.getDatabase(this).getDataDao().findAll();
-                //Log.i("MapsActivity", "size: "+list.size());
-                runOnUiThread(() -> {
-                    //Toast.makeText(this, "Number of entities: " + list.size(), Toast.LENGTH_LONG).show();
-                });
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });*/
-
-        /*db = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "test-db")
-                .addCallback(new RoomDatabase.Callback() {
-                    @Override
-                    public void onCreate(@NonNull SupportSQLiteDatabase sqLiteDb) {
-                        super.onCreate(sqLiteDb);
-                        AsyncTaskResult.run(() -> {
-                            getApplicationContext().db.getDataDao().insert(new MapEntity("test03", "descrizione", 3.23, 4.23));
-                            db.getDataDao().insert(new MapEntity("test04", "descrizione", 10.23, 10.23));
-                        });
-                    }
-                })
-                .build();*/
-        /*to do in a async task
-        AsyncTaskResult.run(() -> {
-            db.getDataDao().insert(new MapEntity("test01", "descrizione", 3.23, 4.23));
-            db.getDataDao().insert(new MapEntity("test02", "descrizione", 10.23, 10.23));
-            List<MapEntity> list = db.getDataDao().findAll();
-
-            runOnUiThread(() -> {
-                try {
-                    Toast.makeText(this, "Number of entities: "+list.size(), Toast.LENGTH_LONG).show();
-                    for(MapItem i: list)
-                        mm.putMarkerFromMapItem(i, (opts) -> opts);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
-        });*/
-        // put markers from embedded resource CSV
-        /*AsyncTaskResult.run(() -> {
-                    //RUNONUITHREAD (evitare eccezione not in UI Thread)
-                    //runOnUiThread(() -> {
-                        try {
-                            mm.putMarkersFromCsv(new InputStreamReader(getResources().openRawResource(R.raw.piattaforme)),
-                                    true, ";",
-                                    MapItem.byCsvColumnNames("Latitudine (WGS84)", "Longitudine (WGS 84)", "Denominazione", "Stato"),
-                                    (opts) -> opts.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)),
-                                    progressBarManager);
-                        } catch (ExecutionException | InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
-                    });
-                //});*/
-
-
-        /*AsyncTaskResult.run(() -> {
-            db.entityDao().insertEntities(new MapEntity("titolo", "marker di prova", 3.23, 4.53, "01"));
-            db.entityDao().insertEntities(new MapEntity("titolo1", "marker 2", 4.23, 10.54,"ciaoo"));
-
-        });*/
-        //Executor executor = Executors.newSingleThreadExecutor();
-
-        // add markers from online CSV
-       /* AsyncTaskResult.run(() -> {
-            try {
-                mm.putMarkersFromCsv(new URL(getString(R.string.demo_csv_url)),
-                        true, ";",
-                        MapItem.byCsvColumnNames("Latitudine", "Longitudine", "Comune", "Provincia"),
-                        (opts) -> opts.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)),
-                        progressBarManager);
-            } catch (ExecutionException | InterruptedException | IOException e) {
-                e.printStackTrace();
-            }
-        });*/
-               /*
-                ----------------------------------------- END TESTING ------------------------------------
+        ms = db.getAll();
+        Log.i("DB", "second getAll: "+ms.size());
+         /*
+                -------------------------------------- END TESTING ------------------------------------
          */
     }
 
