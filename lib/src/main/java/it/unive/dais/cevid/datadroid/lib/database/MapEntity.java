@@ -29,25 +29,15 @@ public class MapEntity implements MapItem{
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
     public double getLat() {
         return lat;
     }
 
-    public void setLat(double lat) {
-        this.lat = lat;
-    }
 
     public double getLon() {
         return lon;
     }
 
-    public void setLon(double lon) {
-        this.lon = lon;
-    }
 
     @NonNull
     @Override
@@ -55,20 +45,16 @@ public class MapEntity implements MapItem{
         return new LatLng(lat, lon);
     }
 
+    @NonNull
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
 
+
+    @NonNull
     public String getDescription() {
         return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public MapEntity(String title, String description, double lat, double lon){
