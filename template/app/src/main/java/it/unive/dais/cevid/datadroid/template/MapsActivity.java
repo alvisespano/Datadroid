@@ -543,17 +543,36 @@ public class MapsActivity extends AppCompatActivity
                 return gMap;
             }
         };
-        /*
-                ----------------------------------------- TESTING ------------------------------------
-         */
+
+            /*    ----------------------------------------- TESTING ------------------------------------
+
+             */
+
         DBManager db = DBManager.instance().builder(this, "database")
                 .withParser(new CsvParser(new InputStreamReader(getResources().openRawResource(R.raw.opere_inc)), true, ";", progressBarManager), "natura_opera", "cup", "lat", "lon")
                 //.withParser(new CsvParser(new InputStreamReader(getResources().openRawResource(R.raw.piattaforme)), true, ";", progressBarManager), "Denominazione", "Codice", "Latitudine (WGS84)", "Longitudine (WGS 84)")
+                .withProgressBarManager(progressBarManager)
+
                 .withGMap(mm,(opts) -> opts.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)))
                 .build();
-         /*
-                -------------------------------------- END TESTING ------------------------------------
+
+          /*      -------------------------------------- END TESTING ------------------------------------
          */
+        /*
+         * test compilazione runtime
+         */
+        /*String c = "package it.unive.dais.cevid.datadroid.lib.database;\n" +
+                "\n" +
+                "import android.arch.persistence.room.Database;\n" +
+                "import android.arch.persistence.room.RoomDatabase;\n" +
+                "import android.support.annotation.MainThread;\n" +
+                "\n" +
+                "@Database(entities = MapEntity.class, version = 1)\n" +
+                "public abstract class AppDatabase<T extends MapEntity> extends RoomDatabase {\n" +
+                "    public abstract BaseDataDao  getDataDao();\n" +
+                "}";*/
+
+
     }
 
 }

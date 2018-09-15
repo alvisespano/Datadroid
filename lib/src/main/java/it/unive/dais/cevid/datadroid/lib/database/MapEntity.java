@@ -69,5 +69,7 @@ public class MapEntity implements MapItem{
     }
 
 
-
+    public void setId(int id) {
+        this.id = id;
+    }
 }
