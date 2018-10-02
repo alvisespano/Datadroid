@@ -3,7 +3,6 @@ package it.unive.dais.cevid.datadroid.template;
 import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.coreutils.BuildConfig;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
@@ -22,7 +21,7 @@ public class AboutActivity extends AppCompatActivity {
     protected void onCreate(Bundle saveInstanceState) {
         super.onCreate(saveInstanceState);
         setContentView(R.layout.activity_about);
-        TextView tv_1 = (TextView) findViewById(R.id.textView_1);
+        TextView tv_1 = findViewById(R.id.textView_1);
         tv_1.setText(getCredits());
     }
 

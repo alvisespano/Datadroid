@@ -45,14 +45,13 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.ExecutionException;
 
-import it.unive.dais.cevid.datadroid.lib.util.AsyncTaskResult;
-import it.unive.dais.cevid.datadroid.lib.util.MapManager;
 import it.unive.dais.cevid.datadroid.lib.progress.ProgressBarManager;
+import it.unive.dais.cevid.datadroid.lib.util.AsyncTaskResult;
 import it.unive.dais.cevid.datadroid.lib.util.MapItem;
+import it.unive.dais.cevid.datadroid.lib.util.MapManager;
 
 /**
  * Questa classe è la componente principale del toolkit: fornisce servizi primari per un'app basata su Google Maps, tra cui localizzazione, pulsanti
@@ -66,6 +65,7 @@ import it.unive.dais.cevid.datadroid.lib.util.MapItem;
  *
  * @author Alvise Spanò, Università Ca' Foscari
  */
+@SuppressWarnings("unused")
 public class MapsActivity extends AppCompatActivity
         implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -120,11 +120,11 @@ public class MapsActivity extends AppCompatActivity
         // inizializza le preferenze
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
-        progressBarManager = new ProgressBarManager(this, new ProgressBar[]{(ProgressBar) findViewById(R.id.progress_bar_1), (ProgressBar) findViewById(R.id.progress_bar_2)});
+        progressBarManager = new ProgressBarManager(this, new ProgressBar[]{findViewById(R.id.progress_bar_1), findViewById(R.id.progress_bar_2)});
 
         // trova gli oggetti che rappresentano i bottoni e li salva come campi d'istanza
-        button_here = (ImageButton) findViewById(R.id.button_here);
-        button_car = (ImageButton) findViewById(R.id.button_car);
+        button_here = findViewById(R.id.button_here);
+        button_car = findViewById(R.id.button_car);
 
         // API per i servizi di localizzazione
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -251,7 +251,7 @@ public class MapsActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.maps_with_options, menu);
+//        inflater.inflate(R.menu.maps_with_options, menu);
         return true;
     }
 
@@ -264,14 +264,14 @@ public class MapsActivity extends AppCompatActivity
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.MENU_SETTINGS:
-                startActivity(new Intent(this, SettingsActivity.class));
-                break;
-            case R.id.MENU_ABOUT:
-                startActivity(new Intent(this, AboutActivity.class));
-                break;
-        }
+//        switch (item.getItemId()) {
+//            case R.id.MENU_SETTINGS:
+//                startActivity(new Intent(this, SettingsActivity.class));
+//                break;
+//            case R.id.MENU_ABOUT:
+//                startActivity(new Intent(this, AboutActivity.class));
+//                break;
+//        }
         return false;
     }
 
@@ -521,7 +521,6 @@ public class MapsActivity extends AppCompatActivity
 
 
     // demo application code
-    //
     //
 
     private void demo() {
